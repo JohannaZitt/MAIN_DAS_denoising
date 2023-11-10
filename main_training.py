@@ -1,5 +1,4 @@
 import os
-# os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' # Gets all the warnings rid of in the terminal
 import time
 import tensorflow as tf
 
@@ -41,7 +40,7 @@ for n in N_subs:
         "dropout_rate": 0.1, #Dropout Rate
         "N_blocks": 4, #Anzahl, woe viele Encoder und wie viele Decoder Blöcke es gibt
         "f0": 4, #Integer, the dimensionality of the output space (i.e. the number of output filters in the convolution)
-        "LR": 1e-4, #1e-4, #learning rate
+        "LR": 1e-4, #learning rate
         "data_shape": (N_sub, Nt, 1),
         "kernel": (3, 5),
         "AA": True # Anti Aliasing
