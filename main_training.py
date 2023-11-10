@@ -30,7 +30,7 @@ for n in N_subs:
 
     """ Parameters """
     N_sub = n
-    batch_size = 16 # mini-batch-size
+    batch_size = 32 # mini-batch-size
     #model_name = day + "__" + folder + "__" + dataset[:-4]
     Nt = 1024
     N_epoch = 2000
