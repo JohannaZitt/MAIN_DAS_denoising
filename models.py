@@ -13,8 +13,8 @@ from scipy.signal import butter, filtfilt, tukey
 
 '''
 
-Code modified after Martijn van den Ende 
-from the paper "Self-Supervised Deep Learning Approach for Blind Denoising and Waveform Coherence Enhancement in Distributed Acoustic Sensing Data"
+Code modified after van den Ende et al. (2021) "Self-Supervised Deep Learning Approach for Blind Denoising and 
+Waveform Coherence Enhancement in Distributed Acoustic Sensing Data"
 
 '''
 
@@ -52,7 +52,6 @@ def butter_bandpass(lowcut, highcut, fs, order=2):
 
     return b, a
 
-
 def taper_filter(arr, fmin, fmax, samp_DAS):
     b_DAS, a_DAS = butter_bandpass(fmin, fmax, samp_DAS)
     window_time = tukey(arr.shape[1], 0.1)
@@ -65,13 +64,13 @@ class DataGenerator(keras.utils.Sequence):
     def __init__(self, X, Nt=2048, N_sub=10, batch_size=32, batch_multiplier=10):
         # Data matrix
         self.X = X
-        # Number of stations (ergo wie viele trainingsample. Bei 100 trainingsdaten und test-train split 20-80 -> Nx = 80)
+        # Number of Trainingsamples
         self.Nx = X.shape[0]
         # Number of time sampling points in data
         self.Nt_all = X.shape[1]
-        # Number of time sampling points in a slice (??)
+        # Number of time sampling points in a slice
         self.Nt = Nt
-        # Number of stations per batch sample (ergo 9, 11, oder 13)
+        # Number of stations per batch sample
         self.N_sub = N_sub
         # Batch size
         self.batch_size = batch_size
@@ -99,7 +98,6 @@ class DataGenerator(keras.utils.Sequence):
 
     def __data_generation(self):
         """ Generate a total batch """
-
         # Number of mini-batches
         N_batch = self.__len__()
         N_total = N_batch * self.batch_size
@@ -112,20 +110,18 @@ class DataGenerator(keras.utils.Sequence):
         masks = np.ones_like(samples)
 
         t_starts = rng.integers(low=1, high=Nt_all-Nt, size=N_total)
-        # N_mid = self.Nt_all // 2
-        # t_starts = rng.integers(low=N_mid - Nt, high=N_mid - Nt // 2, size=N_total)
         X = self.X
 
         # we want to detect stick-slip events the most -> use velocities of p- and s- waves:
         # p-wave velocity: 3600-3900 m/s
         # s-wave velocity: 1700-1950 m/s
         # rayleigh wave velocity: 1650 - 1668 m/s
-        # test first range between 1650 - 3900
-        s_min = 1 / 3900. # minimale slowness M. uses 1/10000 in m/s
-        s_max = 1 / 1650. # maximale slowness M. uses 1/200
+        # -> between 1650 - 3900
+        s_min = 1 / 3900.
+        s_max = 1 / 1650.
 
-        gauge = 10. # Bei Martijn 19.2 in m
-        samp = 400. # Sampling Rate
+        gauge = 10.
+        fs = 400.
 
         log_SNR_min = -2
         log_SNR_max = 4
@@ -143,9 +139,9 @@ class DataGenerator(keras.utils.Sequence):
             direction = rng.integers(low=0, high=2) * 2 - 1
 
             slowness = rng.random() * (s_max - s_min) + s_min
-            shift = direction * gauge * slowness * samp # shift is in the range of [-6, 6] when s_min = 1 / 3900 and s_max = 1 / 1650
+            shift = direction * gauge * slowness * fs # shift is in the range of [-6, 6] when s_min = 1 / 3900 and s_max = 1 / 1650
             sample = sign * X[sample_ind, ::order] # without timereversals: sample = sign * X[sample_ind, :]
-            # die channel spacing length ist aufm Rhonegletscher 4m hier werden Entfernungen zwischen 4m und 60m angenommen, je nach Geschwindigkeit der Welle and so on
+            # (die channel spacing length ist aufm Rhonegletscher 4m hier werden Entfernungen zwischen 4m und 60m angenommen)
 
 
             SNR = rng.random() * (log_SNR_max - log_SNR_min) + log_SNR_min
@@ -162,15 +158,12 @@ class DataGenerator(keras.utils.Sequence):
 
         gutter = 100
         noise = rng.standard_normal((N_total * N_sub, Nt + 2 * gutter))
-        noise = taper_filter(noise, fmin=1.0, fmax=180.0, samp_DAS=samp)[:, gutter:-gutter]
+        noise = taper_filter(noise, fmin=1.0, fmax=180.0, samp_DAS=fs)[:, gutter:-gutter]
         noise = noise.reshape(*samples.shape)
 
         noisy_samples = samples + noise
         for s, sample in enumerate(noisy_samples):
             noisy_samples[s] = sample / sample.std()
-
-        #print('type_noisy_samples: ', type(noisy_samples[5]))
-        #print('noisy_samples: ', noisy_samples[5])
 
         self.samples = noisy_samples
         self.masks = masks
@@ -207,7 +200,6 @@ class CallBacks:
 
 class UNet:
 
-    # Diese Parameter werden überschrieben in den train_j-invariant Klassen.
     def __init__(self):
         self.kernel = (3, 5)
         self.f0 = 2
