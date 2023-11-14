@@ -40,7 +40,7 @@ model_params = {
     'AA': True # anti aliasing
 }
 
-different_training_data = ['ablation_horizontal', 'ablation_vertical', 'accumulation_horizontal', 'accumulation_vertical', 'combined200']
+different_training_data = ['ablation_horizontal_stick_slip', 'ablation_vertical', 'accumulation_horizontal', 'accumulation_vertical', 'combined200']
 
 for training_data in different_training_data:
 
@@ -83,6 +83,18 @@ for training_data in different_training_data:
     train_generator = DataGenerator(X=train_data, Nt=Nt, N_sub=N_sub, batch_size=batch_size, batch_multiplier=batch_multiplier)
     test_generator = DataGenerator(X=test_data, Nt=Nt, N_sub=N_sub, batch_size=batch_size, batch_multiplier=batch_multiplier)
     print("Done")
+
+    print('Input: Data Shape: ', data.shape)
+    print('Input: Train Data Shape: ', train_data.shape)
+    print('Input: Test Data Shape: ', test_data.shape)
+
+    print('Output: Train Samples Shape: ', train_generator.samples.shape)
+    print('Output: Train Masks Shape: ', train_generator.masks.shape)
+    print('Output: Train Masked_Samples Shape: ', train_generator.masked_samples.shape)
+
+    print('Output: Test Samples Shape: ', test_generator.samples.shape)
+    print('Output: Test Masks Shape: ', test_generator.masks.shape)
+    print('Output: Test Masked_Samples Shape: ', test_generator.masked_samples.shape)
 
     # Construct model
     net = UNet()

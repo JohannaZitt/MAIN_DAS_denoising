@@ -41,7 +41,7 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=4):
     y = lfilter(b, a, data)
     return y
 
-folders = ['ablation_horizontal', 'ablation_vertical', 'accumulation_horizontal', 'accumulation_vertical', 'combined200']
+folders = ['1_ablation_horizontal', '2_ablation_vertical', '4_accumulation_horizontal', '3_accumulation_vertical', '5_stick-slip', '6_surface', '7_combined120']
 
 for folder in folders:
 
@@ -70,7 +70,7 @@ for folder in folders:
     n_trc, n_t = data.shape
     for i in range(n_trc):
         # filter data
-        butter_bandpass_filter(data[i], lowcut=1, highcut=180, fs=fs, order=4)
+        butter_bandpass_filter(data[i], lowcut=1, highcut=120, fs=fs, order=4)
         # compute  ground velocity (nm/s) into strain rate
         data[i] = np.roll(data[i], rollout) - np.roll(data[i], -rollout)
         data[i] /= gauge_length * pow(10, 10)  # gauge length in nm
@@ -79,13 +79,12 @@ for folder in folders:
         data[i] /= std
 
     # cut to size
-    data = data[:, 500:-500]
+    # data = data[:, 500:-500]
 
     savedir = 'data/training_data/preprocessed_seismometer/'
     if not os.path.isdir(savedir):
         os.makedirs(savedir)
     np.save(savedir + folder, data)
-
 
 # Compute combined800 training data set:
 loaded_arrays = []
@@ -94,12 +93,11 @@ for i in range(4):
     loaded_arrays.append(loaded_array)
 combined_array = np.vstack(loaded_arrays)
 savedir = 'data/training_data/preprocessed_seismometer/'
-np.save(savedir + 'combined800', combined_array)
-
+np.save(savedir + '8_combined480', combined_array)
 
 '''
-# Plotting the training_data waveforms
-for i in range(10, 50):
-   plt.plot(data[i])
-   plt.show()
+    # Plotting the training_data waveforms
+    for i in range(10, 20):
+        plt.plot(data[i])
+        plt.show()
 '''

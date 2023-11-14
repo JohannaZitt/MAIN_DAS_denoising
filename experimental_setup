@@ -1,0 +1,10 @@
+1_ablation_horizontal: 60 stick-slip + 60 surface = 120
+2_ablation_vertical: 60 stick-slip + 60 surface = 120
+3_accumulation_horizontal: 60 stick-slip + 60 surface = 120
+4_accumulation_vertical: 60 stick-slip + 60 surface = 120
+5_stick-slip: 30 ablation_horizontal + 30 ablation_vertical + 30 accumulation_horizontal + 30 accumulation_vertical = 120
+6_surface: 30 ablation_horizontal + 30 ablation_vertical + 30 accumulation_horizontal + 30 accumulation_vertical = 120
+7_combined120: 15 ablation_horizontal_stick_slip + 15 ablation_vertical_stick_slip + 15 accumulation_horizontal_stick_slip + accumulation_vertical_stick_slip +
+               15 ablation_horizontal_surface + 15 ablation_vertical_surface + 15 accumulation_horizontal_surface + 15 accumulation_vertical_surface = 120
+8_combined480: all training samples from model 1-4
+9_random480: TODO: generate training data

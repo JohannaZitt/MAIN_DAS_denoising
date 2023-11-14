@@ -158,7 +158,7 @@ class DataGenerator(keras.utils.Sequence):
 
         gutter = 100
         noise = rng.standard_normal((N_total * N_sub, Nt + 2 * gutter))
-        noise = taper_filter(noise, fmin=1.0, fmax=180.0, samp_DAS=fs)[:, gutter:-gutter]
+        noise = taper_filter(noise, fmin=1.0, fmax=120.0, samp_DAS=fs)[:, gutter:-gutter]
         noise = noise.reshape(*samples.shape)
 
         noisy_samples = samples + noise
