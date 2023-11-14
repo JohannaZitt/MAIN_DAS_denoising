@@ -26,7 +26,7 @@ tf.config.threading.set_inter_op_parallelism_threads(4)
 N_sub = 11
 batch_size = 32
 Nt = 1024
-N_epoch = 2000
+N_epoch = 5
 batch_multiplier = 15
 model_params = {
     'use_bn': False, # batch normalization
@@ -40,7 +40,7 @@ model_params = {
     'AA': True # anti aliasing
 }
 
-different_training_data = ['ablation_horizontal_stick_slip', 'ablation_vertical', 'accumulation_horizontal', 'accumulation_vertical', 'combined200']
+different_training_data = ['1_ablation_horizontal', '2_ablation_vertical', '4_accumulation_horizontal', '3_accumulation_vertical', '5_stick-slip', '6_surface', '7_combined120', '8_combined480']
 
 for training_data in different_training_data:
 
