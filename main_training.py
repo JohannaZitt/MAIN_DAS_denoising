@@ -26,7 +26,7 @@ tf.config.threading.set_inter_op_parallelism_threads(4)
 N_sub = 11
 batch_size = 32
 Nt = 1024
-N_epoch = 5
+N_epoch = 2000
 batch_multiplier = 15
 model_params = {
     'use_bn': False, # batch normalization
