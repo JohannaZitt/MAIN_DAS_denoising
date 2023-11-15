@@ -3,5 +3,5 @@ Runtimes of experiments:
 
 1_ablation_horizontal: 2 Stunden, 58 Minuten und 44.092952 Sekunden
 2_ablation_vertical: 2 Stunden, 57 Minuten und 25.561701 Sekunden
-4_accumulation_horizontal: 2 Stunden, 57 Minuten und 38.772668 Sekunden
 3_accumulation_vertical: 2 Stunden, 57 Minuten und 36.689762 Sekunden
+4_accumulation_horizontal: 2 Stunden, 57 Minuten und 38.772668 Sekunden

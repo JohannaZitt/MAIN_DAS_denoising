@@ -1,10 +1,43 @@
-1_ablation_horizontal: 60 stick-slip + 60 surface = 120
-2_ablation_vertical: 60 stick-slip + 60 surface = 120
-3_accumulation_horizontal: 60 stick-slip + 60 surface = 120
-4_accumulation_vertical: 60 stick-slip + 60 surface = 120
-5_stick-slip: 30 ablation_horizontal + 30 ablation_vertical + 30 accumulation_horizontal + 30 accumulation_vertical = 120
-6_surface: 30 ablation_horizontal + 30 ablation_vertical + 30 accumulation_horizontal + 30 accumulation_vertical = 120
-7_combined120: 15 ablation_horizontal_stick_slip + 15 ablation_vertical_stick_slip + 15 accumulation_horizontal_stick_slip + accumulation_vertical_stick_slip +
+################# Training Samples: #########################
+
+01_ablation_horizontal: 60 stick-slip + 60 surface = 120
+02_ablation_vertical: 60 stick-slip + 60 surface = 120
+03_accumulation_horizontal: 60 stick-slip + 60 surface = 120
+04_accumulation_vertical: 60 stick-slip + 60 surface = 120
+05_stick-slip: 30 ablation_horizontal + 30 ablation_vertical + 30 accumulation_horizontal + 30 accumulation_vertical = 120
+06_surface: 30 ablation_horizontal + 30 ablation_vertical + 30 accumulation_horizontal + 30 accumulation_vertical = 120
+07_combined120: 15 ablation_horizontal_stick_slip + 15 ablation_vertical_stick_slip + 15 accumulation_horizontal_stick_slip + accumulation_vertical_stick_slip +
                15 ablation_horizontal_surface + 15 ablation_vertical_surface + 15 accumulation_horizontal_surface + 15 accumulation_vertical_surface = 120
-8_combined480: all training samples from model 1-4
-9_random480: TODO: generate training data
+08_combined480: all training samples from model 1-4
+09_random480: TODO: generate training data
+10_retrain_DAS : TODO
+
+
+################# Samples per epoch #########################
+01_ablation_horizontal: 105*32 = 3360
+02_ablation_vertical: 105*32 = 3360
+03_accumulation_horizontal: 105*32 = 3360
+04_accumulation_vertical: 105*32 = 3360
+05_stick-slip: 105*32 = 3360
+06_surface: 105*32 = 3360
+07_combined120: 105*32 = 3360
+08_combined480: TODO
+09_random480: TODO
+10_retrain_DAS : TODO
+
+################# Runtime #########################
+see at experiments/runtime.txt
+
+
+
+#################  #########################
+01_ablation_horizontal:
+02_ablation_vertical:
+03_accumulation_horizontal:
+04_accumulation_vertical:
+05_stick-slip:
+06_surface:
+07_combined120:
+08_combined480:
+09_random480:
+10_retrain_DAS :
