@@ -5,9 +5,6 @@ Runtimes of experiments:
 2_ablation_vertical: 2 Stunden, 57 Minuten und 25.561701 Sekunden
 3_accumulation_vertical: 2 Stunden, 57 Minuten und 36.689762 Sekunden
 4_accumulation_horizontal: 2 Stunden, 57 Minuten und 38.772668 Sekunden
-
-05_stick-slip: 0 Stunden, 00 Minuten und 33.948415 Sekunden
-06_surface: 0 Stunden, 00 Minuten und 29.035622 Sekunden
-07_combined120: 0 Stunden, 00 Minuten und 29.147446 Sekunden
-08_combined480: 0 Stunden, 01 Minuten und 50.793743 Sekunden
-09_random480: 0 Stunden, 01 Minuten und 51.881745 Sekunden
+05_stick-slip: 2 Stunden, 59 Minuten und 05.873423 Sekunden
+06_surface: 2 Stunden, 57 Minuten und 54.733482 Sekunden
+07_combined120: 2 Stunden, 57 Minuten und 55.228303 Sekunden
