@@ -27,7 +27,7 @@ N_sub = 11
 batch_size = 32
 Nt = 1024
 N_epoch = 2000
-batch_multiplier = 15
+batch_multiplier = 5 # set to 15 for 120 training samples (105*32 = 3360), set to 5 for 480 training samples (32*140 = 4480 samples per epoch)
 model_params = {
     'use_bn': False, # batch normalization
     'use_dropout': False,
@@ -40,7 +40,7 @@ model_params = {
     'AA': True # anti aliasing
 }
 
-different_training_data = ['05_stick-slip', '06_surface', '07_combined120', '08_combined480', '09_random480']
+different_training_data = ['08_combined480', '09_random480']
 
 for training_data in different_training_data:
 

@@ -1,3 +1,5 @@
 .idea
 __pycache__
 data/raw_training_data/seismometer/
+data/raw_DAS/
+experiments/01_ablation_horizontal/denoisedDAS/

@@ -8,3 +8,7 @@ Runtimes of experiments:
 05_stick-slip: 2 Stunden, 59 Minuten und 05.873423 Sekunden
 06_surface: 2 Stunden, 57 Minuten und 54.733482 Sekunden
 07_combined120: 2 Stunden, 57 Minuten und 55.228303 Sekunden
+
+
+Runtimes of denoising data
+1. Denoisen 30 Sekunden, 2496 channels, mit CPU: 31.7594 Sekunden

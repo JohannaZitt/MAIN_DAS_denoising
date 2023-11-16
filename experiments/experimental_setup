@@ -14,15 +14,15 @@
 
 
 ################# Samples per epoch #########################
-01_ablation_horizontal: 105*32 = 3360
-02_ablation_vertical: 105*32 = 3360
-03_accumulation_horizontal: 105*32 = 3360
-04_accumulation_vertical: 105*32 = 3360
-05_stick-slip: 105*32 = 3360
-06_surface: 105*32 = 3360
-07_combined120: 105*32 = 3360
-08_combined480: TODO
-09_random480: TODO
+01_ablation_horizontal: 105*32 = 3360 (batch multiplier = 15)
+02_ablation_vertical: 105*32 = 3360 (batch multiplier = 15)
+03_accumulation_horizontal: 105*32 = 3360 (batch multiplier = 15)
+04_accumulation_vertical: 105*32 = 3360 (batch multiplier = 15)
+05_stick-slip: 105*32 = 3360 (batch multiplier = 15)
+06_surface: 105*32 = 3360 (batch multiplier = 15)
+07_combined120: 105*32 = 3360 (batch multiplier = 15)
+08_combined480: 32*140 = 4480 (batch multiplier = 5)
+09_random480: 32*140 = 4480 (batch multiplier = 5)
 10_retrain_DAS : TODO
 
 ################# Runtime #########################
