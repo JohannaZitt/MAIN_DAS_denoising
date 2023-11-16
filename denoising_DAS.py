@@ -1,13 +1,13 @@
 import numpy as np
 import h5py
 import keras
-#import tensorflow as tf
-#from keras.backend.tensorflow_backend import set_session
+import gc
 import os
 from pydas_readers.readers import load_das_h5_CLASSIC as load_das_h5, write_das_h5
 from scipy.signal import butter, lfilter
 import time
 from datetime import timedelta
+
 
 def butter_bandpass(lowcut, highcut, fs, order=4):
     nyq = 0.5 * fs
@@ -178,6 +178,7 @@ for model in models:
 
         # load model
         model = keras.models.load_model(model_file)
+        # denoise data
         data, headers = denoise_file(file=raw_das_file_path, timesamples=timesamples, model=model, N_sub=n_sub, fs_trainingdata=fs_trainingdata)
         if DEAL_WITH_ARTIFACTS:
             print('deals with artifacts')
@@ -195,3 +196,5 @@ for model in models:
         dur_str = str(timedelta(seconds=dur))
         x = dur_str.split(':')
         print('Laufzeit für file ' + str(file) + ': ' + str(x[1]) + ' Minuten und ' + str(x[2]) + ' Sekunden.')
+
+        gc.collect()
