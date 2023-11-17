@@ -141,7 +141,7 @@ class DataGenerator(keras.utils.Sequence):
             slowness = rng.random() * (s_max - s_min) + s_min
             shift = direction * gauge * slowness * fs # shift is in the range of [-6, 6] when s_min = 1 / 3900 and s_max = 1 / 1650
             sample = sign * X[sample_ind, ::order] # without timereversals: sample = sign * X[sample_ind, :]
-            # (die channel spacing length ist aufm Rhonegletscher 4m hier werden Entfernungen zwischen 4m und 60m angenommen)
+            # (die channel spacing length ist aufm Rhonegletscher 4m hier werden Entfernungen je nach Wellentyp zwischen 4m und 60m angenommen)
 
 
             SNR = rng.random() * (log_SNR_max - log_SNR_min) + log_SNR_min

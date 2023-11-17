@@ -139,8 +139,7 @@ def deal_with_artifacts(data, filler = 0, Nt=1024):
 
 
 
-# TODO: GPU speed up wäre hier auch noch richtig nice! -> vorallem, wenn ganzer Datensatz denoist werden sollte.
-# TODO: Denoisen für nur eine gewisse channel Anzahl
+# TODO: channel spacing sollten 8 m sein, auf dem denoist wird!
 
 models=['01_ablation_horizontal']
 n_sub = 11

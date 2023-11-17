@@ -36,8 +36,8 @@ def get_event_times (event_folder_path):
 
     event_times = []
     for file_name in file_names:
-        date = file_name[-29:-19]
-        time = file_name[-18:-10]
+        date = file_name[-28:-18]
+        time = file_name[-17:-9]
         event_time = date + 'T' + time + '.0'
         event_times.append(event_time)
 
@@ -108,11 +108,9 @@ def set_file_name (event_time, client, remote_path, range):
     return return_files
 
 
-# Get Event times from seismometer data:
-event_folder_path = 'data/test_data/stick-slip_ablation'
 
-events = get_event_times(event_folder_path)
-print(events)
+event_folder_paths = ['data/test_data/surface_accumulation']
+#event_folder_paths = ['data/test_data/surface_ablation']
 
 # Access to Nextcloud Server via generated App Password
 options = {
@@ -125,41 +123,48 @@ client = Client(options)
 # Set range in seconds
 range = 6
 
-# Set local path, where the data should be stored
-local_path = 'data/raw_DAS/'
 
-for event in events:
+for event_folder_path in event_folder_paths:
+    # Get Event times from seismometer data:
+    events = get_event_times(event_folder_path)
 
-    print('___________________Event: ', event, ' _____________________________')
+    # Set local path, where the data should be stored
+    local_path = 'data/raw_DAS/' + event_folder_path[-15:] + '/'
+    if not os.path.exists(local_path):
+        os.makedirs(local_path)
 
-    # Set folder and file according to nextcloud structure
-    event_time = UTCDateTime(event)
-    folder = event_time.strftime("%Y%m%d")
-    folder2 = event_time.strftime("%Y%m%d") + '_2'
+    for event in events:
 
-    # Set remote and local path:
-    remote_path = 'environment-earth/Projects/Rhonegletscher/Data/DAS_2020/' + folder
-    remote_path2 = 'environment-earth/Projects/Rhonegletscher/Data/DAS_2020/' + folder2
+        print('___________________Event: ', event, ' _____________________________')
+
+        # Set folder and file according to nextcloud structure
+        event_time = UTCDateTime(event)
+        folder = event_time.strftime("%Y%m%d")
+        folder2 = event_time.strftime("%Y%m%d") + '_2'
+
+        # Set remote and local path:
+        remote_path = 'environment-earth/Projects/Rhonegletscher/Data/DAS_2020/' + folder
+        remote_path2 = 'environment-earth/Projects/Rhonegletscher/Data/DAS_2020/' + folder2
 
 
-    # Set Files we want to download
-    files = set_file_name(event_time=event_time.strftime("%H%M%S"), client=client, remote_path=remote_path, range=range)
+        # Set Files we want to download
+        files = set_file_name(event_time=event_time.strftime("%H%M%S"), client=client, remote_path=remote_path, range=range)
 
-    # In case we didn't find the file in the first folder (YYYYMMDD), search for it in the second folder (YYYYMMDD_2)
-    files2 = []
-    if not len(files) and client.check(remote_path2):
-        files2 = set_file_name(event_time=event_time.strftime("%H%M%S"), client=client, remote_path=remote_path2, range=range)
+        # In case we didn't find the file in the first folder (YYYYMMDD), search for it in the second folder (YYYYMMDD_2)
+        files2 = []
+        if not len(files) and client.check(remote_path2):
+            files2 = set_file_name(event_time=event_time.strftime("%H%M%S"), client=client, remote_path=remote_path2, range=range)
 
-    # Download Data
-    if len(files):
-        print('download file ', files)
-        for file in files:
-            client.download(remote_path=remote_path + '/' + file, local_path=local_path + file)
-    if len(files2):
-        print('download file2 ', files2)
-        for file in files2:
-            client.download(remote_path=remote_path2 + '/' + file, local_path=local_path + file)
-    if not len(files) and not len(files2):
-        print("No data for that event time available :'(")
+        # Download Data
+        if len(files):
+            print('download file ', files)
+            for file in files:
+                client.download(remote_path=remote_path + '/' + file, local_path=local_path + file)
+        if len(files2):
+            print('download file2 ', files2)
+            for file in files2:
+                client.download(remote_path=remote_path2 + '/' + file, local_path=local_path + file)
+        if not len(files) and not len(files2):
+            print("No data for that event time available :'(")
 
     
