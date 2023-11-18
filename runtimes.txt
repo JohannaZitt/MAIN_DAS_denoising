@@ -15,3 +15,5 @@ Runtimes of experiments:
 Runtimes of denoising data
 1. Denoisen 30 Sekunden, 2496 channels, mit CPU: 31.7594 Sekunden
 2. Denoisen 30 Sekunden, 2496 channel, mit GPU: 13.9757 Sekunden oder 15.323501 oder 14.570121
+3. Denoising 30 Sekunden 1248 channels, mit GPU: 09.137 Sekunden oder 09.249 oder 09.176 oder 09.2066
+start denoising: 22:37 Uhr (9 modelle und 200 raw_DAS data a 30 sec and 1248 channels8)

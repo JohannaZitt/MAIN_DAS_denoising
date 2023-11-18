@@ -1,4 +1,28 @@
 import os
+models_path = '../experiments'
+models = os.listdir(models_path)
+print(models)
+
+raw_DAS_path = '../data/raw_DAS'
+data_types = os.listdir(raw_DAS_path)
+print(data_types)
+#print(data_types)
+#data_types = ['stick-slip_ablation', 'stick-slip_accumulation', 'surface_accumulation']
+
+for model in models:
+
+    # for every raw data folder
+    for data_type in data_types:
+
+        raw_das_folder_path = os.path.join(raw_DAS_path, data_type)
+        saving_path = os.path.join('../experiments', model, 'denoisedDAS', data_type) # Hier fliege ich immer raus, sobald
+        model_file = os.path.join('../experiments', model, model + '.h5')
+        print('hi')
+
+
+
+'''
+import os
 
 
 folder_path = '../data/raw_DAS/surface_ablation/'
@@ -9,7 +33,7 @@ for file in files:
     new_filename = file[15:]
     #os.rename(folder_path + file, folder_path + new_filename)
 
-
+'''
 '''
 folder_path = '../data/test_data/stick-slip_accumulation/'
 files = os.listdir(folder_path)

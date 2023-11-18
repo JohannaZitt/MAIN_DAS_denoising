@@ -141,11 +141,10 @@ def deal_with_artifacts(data, filler = 0, Nt=1024):
 
 
 models_path = 'experiments'
-models = os.listdir(models_path)
+model_names = os.listdir(models_path)
 
 raw_DAS_path = 'data/raw_DAS'
 data_types = os.listdir(raw_DAS_path)
-
 
 n_sub = 11
 timesamples = 1024
@@ -153,14 +152,14 @@ fs_trainingdata = 400
 DEAL_WITH_ARTIFACTS = True
 
 # every model:
-for model in models:
+for model_name in model_names:
 
     # for every raw data folder
     for data_type in data_types:
 
         raw_das_folder_path = os.path.join(raw_DAS_path, data_type)
-        saving_path = os.path.join('experiments', model, 'denoisedDAS', data_type)
-        model_file = os.path.join('experiments', model, model + '.h5')
+        saving_path = os.path.join('experiments', model_name, 'denoisedDAS', data_type) # Hier fliege ich immer raus, sobald
+        model_file = os.path.join('experiments', model_name, model_name + '.h5')
 
         if not os.path.isdir(saving_path):
             os.makedirs(saving_path)
