@@ -23,8 +23,18 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=4):
 
 def resample(data, ratio):
     res = np.zeros((data.shape[0], int(data.shape[1]/ 2.5)))
+
+    # time axis
     for i in range(data.shape[0]):
         res[i] = np.interp(np.arange(0, len(data[0]), ratio), np.arange(0, len(data[0])), data[i])
+
+    # spatial axis:
+    n_ch = res.shape[0]
+    if n_ch == 4800 or n_ch == 4864:
+        res=res[::4,:]
+    else:
+        res = res[::2,:]
+
     return res
 
 def denoise_file (file, timesamples, model, N_sub, fs_trainingdata):
@@ -55,9 +65,7 @@ def denoise_file (file, timesamples, model, N_sub, fs_trainingdata):
     DAS_data = resample(DAS_data, headers['fs']/400)
     print('DAS_data.shape nach resampels: ', DAS_data.shape)
 
-    # Lieber immer alles denoisen!! -> auch besser für plotten
-    #if n_ch == 4800 or n_ch == 4864:
-    #    DAS_data=DAS_data[::2,:]
+
 
     n_ch, n_t = DAS_data.shape
     n_samples = int(n_t / timesamples) + 1
@@ -104,10 +112,6 @@ def denoise_file (file, timesamples, model, N_sub, fs_trainingdata):
         for j in range(DAS_reconstructions.shape[0] - 1):  # per sample
             data_save[i, j * timesamples: (j + 1) * timesamples] = DAS_reconstructions[j, i, :]
 
-    # Der DAS Datensatz der denoised werden soll, hat die Größ von [2560, 12.000]
-    # 12000 modulo 2048 =  1760
-    # 12000 div 2048 = 5 Rest 1760
-
     z = int(data_save.shape[1] / timesamples)
 
     x = z * timesamples
@@ -119,9 +123,7 @@ def denoise_file (file, timesamples, model, N_sub, fs_trainingdata):
     headers['npts'] = data_save.shape[0]
     headers['nchan'] = data_save.shape[1]
     headers['fs'] = fs_trainingdata
-    headers['dx'] = 4
-
-    #print('Data_Shape: ' + str(data_save.shape))
+    headers['dx'] = 8
 
     return data_save, headers
 
@@ -138,62 +140,58 @@ def deal_with_artifacts(data, filler = 0, Nt=1024):
     return data
 
 
+models_path = 'experiments'
+models = os.listdir(models_path)
 
-# TODO: channel spacing sollten 8 m sein, auf dem denoist wird!
+raw_DAS_path = 'data/raw_DAS'
+data_types = os.listdir(raw_DAS_path)
 
-models=['01_ablation_horizontal']
+
 n_sub = 11
 timesamples = 1024
 fs_trainingdata = 400
 DEAL_WITH_ARTIFACTS = True
 
+# every model:
 for model in models:
 
-    raw_das_folder_path = "data/raw_DAS"
-    model_name = model
-    saving_path = os.path.join('experiments', model_name, 'denoisedDAS/')
-    model_file = os.path.join('experiments', model_name, model_name + '.h5')
+    # for every raw data folder
+    for data_type in data_types:
 
-    if not os.path.isdir(saving_path):
-        os.makedirs(saving_path)
+        raw_das_folder_path = os.path.join(raw_DAS_path, data_type)
+        saving_path = os.path.join('experiments', model, 'denoisedDAS', data_type)
+        model_file = os.path.join('experiments', model, model + '.h5')
 
-    files = os.listdir(raw_das_folder_path)
+        if not os.path.isdir(saving_path):
+            os.makedirs(saving_path)
+
+        files = os.listdir(raw_das_folder_path)
 
 
 
-    for file in files:
-        start = time.time()
-        print('------------ File: ', file, ' is denoising --------------------')
+        for file in files:
+            start = time.time()
+            print('------------ File: ', file, ' is denoising --------------------')
 
-        # Path to raw DAS data
-        raw_das_file_path = os.path.join(raw_das_folder_path, file)
-        saving_filename = 'denoised_' + file
+            # Path to raw DAS data
+            raw_das_file_path = os.path.join(raw_das_folder_path, file)
+            saving_filename = '/denoised_' + file
 
-        # config ansprechen:
-        #config = tf.ConfigProto()
-        #config.gpu_options.allow_growth = True
-        #sess = tf.Session(config=config)
-        #set_session(sess)
+            # load model
+            model = keras.models.load_model(model_file)
+            # denoise data
+            data, headers = denoise_file(file=raw_das_file_path, timesamples=timesamples, model=model, N_sub=n_sub, fs_trainingdata=fs_trainingdata)
+            if DEAL_WITH_ARTIFACTS:
+                print('deals with artifacts')
+                data = deal_with_artifacts(data)
+            write_das_h5.write_block(data, headers, saving_path + saving_filename)
+            print('Saved Data with Shape: ', data.shape)
 
-        # load model
-        model = keras.models.load_model(model_file)
-        # denoise data
-        data, headers = denoise_file(file=raw_das_file_path, timesamples=timesamples, model=model, N_sub=n_sub, fs_trainingdata=fs_trainingdata)
-        if DEAL_WITH_ARTIFACTS:
-            print('deals with artifacts')
-            data = deal_with_artifacts(data)
-        write_das_h5.write_block(data, headers, saving_path + saving_filename)
-        print('Saved Data with Shape: ', data.shape)
+            # Measuring time for one file
+            end = time.time()
+            dur = end - start
+            dur_str = str(timedelta(seconds=dur))
+            x = dur_str.split(':')
+            print('Laufzeit für file ' + str(file) + ': ' + str(x[1]) + ' Minuten und ' + str(x[2]) + ' Sekunden.')
 
-        # reset GPU memory
-        #sess.close()
-        #tf.reset_default_graph()
-
-        # Measuring time for one file
-        end = time.time()
-        dur = end - start
-        dur_str = str(timedelta(seconds=dur))
-        x = dur_str.split(':')
-        print('Laufzeit für file ' + str(file) + ': ' + str(x[1]) + ' Minuten und ' + str(x[2]) + ' Sekunden.')
-
-        gc.collect()
+            gc.collect()

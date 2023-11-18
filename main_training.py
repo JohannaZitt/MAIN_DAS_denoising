@@ -119,7 +119,7 @@ for training_data in different_training_data:
     x = dur_str.split(':')
     output_text = training_data + ': ' + str(x[0]) + ' Stunden, ' + str(x[1]) + ' Minuten und ' + str(x[2]) + ' Sekunden'
 
-    with open('experiments/runtimes.txt', 'a') as file:
+    with open('runtimes.txt', 'a') as file:
         file.write('\n' + output_text)
 
     print(output_text)
