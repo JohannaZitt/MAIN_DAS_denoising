@@ -1,4 +1,15 @@
 import os
+'''
+folder = '../data/test_data/surface_accumulation'
+files = os.listdir(folder)
+#files = ['stick-slip_AJP_2020-07-07_04:33:19_p2.mseed']
+
+for file in files:
+    new_file_name = file[:32] + '_' + file[-8:]
+    #print(new_file_name)
+    #os.rename(folder + '/' + file, folder + '/' + new_file_name)
+
+
 models_path = '../experiments'
 models = os.listdir(models_path)
 print(models)
@@ -20,7 +31,7 @@ for model in models:
         print('hi')
 
 
-
+'''
 '''
 import os
 

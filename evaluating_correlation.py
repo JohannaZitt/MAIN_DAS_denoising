@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy as np
 import os
 import matplotlib.pyplot as plt
@@ -7,20 +7,28 @@ from obspy.core.stream import Stream
 from obspy import read
 from obspy.signal.cross_correlation import correlate
 from pydas_readers.readers import load_das_h5_CLASSIC as load_das_h5
+from scipy.signal import butter, lfilter
 
 
 '''
 
-This Script should:
-Cross - Correlation Values overview max:
-meaning computed the maximum correlation over 40 traces and for each trace the signal was shifted 41 times.
-The Cross-correlation was computed over a time window of 1.25 sec.
+
 
 '''
+def butter_bandpass(lowcut, highcut, fs, order=4):
+    nyq = 0.5 * fs
+    low = lowcut / nyq
+    high = highcut / nyq
+    b, a = butter(order, [low, high], btype='band')
+    return b, a
 
+def butter_bandpass_filter(data, lowcut, highcut, fs, order=4):
+    b, a = butter_bandpass(lowcut, highcut, fs, order=order)
+    y = lfilter(b, a, data)
+    return y
 
 def resample(data, ratio):
-    res = np.zeros((int(data.shape[0]/ratio)+1, data.shape[1]))
+    res = np.zeros((int(data.shape[0]/ratio) + 1, data.shape[1]))
     for i in range(data.shape[1]):
         res[:,i] = np.interp(np.arange(0, len(data), ratio), np.arange(0, len(data)), data[:,i])
     return res
@@ -66,10 +74,113 @@ def compute_moving_coherence(data, bin_size):
 
     return cc
 
+def load_raw_das_data(folder_path, t_start, t_end, receiver): # TODO: downsample in space and time, filter in 1-120 Hz band, normalize -> extra function
+
+    # corresponding DAS channel of seismometer position:
+    ch_start = 0
+    ch_end = 0
+    if receiver == 'AKU':
+        ch_start = 3730
+        ch_end = 3750
+    elif receiver == 'AJP':
+        ch_start = 3450
+        ch_end = 3470
+    elif receiver == 'ALH':
+        ch_start = 3832
+        ch_end = 3852
+    elif receiver == 'RA82':
+        ch_start = 1280
+        ch_end = 1320
+    elif receiver == 'RA87':
+        ch_start = 1200
+        ch_end =  1250
+    elif receiver == 'RA88':
+        ch_start = 1450
+        ch_end = 1480
+    else:
+        print('There is no start nor end channel for receiver ' + receiver + '.')
+    ch_start = ch_start/2
+    ch_end = ch_end/2
+    ch_middel = int(ch_start + (ch_end-ch_start)/2)
+
+    # 1. load data
+    raw_data, raw_headers, raw_axis = load_das_h5.load_das_custom(t_start, t_end, input_dir=folder_path, convert=False)
+    raw_data = raw_data.astype('f')
+
+    # 2. downsample data in space:
+    if raw_data.shape == 4864 or raw_data.shape == 4800 :
+        raw_data = raw_data[:,::4]
+    else:
+        raw_data = raw_data[:, ::2]
+    raw_headers['dx'] = 8
+
+    # 3. cut to size
+    raw_data = raw_data[:, ch_middel-50:ch_middel+50]
+
+    # 4. bandpasfilter and normalize
+    for i in range(raw_data.shape[1]):
+        butter_bandpass_filter(raw_data[:,i], 1, 120, fs=raw_headers['fs'], order=4)
+        raw_data[:,i] = raw_data[:,i] / raw_data[:,i].std()
+
+    # 5. resample time
+    raw_data = resample(raw_data, raw_headers['fs']/400)
+    raw_headers['fs'] = 400
+
+    return raw_data, raw_headers, raw_axis
+
+
+data_types = ['stick-slip_ablation', 'stick-slip_accumulation', 'surface_ablation', 'surface_accumulation']
+data_types = data_types[0:1]
+experiments = os.listdir('experiments/')
+experiments = experiments[0:1]
+
+# for every data type
+for data_type in data_types:
+
+    seismometer_data_path = 'data/test_data/' + data_type
+
+    seismometer_events = os.listdir(seismometer_data_path)
+    seismometer_events = seismometer_events[0:1]
+
+    # for every seismometer event
+    for seismometer_event in seismometer_events:
+
+        event_time = seismometer_event[-18:-10]
+        event_date = seismometer_event[-29:-19]
+        receiver = seismometer_event[-34:-30]
+
+        # evaluation time window:
+        t_start = datetime.strptime(event_date + ' ' + event_time + '.0', '%Y-%m-%d %H:%M:%S.%f')
+        t_end = t_start + timedelta(seconds=3)
+
+        # load seismometer data:
+        seis_stream = read(seismometer_data_path + '/' + seismometer_event)
+        seis_data = seis_stream[0].data
+        seis_stats = seis_stream[0].stats
+
+        # load raw DAS data:
+        raw_folder_path = 'data/raw_DAS/' + data_type + '/'
+        raw_data, raw_headers, raw_axis = load_raw_das_data(folder_path =raw_folder_path, t_start = t_start, t_end = t_end, receiver = receiver)
+
+        # for every event:
+        for experiment in experiments:
+
+            # load denoised DAS data
+            denoised_folder_path = 'experiments/' + experiment + '/denoisedDAS/' + data_type + '/'
+            denoised_data, denoised_headers, denoised_axis = load_das_h5.load_das_custom(t_start, t_end, input_dir=denoised_folder_path, convert=False)
 
 
 
-''' PARAMETERS FOR DAS LOADING AND PLOTTING 2020-07-10T03:54:35.0,ALH,P2,3822 '''
+
+
+        #plt.plot(seis_data)
+       # plt.show()
+
+
+
+
+
+''' PARAMETERS FOR DAS LOADING AND PLOTTING 2020-07-10T03:54:35.0,ALH,P2,3822 
 # time of hole data
 t_start = datetime.strptime('2020/07/10 03:54:32.0', '%Y/%m/%d %H:%M:%S.%f')
 t_end = datetime.strptime('2020/07/10 03:54:38.0', '%Y/%m/%d %H:%M:%S.%f')
@@ -82,7 +193,7 @@ n_end = 1500
 # normalizing method: 'trace' or 'stream'
 norm_method = 'trace'
 
-''' PARAMETERS FOR SEISMOMETER LOADING '''
+PARAMETERS FOR SEISMOMETER LOADING 
 receiver = 'ALH'
 event_date = '2020-07-10'
 event_time = '03:54:35'
@@ -182,6 +293,6 @@ for file in list_experiments:
     print('cc_gain: ', cc_max)
     print('cc_gain position: ', position)
 
-
+'''
 
 

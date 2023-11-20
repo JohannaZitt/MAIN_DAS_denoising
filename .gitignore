@@ -3,3 +3,11 @@ __pycache__
 data/raw_training_data/seismometer/
 data/raw_DAS/
 experiments/01_ablation_horizontal/denoisedDAS/
+experiments/02_ablation_vertical/denoisedDAS/
+experiments/03_accumulation_vertical/denoisedDAS/
+experiments/04_accumulation_horizontal/denoisedDAS/
+experiments/05_stick-slip/denoisedDAS/
+experiments/06_surface/denoisedDAS/
+experiments/07_combined120/denoisedDAS/
+experiments/08_combined480/denoisedDAS/
+experiments/09_random480/denoisedDAS/
