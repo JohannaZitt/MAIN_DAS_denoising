@@ -10,11 +10,6 @@ from pydas_readers.readers import load_das_h5_CLASSIC as load_das_h5
 from scipy.signal import butter, lfilter
 
 
-'''
-
-
-
-'''
 def butter_bandpass(lowcut, highcut, fs, order=4):
     nyq = 0.5 * fs
     low = lowcut / nyq
@@ -49,7 +44,6 @@ def xcorr(x, y):
     # Return correlation coefficient
     return np.max(R)
 
-
 def compute_xcorr_window(x):
     Nch = x.shape[0]
     Cxy = np.zeros((Nch, Nch)) * np.nan
@@ -59,7 +53,6 @@ def compute_xcorr_window(x):
             Cxy[i, j] = xcorr(x[i], x[j])
 
     return np.nanmean(Cxy)
-
 
 def compute_moving_coherence(data, bin_size):
     N_ch = data.shape[0]
@@ -74,9 +67,7 @@ def compute_moving_coherence(data, bin_size):
 
     return cc
 
-def load_raw_das_data(folder_path, t_start, t_end, receiver): # TODO: downsample in space and time, filter in 1-120 Hz band, normalize -> extra function
-
-    # corresponding DAS channel of seismometer position:
+def get_channel(receiver):
     ch_start = 0
     ch_end = 0
     if receiver == 'AKU':
@@ -93,40 +84,129 @@ def load_raw_das_data(folder_path, t_start, t_end, receiver): # TODO: downsample
         ch_end = 1320
     elif receiver == 'RA87':
         ch_start = 1200
-        ch_end =  1250
+        ch_end = 1250
     elif receiver == 'RA88':
         ch_start = 1450
         ch_end = 1480
     else:
         print('There is no start nor end channel for receiver ' + receiver + '.')
+
+    return ch_start, ch_end
+
+def load_das_data(folder_path, t_start, t_end, receiver, raw): # TODO: downsample in space and time, filter in 1-120 Hz band, normalize -> extra function
+
+    # get start and end channel:
+    ch_start, ch_end = get_channel(receiver)
     ch_start = ch_start/2
     ch_end = ch_end/2
     ch_middel = int(ch_start + (ch_end-ch_start)/2)
 
     # 1. load data
-    raw_data, raw_headers, raw_axis = load_das_h5.load_das_custom(t_start, t_end, input_dir=folder_path, convert=False)
-    raw_data = raw_data.astype('f')
+    data, headers, axis = load_das_h5.load_das_custom(t_start, t_end, input_dir=folder_path, convert=False)
+    data = data.astype('f')
 
     # 2. downsample data in space:
-    if raw_data.shape == 4864 or raw_data.shape == 4800 :
-        raw_data = raw_data[:,::4]
-    else:
-        raw_data = raw_data[:, ::2]
-    raw_headers['dx'] = 8
+    if raw:
+        if data.shape == 4864 or data.shape == 4800 :
+            data = data[:,::4]
+        else:
+            data = data[:, ::2]
+        headers['dx'] = 8
 
     # 3. cut to size
-    raw_data = raw_data[:, ch_middel-50:ch_middel+50]
+    data = data[:, ch_middel-50:ch_middel+50]
 
-    # 4. bandpasfilter and normalize
-    for i in range(raw_data.shape[1]):
-        butter_bandpass_filter(raw_data[:,i], 1, 120, fs=raw_headers['fs'], order=4)
-        raw_data[:,i] = raw_data[:,i] / raw_data[:,i].std()
+    if raw:
+        # 4. bandpasfilter and normalize
+        for i in range(data.shape[1]):
+            butter_bandpass_filter(data[:,i], 1, 120, fs=headers['fs'], order=4)
+            data[:,i] = data[:,i] / data[:,i].std()
 
-    # 5. resample time
-    raw_data = resample(raw_data, raw_headers['fs']/400)
-    raw_headers['fs'] = 400
+        # 5. resample time
+        data = resample(data, headers['fs']/400)
+        headers['fs'] = 400
 
-    return raw_data, raw_headers, raw_axis
+    return data, headers, axis
+
+def plot_data(raw_data, denoised_data, seis_data, seis_stats, data_type):
+
+    # different fonts:
+    font_s = 12
+    font_m = 14
+    font_l = 16
+
+    # parameters:
+    channels = raw_data.shape[0]
+    fs = 400
+    normalize_trace = True
+    alpha = 0.7
+    alpha_dashed_line = 0.2
+    plot_title = data_type + ', ' + str(seis_stats['starttime']) + ' - ' + str(seis_stats['endtime']) + ', ' + str(seis_stats['station'])
+
+    fig, ax = plt.subplots(2, 2, figsize=(20, 12), gridspec_kw={'height_ratios': [5, 1]})
+    fig.suptitle(plot_title, x=0.2, size=font_s)
+    plt.rcParams.update({'font.size': font_l})
+    plt.tight_layout()
+
+    # Plotting raw_data!
+    plt.subplot(221)
+    i = 0
+    for ch in range(channels):
+        plt.plot(raw_data[ch][:] + 8 * i, '-k', alpha=alpha)
+        i += 1
+    for i in range(11):
+        plt.axvline(x=(i + 1) * (fs / 2), color="black", linestyle='dashed', alpha=alpha_dashed_line)
+    plt.xticks(np.arange(0, 2401, 200), np.arange(0, 6.1, 0.5), size=font_s)
+    plt.xlabel('Time[s]', size=font_m)
+    plt.ylabel('Offset [m]', size=font_m)
+    plt.yticks(size=font_s)
+    plt.title('Raw DAS Data', loc='left')
+
+    # Plotting Denoised Data:
+    plt.subplot(222)
+    i = 0
+    for ch in range(channels):
+        plt.plot((denoised_data[ch][:] * 0.5) + 8 * i, '-k', alpha=alpha)
+        i += 1
+    for i in range(11):
+        plt.axvline(x=(i + 1) * (fs / 2), color="black", linestyle='dashed', alpha=alpha_dashed_line)
+    plt.xticks(np.arange(0, 2401, 200), np.arange(0, 6.1, 0.5), size=font_s)
+    plt.title('Denoised DAS Data', loc='left')
+    ax = plt.gca()
+    ax.axes.yaxis.set_ticklabels([])
+    plt.subplots_adjust(wspace=0.05)
+
+    # plotting seismometer data 1
+    seis_fs = seis_stats['sampling_rate']
+    plt.subplot(223)
+    plt.plot(seis_data, color='black', alpha=0.4)
+    for i in range(11):
+        plt.axvline(x=(i + 1) * seis_fs / 2, color="black", linestyle='dashed', alpha=alpha_dashed_line)
+    plt.xlabel('Time[s]', size=font_m)
+    if seis_fs == 500:
+        plt.xticks(np.arange(0, 3001, 250), np.arange(0, 6.1, 0.5), size=font_s)
+    else:  # if seis_fs==400
+        plt.xticks(np.arange(0, 2401, 200), np.arange(0, 6.1, 0.5), size=font_s)
+    plt.ylabel('Seismometer Data', size=font_l)
+    plt.yticks(size=font_s)
+    ax = plt.gca()
+    ax.axes.yaxis.set_ticklabels([])
+
+    # plotting seismometer data 2
+    plt.subplot(224)
+    plt.plot(seis_data, color='black', alpha=0.4)
+    for i in range(11):
+        plt.axvline(x=(i + 1) * seis_fs / 2, color="black", linestyle='dashed', alpha=alpha_dashed_line)
+    plt.xlabel('Time[s]', size=font_m)
+    if seis_fs == 500:
+        plt.xticks(np.arange(0, 3001, 250), np.arange(0, 6.1, 0.5), size=font_s)
+    else:  # if seis_fs==400
+        plt.xticks(np.arange(0, 2401, 200), np.arange(0, 6.1, 0.5), size=font_s)
+    ax = plt.gca()
+    ax.axes.yaxis.set_ticklabels([])
+
+    plt.show()
+
 
 
 data_types = ['stick-slip_ablation', 'stick-slip_accumulation', 'surface_ablation', 'surface_accumulation']
@@ -151,7 +231,7 @@ for data_type in data_types:
 
         # evaluation time window:
         t_start = datetime.strptime(event_date + ' ' + event_time + '.0', '%Y-%m-%d %H:%M:%S.%f')
-        t_end = t_start + timedelta(seconds=3)
+        t_end = t_start + timedelta(seconds=6)
 
         # load seismometer data:
         seis_stream = read(seismometer_data_path + '/' + seismometer_event)
@@ -160,14 +240,32 @@ for data_type in data_types:
 
         # load raw DAS data:
         raw_folder_path = 'data/raw_DAS/' + data_type + '/'
-        raw_data, raw_headers, raw_axis = load_raw_das_data(folder_path =raw_folder_path, t_start = t_start, t_end = t_end, receiver = receiver)
+        raw_data, raw_headers, raw_axis = load_das_data(folder_path =raw_folder_path, t_start = t_start, t_end = t_end, receiver = receiver, raw = True)
 
-        # for every event:
+        # for every experiment:
         for experiment in experiments:
 
             # load denoised DAS data
             denoised_folder_path = 'experiments/' + experiment + '/denoisedDAS/' + data_type + '/'
-            denoised_data, denoised_headers, denoised_axis = load_das_h5.load_das_custom(t_start, t_end, input_dir=denoised_folder_path, convert=False)
+            denoised_data, denoised_headers, denoised_axis = load_das_data(folder_path =denoised_folder_path, t_start = t_start, t_end = t_end, receiver = receiver, raw = False)
+
+            print(denoised_data.shape)
+            print(raw_data.shape)
+
+            # plotting data:
+            plot_data(raw_data.T, denoised_data.T, seis_data, seis_stats, data_type)
+
+
+            # calculate CC
+            cc_ch_start = 50
+            cc_ch_end = 70
+            cc_t_start = 900
+            cc_t_end = cc_t_start + 1024
+            bin_size = 11
+            raw_cc = compute_moving_coherence(raw_data.T[cc_ch_start:cc_ch_end, cc_t_start:cc_t_end], bin_size)
+            denoised_cc = compute_moving_coherence(denoised_data.T[cc_ch_start:cc_ch_end, cc_t_start:cc_t_end], bin_size)
+
+            cc_gain = denoised_cc / raw_cc
 
 
 
