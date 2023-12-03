@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from obspy.core.trace import Trace
 from obspy.core.stream import Stream
 from obspy import read
-from obspy.signal.cross_correlation import correlate
+from obspy.signal.cross_correlation import correlate, xcorr_max
 from pydas_readers.readers import load_das_h5_CLASSIC as load_das_h5
 from scipy.signal import butter, lfilter
 
@@ -211,7 +211,7 @@ def plot_data(raw_data, denoised_data, seis_data, seis_stats, data_type, saving_
 
 
 experiments = os.listdir('experiments/')
-experiments = ['01_ablation_horizontal', '07_combined120', '09_random480']
+#experiments = ['01_ablation_horizontal', '07_combined120', '09_random480']
 #experiments = experiments[0:1]
 data_types = ['stick-slip_ablation', 'stick-slip_accumulation', 'surface_ablation', 'surface_accumulation']
 #data_types = data_types[3:4]
@@ -284,7 +284,7 @@ with h5py.File('evaluation/cc_gain.h5', 'w') as cc_gain_h5:
                 saving_path += '/' + seismometer_event
                 # when the plot should be depicted, set
                 # saving_path = None
-                plot_data(raw_data.T, denoised_data.T, seis_data, seis_stats, data_type, saving_path)
+                # plot_data(raw_data.T, denoised_data.T, seis_data, seis_stats, data_type, saving_path)
 
 
                 # calculate CC
@@ -296,7 +296,6 @@ with h5py.File('evaluation/cc_gain.h5', 'w') as cc_gain_h5:
                 raw_cc = compute_moving_coherence(raw_data.T, bin_size)
                 denoised_cc = compute_moving_coherence(denoised_data.T, bin_size)
                 cc_gain = denoised_cc / raw_cc
-
                 # save CC gain
                 seismometer_event_group.create_dataset('data_cc', data=cc_gain)
 
@@ -306,13 +305,19 @@ with h5py.File('evaluation/cc_gain.h5', 'w') as cc_gain_h5:
                 denoised_cc_seis = np.zeros(raw_data.shape[1])
                 for i in range(raw_data.shape[1]):
                     raw_cc_seis = correlate(seis_data[cc_t_start:cc_t_end], raw_data[cc_t_start:cc_t_end][i], 20,
-                                   normalize='naive', method='direct') + 1
+                                   normalize='naive', method='fft') + 1
                     denoised_cc_seis = correlate(seis_data[cc_t_start:cc_t_end], denoised_data[cc_t_start:cc_t_end][i], 20,
-                                            normalize='naive', method='direct') + 1
-                cc_seis_gain = denoised_cc_seis - raw_cc_seis
+                                            normalize='naive', method='fft') + 1
+
+
+                denoised_shift, denoised_max_value = xcorr_max(denoised_cc_seis)
+                max_index = 20 + denoised_shift
+                raw_value = raw_cc_seis[denoised_shift]
+                cc_gain_seis = denoised_max_value - raw_value
+                print(cc_gain_seis)
 
                 # save CC gain
-                seismometer_event_group.create_dataset('data_cc_seis', data=cc_seis_gain)
+                seismometer_event_group.create_dataset('data_cc_seis', data=cc_gain_seis)
 
 
 
