@@ -1,0 +1,16 @@
+
+Befehl für Konsole, um sich alle epoch losses anzugucken:
+tensorboard --logdir_spec 01_ablation_horizontal_train:experiments/01_ablation_horizontal/logs/train,01_ablation_horizontal_validation:experiments/01_ablation_horizontal/logs/validation,02_ablation_vertical_train:experiments/02_ablation_vertical/logs/train,02_ablation_vertical_validation:experiments/02_ablation_vertical/logs/validation,03_accumulation_vertical_train:experiments/03_accumulation_vertical/logs/train,03_accumulation_vertical_validation:experiments/03_accumulation_vertical/logs/validation,04_accumulation_horizontal_train:experiments/04_accumulation_horizontal/logs/train,04_accumulation_horizontal_validation:experiments/04_accumulation_horizontal/logs/validation,05_stick-slip_train:experiments/05_stick-slip/logs/train,05_stick-slip_validation:experiments/05_stick-slip/logs/validation,06_surface_train:experiments/06_surface/logs/train,06_surface_validation:experiments/06_surface/logs/validation,07_combined120_train:experiments/07_combined120/logs/train,07_combined120_validation:experiments/07_combined120/logs/validation,08_combined480_train:experiments/08_combined480/logs/train,08_combined480_validation:experiments/08_combined480/logs/validation,09_random480_train:experiments/09_random480/logs/train,09_random_validation:experiments/09_random480/logs/validation
+
+
+
+[['model_name'                  , 'train_last'  , 'validation_last' , 'train_mean'  , 'validation_mean' , 'train_min'   , 'validation_min']]
+['01_ablation_horizontal'       , **0.0612**    , **0.0612**        , **0.0621**    , *0.0621*          , **0.06**      , 0.06]
+['02_ablation_vertical'         , *0.0621*      , 0.0637            , 0.063         , 0.0648            , *0.0608*      , 0.0603]
+['03_accumulation_vertical'     , 0.0637        , 0.0643            , 0.0644        , 0.0647            , 0.0622        , 0.0614]
+['04_accumulation_horizontal'   , 0.0634        , 0.0654            , 0.0653        , 0.0652            , 0.0631        , 0.0623]
+['05_stick-slip'                , 0.0661        , 0.0648            , 0.0661        , 0.0669            , 0.0643        , 0.0628]
+['06_surface'                   , 0.063         , *0.0615*          , 0.0634        , **0.0619**        , 0.0615        , **0.0585**]
+['07_combined120'               , 0.0638        , 0.0623            , 0.0652        , 0.0638            , 0.0633        , 0.0606]
+['08_combined480'               , 0.0629        , 0.0644            , 0.0632        , 0.0639            , 0.0617        , 0.0608]
+['09_random480'                 , 0.0624        , 0.0634            , *0.0626*      , 0.0629            , 0.061         , *0.0586*]
