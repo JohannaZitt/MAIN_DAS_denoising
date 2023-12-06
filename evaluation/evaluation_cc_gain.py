@@ -172,13 +172,16 @@ with h5py.File('cc_gain_naive.h5', 'r') as hf:
     ###############################################################
     ###########  ONE PLOT FOR ALL DATA TYPES  #####################
     ###############################################################
-    
+    '''
 
     #experiments = ['01_ablation_horizontal', '02_ablation_vertical', '03_accumulation_vertical', '04_accumulation_horizontal', '05_stick-slip', '06_surface', '07_combined120', '08_combined480', '09_random480']
 
     #experiments = ['01_ablation_horizontal', '02_ablation_vertical', '03_accumulation_vertical', '04_accumulation_horizontal']
     #experiments = ['05_stick-slip', '06_surface']
-    experiments = ['07_combined120', '08_combined480', '09_random480']
+    #experiments = ['07_combined120', '08_combined480', '09_random480']
+    #experiments = ['02_ablation_vertical', '07_combined120', '08_combined480']
+    #experiments = ['02_ablation_vertical', '09_random480']
+    experiments = ['03_accumulation_vertical', '07_combined120', '08_combined480']
 
 
     data_types = ['stick-slip_ablation', 'surface_ablation', 'stick-slip_accumulation', 'surface_accumulation']
@@ -214,9 +217,9 @@ with h5py.File('cc_gain_naive.h5', 'r') as hf:
             ax.legend(loc='upper left', fontsize=12)
 
     plt.tight_layout()
-    plt.show()
-    #plt.savefig('plots/plot_for_every_data_type/' + 'test')
-    '''
+    #plt.show()
+    plt.savefig('plots/plot_for_every_data_type/' + 'accumulation_vs_random_model')
+
 
     '''
     ###############################################################
