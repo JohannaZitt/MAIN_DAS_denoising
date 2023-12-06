@@ -4,8 +4,30 @@ import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 
+def compute_data_cc_seis_gain(raw, denoised):
+    max_mean = -1
+    trace_index = -1
+    for i in range(denoised.shape[0]):
+        # calculate which trace should be considered
+        denoised_mean = np.mean(denoised[i])
+        if max_mean < denoised_mean:
+            max_mean = denoised_mean
+            trace_index = i
 
-with h5py.File('2_cc_gain.h5', 'r') as hf:
+    objective_trace_denoised = denoised[trace_index]
+    objective_trace_raw = raw[trace_index]
+
+    max_value_denoised = np.max(objective_trace_denoised) + 1
+    max_value_index = np.argmax(objective_trace_denoised)
+    max_value_raw = objective_trace_raw[max_value_index] + 1
+
+    gain = max_value_denoised / max_value_raw
+
+    return gain
+
+with h5py.File('cc_gain_naive.h5', 'r') as hf:
+
+
 
     '''
     ###############################################################
@@ -200,7 +222,7 @@ with h5py.File('2_cc_gain.h5', 'r') as hf:
     ###############################################################
     #########  SEIS!!! SINGLE PLOTS, EACH FOR ONE MODEL  ##########
     ###############################################################
-    '''
+
     for experiment in hf.keys():
         experiment_group = hf[experiment]
 
@@ -209,7 +231,7 @@ with h5py.File('2_cc_gain.h5', 'r') as hf:
         for data_type in experiment_group.keys():
             data_type_group = experiment_group[data_type]
 
-            means_cc_seis = []
+            cc_seis_gain = []
 
             for seis_event in data_type_group.keys():
                 seis_event_group = data_type_group[seis_event]
@@ -217,31 +239,134 @@ with h5py.File('2_cc_gain.h5', 'r') as hf:
                 data_cc_seis_raw = seis_event_group['data_cc_seis_raw'][:]
                 data_cc_seis_denoised = seis_event_group['data_cc_seis_denoised'][:]
 
-                print('DENOISED: ', data_cc_seis_denoised)
-                print('RAW: ', data_cc_seis_raw)
+                data_cc_seis_gain = compute_data_cc_seis_gain(data_cc_seis_raw, data_cc_seis_denoised)
+
+                cc_seis_gain.append(data_cc_seis_gain)
+
+            ids = np.arange(1, 41)
+            cc_seis_gain = sorted(cc_seis_gain)
+            cc_seis_gain = cc_seis_gain[:40]
+
+            # Plot erstellen
+            plt.scatter(ids, cc_seis_gain, label=data_type)
+
+        # Font:
+        s_font = 15
+        m_font = 18
+        l_font = 21
+        plt.xlabel('# Icequakes', size=s_font)
+        plt.ylabel('CC gain [-]', size=s_font)
+        plt.ylim(0.75, 1.5)
+        plt.title('Experiment: ' + experiment, size=l_font)
+        plt.grid(True)
+        plt.legend(loc='upper left', fontsize=s_font)
+
+        # save figure
+        #plt.show()
+        plt.savefig('plots/seis_plot_for_every_model/seis_' + experiment)
+    '''
+
+    '''
+    ###############################################################
+    ###########  SEIS ONE PLOT FOR ALL MODELS  ####################
+    ###############################################################
+    
+
+    fig, axes = plt.subplots(3, 3, figsize=(25, 18))
+
+    for i, experiment in enumerate(hf.keys()):
+        experiment_group = hf[experiment]
+
+        row = i // 3
+        col = i % 3
+
+        ax = axes[row, col]
+
+        for data_type in experiment_group.keys():
+            data_type_group = experiment_group[data_type]
+            cc_seis_gain = []
+
+            for seis_event in data_type_group.keys():
+                seis_event_group = data_type_group[seis_event]
+                data_cc_seis_raw = seis_event_group['data_cc_seis_raw'][:]
+                data_cc_seis_denoised = seis_event_group['data_cc_seis_denoised'][:]
+
+                data_cc_seis_gain = compute_data_cc_seis_gain(data_cc_seis_raw, data_cc_seis_denoised)
+
+                cc_seis_gain.append(data_cc_seis_gain)
+
+            cc_seis_gain = sorted(cc_seis_gain)
+            cc_seis_gain = cc_seis_gain[:40]
+            ids = np.arange(1, 41)
+
+            # Plot
+            ax.scatter(ids, cc_seis_gain, label=data_type)
+            #plt.ylim(0.75, 1.5)
+
+        ax.set_ylim(0.75, 1.5)
+        ax.set_xlabel('# Icequakes', size=15)
+        ax.set_ylabel('CC gain [-]', size=15)
+        ax.set_title('Experiment: ' + experiment, size=18)
+        ax.grid(True)
+        ax.legend(loc='upper left', fontsize=12)
+
+    plt.tight_layout()
+    # Save plot
+    #plt.show()
+    plt.savefig('plots/seis_plot_for_every_model/seis_model_plot')
+    '''
 
 
+    '''
+    ###############################################################
+    ###########  SEIS ONE PLOT FOR ALL DATA TYPES  ################
+    ###############################################################
+    
+
+    #experiments = ['01_ablation_horizontal', '02_ablation_vertical', '03_accumulation_vertical', '04_accumulation_horizontal', '05_stick-slip', '06_surface', '07_combined120', '08_combined480', '09_random480']
+
+    #experiments = ['01_ablation_horizontal', '02_ablation_vertical', '03_accumulation_vertical', '04_accumulation_horizontal']
+    #experiments = ['05_stick-slip', '06_surface']
+    experiments = ['07_combined120', '08_combined480', '09_random480']
 
 
+    data_types = ['stick-slip_ablation', 'surface_ablation', 'stick-slip_accumulation', 'surface_accumulation']
+
+    fig, axes = plt.subplots(2, 2, figsize=(25, 18))
+
+    for ax, data_type in zip(axes.flatten(), data_types):
+        for i, experiment in enumerate(experiments):
+            experiment_group = hf[experiment]
+
+            cc_seis_gain = []
+            for seis_event in experiment_group[data_type].keys():
+                seis_event_group = experiment_group[data_type][seis_event]
+                data_cc_seis_raw = seis_event_group['data_cc_seis_raw'][:]
+                data_cc_seis_denoised = seis_event_group['data_cc_seis_denoised'][:]
+
+                data_cc_seis_gain = compute_data_cc_seis_gain(data_cc_seis_raw, data_cc_seis_denoised)
+
+                cc_seis_gain.append(data_cc_seis_gain)
+
+            cc_seis_gain = cc_seis_gain[:40]
+
+            if i == 0:
+                index = [i for i, _ in sorted(enumerate(cc_seis_gain), key=lambda x: x[1])]
+            cc_seis_gain = [cc_seis_gain[j] for j in index]
 
             ids = np.arange(1, 41)
 
-            # Plot erstellen
-            #plt.scatter(ids, means_cc, label=data_type)
+            # Plot
+            ax.scatter(ids, cc_seis_gain, label=experiment)
+            ax.set_xlabel('# Icequakes', size=15)
+            ax.set_ylabel('CC gain [-]', size=15)
+            ax.set_ylim(0.75, 2.2)
+            ax.set_title('Data Type: ' + data_type, size=18)
+            ax.grid(True)
+            ax.legend(loc='upper left', fontsize=12)
 
-        # Font:
-        #s_font = 15
-        #m_font = 18
-        #l_font = 21
-        #plt.xlabel('# Icequakes', size=s_font)
-        #plt.ylabel('CC gain [-]', size=s_font)
-        #plt.ylim(0, 5)
-        #plt.title('Experiment: ' + experiment, size=l_font)
-        #plt.grid(True)
-        #plt.legend(loc='upper left', fontsize=s_font)
-
-        # save figure
-        # plt.show()
-        # plt.savefig('plots/plot_for_every_model/' + experiment)
-
+    plt.tight_layout()
+    #plt.show()
+    plt.savefig('plots/seis_plot_for_every_data_type/' + 'random')
+    '''
 
