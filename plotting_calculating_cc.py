@@ -301,23 +301,32 @@ with h5py.File('evaluation/cc_gain.h5', 'w') as cc_gain_h5:
 
 
                 # calculate crosscorrelation between seismometer data and raw_data and denoised data:
-                raw_cc_seis = np.zeros(raw_data.shape[1])
-                denoised_cc_seis = np.zeros(raw_data.shape[1])
+                print(raw_data.shape)
+                shift = 20
+                raw_cc_seis = np.zeros((raw_data.shape[1], (shift * 2)+1))
+                denoised_cc_seis = np.zeros((raw_data.shape[1], (shift * 2)+1))
                 for i in range(raw_data.shape[1]):
-                    raw_cc_seis = correlate(seis_data[cc_t_start:cc_t_end], raw_data[cc_t_start:cc_t_end][i], 20,
-                                   normalize='naive', method='fft') + 1
-                    denoised_cc_seis = correlate(seis_data[cc_t_start:cc_t_end], denoised_data[cc_t_start:cc_t_end][i], 20,
-                                            normalize='naive', method='fft') + 1
+                    raw_cc_seis[i] = correlate(seis_data[cc_t_start:cc_t_end], raw_data[cc_t_start:cc_t_end][i], shift,
+                                   normalize='naive', method='fft')
+                    denoised_cc_seis[i] = correlate(seis_data[cc_t_start:cc_t_end], denoised_data[cc_t_start:cc_t_end][i], shift,
+                                            normalize='naive', method='fft')
+
+                print(raw_cc_seis.shape)
+                print(raw_cc_seis)
 
 
-                denoised_shift, denoised_max_value = xcorr_max(denoised_cc_seis)
-                max_index = 20 + denoised_shift
-                raw_value = raw_cc_seis[denoised_shift]
-                cc_gain_seis = denoised_max_value - raw_value
-                print(cc_gain_seis)
+                #print('RAW_CC_SEIS: ', raw_cc_seis)
+                #print('DENOISED_CC_SEIS: ', denoised_cc_seis)
+
+                #denoised_shift, denoised_max_value = xcorr_max(denoised_cc_seis)
+                #max_index = 20 + denoised_shift
+                #raw_value = raw_cc_seis[denoised_shift]
+                #cc_gain_seis = denoised_max_value - raw_value
+                #print(cc_gain_seis)
 
                 # save CC gain
-                seismometer_event_group.create_dataset('data_cc_seis', data=cc_gain_seis)
+                seismometer_event_group.create_dataset('data_cc_seis_raw', data=raw_cc_seis)
+                seismometer_event_group.create_dataset('data_cc_seis_denoised', data=denoised_cc_seis)
 
 
 

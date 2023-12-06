@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-with h5py.File('1_cc_gain.h5', 'r') as hf:
+with h5py.File('2_cc_gain.h5', 'r') as hf:
 
     '''
     ###############################################################
@@ -53,7 +53,7 @@ with h5py.File('1_cc_gain.h5', 'r') as hf:
 
         # save figure
         plt.show()
-        # plt.savefig('plots/' + experiment)
+        #plt.savefig('plots/plot_for_every_model/' + experiment)
     '''
 
     '''
@@ -150,7 +150,7 @@ with h5py.File('1_cc_gain.h5', 'r') as hf:
     ###############################################################
     ###########  ONE PLOT FOR ALL DATA TYPES  #####################
     ###############################################################
-    '''
+    
 
     #experiments = ['01_ablation_horizontal', '02_ablation_vertical', '03_accumulation_vertical', '04_accumulation_horizontal', '05_stick-slip', '06_surface', '07_combined120', '08_combined480', '09_random480']
 
@@ -194,8 +194,54 @@ with h5py.File('1_cc_gain.h5', 'r') as hf:
     plt.tight_layout()
     plt.show()
     #plt.savefig('plots/plot_for_every_data_type/' + 'test')
+    '''
+
+    '''
+    ###############################################################
+    #########  SEIS!!! SINGLE PLOTS, EACH FOR ONE MODEL  ##########
+    ###############################################################
+    '''
+    for experiment in hf.keys():
+        experiment_group = hf[experiment]
+
+        plt.figure(figsize=(14, 10))
+
+        for data_type in experiment_group.keys():
+            data_type_group = experiment_group[data_type]
+
+            means_cc_seis = []
+
+            for seis_event in data_type_group.keys():
+                seis_event_group = data_type_group[seis_event]
+
+                data_cc_seis_raw = seis_event_group['data_cc_seis_raw'][:]
+                data_cc_seis_denoised = seis_event_group['data_cc_seis_denoised'][:]
+
+                print('DENOISED: ', data_cc_seis_denoised)
+                print('RAW: ', data_cc_seis_raw)
 
 
 
+
+
+            ids = np.arange(1, 41)
+
+            # Plot erstellen
+            #plt.scatter(ids, means_cc, label=data_type)
+
+        # Font:
+        #s_font = 15
+        #m_font = 18
+        #l_font = 21
+        #plt.xlabel('# Icequakes', size=s_font)
+        #plt.ylabel('CC gain [-]', size=s_font)
+        #plt.ylim(0, 5)
+        #plt.title('Experiment: ' + experiment, size=l_font)
+        #plt.grid(True)
+        #plt.legend(loc='upper left', fontsize=s_font)
+
+        # save figure
+        # plt.show()
+        # plt.savefig('plots/plot_for_every_model/' + experiment)
 
 
