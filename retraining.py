@@ -20,7 +20,7 @@ rng = np.random.default_rng(seed)
 '''
 
 Retraining on DAS data of the trained in main_training.py models
-
+test
 '''
 
 """ Parameters """
@@ -34,6 +34,7 @@ trainingdata = "data/training_data/preprocessed_DAS/retraining_data.npy"
 # Load pretrained Model:
 model_file = os.path.join("experiments", pretrained_model_name, pretrained_model_name + ".h5")
 model = keras.models.load_model(model_file)
+model.summary()
 
 """ Callbacks """
 logdir = os.path.join("experiments", model_name, 'logs')
