@@ -103,6 +103,7 @@ for training_data in different_training_data:
     # model.summary()
 
     # Model training
+    '''
     start = time.time()
     print('Start Model Training')
     model.fit(
@@ -123,3 +124,4 @@ for training_data in different_training_data:
         file.write('\n' + output_text)
 
     print(output_text)
+    '''

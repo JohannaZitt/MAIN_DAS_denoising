@@ -70,7 +70,7 @@ for folder in folders:
     n_trc, n_t = data.shape
     for i in range(n_trc):
         # filter data
-        butter_bandpass_filter(data[i], lowcut=1, highcut=120, fs=fs, order=4)
+        data[i] = butter_bandpass_filter(data[i], lowcut=1, highcut=120, fs=fs, order=4)
         # compute  ground velocity (nm/s) into strain rate
         data[i] = np.roll(data[i], rollout) - np.roll(data[i], -rollout)
         data[i] /= gauge_length * pow(10, 10)  # gauge length in nm
@@ -81,10 +81,13 @@ for folder in folders:
     # cut to size
     # data = data[:, 500:-500]
 
+    print(data.shape)
+
     savedir = 'data/training_data/preprocessed_seismometer/'
     if not os.path.isdir(savedir):
         os.makedirs(savedir)
-    np.save(savedir + folder, data)
+    #np.save(savedir + folder, data)
+
 
 # Compute combined800 training data set:
 '''

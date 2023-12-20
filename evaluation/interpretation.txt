@@ -41,7 +41,8 @@ CC_Gain: nach model VORSICHT!! Es können keine Datenpunkte direkt miteinander v
           Somit kann der Denoiser mehr noise erkennen und herausfiltern -> der Effekt auf die Zunahme von local
           waveform coherence ist größer als bei Daten mit besserem SNR (ablation und surface events)
 
-Seis_CC_Gain:
+Seis_CC_Gain nach data type:
+        1.
 
 
 
@@ -51,7 +52,6 @@ weitere Informationen:
 
 
 TODO:
-    - nochmal
     - retraining mit DAS
     - reines Training mit DAS
     - synthetic test data generation
