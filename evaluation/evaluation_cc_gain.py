@@ -2,6 +2,7 @@ import os
 
 import h5py
 import numpy as np
+import json
 import matplotlib.pyplot as plt
 
 def compute_data_cc_seis_gain(raw, denoised):
@@ -25,7 +26,68 @@ def compute_data_cc_seis_gain(raw, denoised):
 
     return gain
 
-with h5py.File('cc_gain_naive.h5', 'r') as hf:
+'''
+
+data_cc_seis ist: (crosscorrelation zwischen seismometer data und raw DAS) / (crosscorrelation zwischen seismometer data und denoised DAS)
+data_cc ist local waveform coherence von Martijn. 
+
+'''
+
+
+with h5py.File('cc_gain_none.h5', 'r') as hf:
+
+
+    # Ziel ist erstmal: für jedes model und jeden data type, einen Wert zu ermitteln.
+    cc_experiment_means = {}
+    cc_seis_experiment_means = {}
+
+    for experiment in hf.keys():
+        experiment_group = hf[experiment]
+
+        cc_experiment_means[experiment] = {}
+        cc_seis_experiment_means[experiment] = {}
+
+        for data_type in experiment_group.keys():
+            data_type_group = experiment_group[data_type]
+
+            means_cc = []
+            means_cc_seis = []
+
+            for seis_event in data_type_group.keys():
+                seis_event_group = data_type_group[seis_event]
+                data_cc = seis_event_group['data_cc'][:]
+                mean_cc = np.mean(data_cc)
+                means_cc.append(mean_cc)
+
+                #data_cc_seis = seis_event_group['data_cc_seis'][:]
+                #mean_cc_seis = np.mean(data_cc_seis)
+                #means_cc_seis.append(mean_cc_seis)
+
+
+            mean_overall = np.mean(means_cc)
+            cc_experiment_means[experiment][data_type] = mean_overall
+
+            #mean_overall_seis = np.mean(means_cc_seis)
+            #cc_seis_experiment_means[experiment][data_type] = mean_overall_seis
+
+
+# Daten als JSON speichern
+
+#with open('cc_experiment_means.json', 'w') as json_file:
+#    json.dump(cc_experiment_means, json_file)
+
+
+#with open('cc_seis_experiment_means.json', 'w') as json_file:
+#    json.dump(cc_seis_experiment_means, json_file)
+
+
+
+
+
+
+
+
+
 
 
 
@@ -172,16 +234,16 @@ with h5py.File('cc_gain_naive.h5', 'r') as hf:
     ###############################################################
     ###########  ONE PLOT FOR ALL DATA TYPES  #####################
     ###############################################################
-    '''
+    
 
-    #experiments = ['01_ablation_horizontal', '02_ablation_vertical', '03_accumulation_vertical', '04_accumulation_horizontal', '05_stick-slip', '06_surface', '07_combined120', '08_combined480', '09_random480']
+    experiments = ['01_ablation_horizontal', '02_ablation_vertical', '03_accumulation_vertical', '04_accumulation_horizontal', '05_stick-slip', '06_surface', '07_combined120', '08_combined480', '09_random480']
 
     #experiments = ['01_ablation_horizontal', '02_ablation_vertical', '03_accumulation_vertical', '04_accumulation_horizontal']
     #experiments = ['05_stick-slip', '06_surface']
     #experiments = ['07_combined120', '08_combined480', '09_random480']
     #experiments = ['02_ablation_vertical', '07_combined120', '08_combined480']
     #experiments = ['02_ablation_vertical', '09_random480']
-    experiments = ['03_accumulation_vertical', '07_combined120', '08_combined480']
+    #experiments = ['03_accumulation_vertical', '07_combined120', '08_combined480']
 
 
     data_types = ['stick-slip_ablation', 'surface_ablation', 'stick-slip_accumulation', 'surface_accumulation']
@@ -217,9 +279,9 @@ with h5py.File('cc_gain_naive.h5', 'r') as hf:
             ax.legend(loc='upper left', fontsize=12)
 
     plt.tight_layout()
-    #plt.show()
-    plt.savefig('plots/plot_for_every_data_type/' + 'accumulation_vs_random_model')
-
+    plt.show()
+    #plt.savefig('plots/plot_for_every_data_type/' + 'accumulation_vs_random_model')
+    '''
 
     '''
     ###############################################################

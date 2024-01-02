@@ -1,0 +1,9 @@
+{"01_ablation_horizontal": {"stick-slip_ablation": 1.5816755535318194, "stick-slip_accumulation": 1.9476426654809362, "surface_ablation": 1.5846977996127845, "surface_accumulation": 1.9427584586806979},
+  "02_ablation_vertical": {"stick-slip_ablation": 1.7573691101298277, "stick-slip_accumulation": 1.9940694250429387, "surface_ablation": 1.7040259812903222, "surface_accumulation": 1.866165094364958},
+  "03_accumulation_vertical": {"stick-slip_ablation": 1.3399357712222362, "stick-slip_accumulation": 2.2135020165909434, "surface_ablation": 1.3427770784118933, "surface_accumulation": 2.2003681457897994},
+  "04_accumulation_horizontal": {"stick-slip_ablation": 1.4234056419805157, "stick-slip_accumulation": 2.7538903811611117, "surface_ablation": 1.4005736390197605, "surface_accumulation": 2.5750520760519913},
+  "05_stick-slip": {"stick-slip_ablation": 1.350014303618855, "stick-slip_accumulation": 2.4887398633073476, "surface_ablation": 1.3326072355460459, "surface_accumulation": 2.402236565163026},
+  "06_surface": {"stick-slip_ablation": 1.7273520559710647, "stick-slip_accumulation": 2.0363928733090697, "surface_ablation": 1.749778964268058, "surface_accumulation": 1.9148898360525153},
+  "07_combined120": {"stick-slip_ablation": 1.534970645927131, "stick-slip_accumulation": 2.1672159633289803, "surface_ablation": 1.5056102452161872, "surface_accumulation": 2.1421950346820227},
+  "08_combined480": {"stick-slip_ablation": 1.5044371122187479, "stick-slip_accumulation": 2.156474971409085, "surface_ablation": 1.4991841855286738, "surface_accumulation": 2.142451177325078},
+  "09_random480": {"stick-slip_ablation": 1.3231904023012016, "stick-slip_accumulation": 1.660217654148297, "surface_ablation": 1.3344830388310673, "surface_accumulation": 1.683463645024864}}

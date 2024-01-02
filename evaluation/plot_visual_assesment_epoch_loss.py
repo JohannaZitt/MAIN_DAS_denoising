@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import json
 
 
 
@@ -23,7 +24,6 @@ bar_width = 0.2
 
 # Positionen der Balken
 bar_positions = np.arange(len(models))
-print(bar_positions)
 
 # Farben für die Balken
 colors = ['r', 'g', 'b', 'y']  # Beispiel: Rote, grüne, blaue und gelbe Balken
@@ -42,12 +42,14 @@ plt.legend()
 
 plt.grid(axis='y')  # Gitterlinien für die y-Achse anzeigen
 plt.tight_layout()
-plt.savefig('plots/visual_assesnent.png')
+#plt.savefig('plots/visual_assesnent.png')
 #plt.show()
 
 
+'''
+2. Epoch Loss
+'''
 
-# 2. Epoch Loss
 train_last = [0.0612, 0.0621, 0.0637, 0.0634, 0.0661, 0.063, 0.0638, 0.0629, 0.0624]
 validation_last = [0.0612, 0.0637, 0.0643, 0.0654, 0.0648, 0.0615, 0.0623, 0.0644, 0.0634]
 train_mean = [0.0621, 0.063, 0.0644, 0.0653, 0.0661, 0.0634, 0.0652, 0.0632, 0.0626]
@@ -58,7 +60,6 @@ bar_width = 0.2
 
 # Positionen der Balken
 bar_positions = np.arange(len(models))
-print(bar_positions)
 
 # Farben für die Balken
 colors = ['r', 'g', 'b', 'y']  # Beispiel: Rote, grüne, blaue und gelbe Balken
@@ -78,6 +79,40 @@ plt.legend()
 
 plt.grid(axis='y')  # Gitterlinien für die y-Achse anzeigen
 plt.tight_layout()
-plt.savefig('plots/epoch_loss.png')
+#plt.savefig('plots/epoch_loss.png')
 #plt.show()
 
+
+'''
+3. CC = Local Waveform coherence
+
+'''
+with open('cc_experiment_means.json', 'r') as file:
+    data = json.load(file)
+
+# Konvertiere Daten in ein 9x4 Numpy-Array
+cc_data = np.array([[data[key][sub_key] for sub_key in data[key]] for key in data])
+
+bar_width = 0.2
+
+# Positionen der Balken
+bar_positions = np.arange(len(models))
+
+# Farben für die Balken
+colors = ['r', 'g', 'b', 'y']  # Beispiel: Rote, grüne, blaue und gelbe Balken
+
+# Plot des Balkendiagramms für jede Kategorie und jeden Wert
+plt.figure(figsize=(10, 6))
+for i in range(4):
+    plt.bar(bar_positions + i * bar_width, cc_data[:, i], width=bar_width, color=colors[i], label=data_types[i])
+
+# Beschriftungen und Titel hinzufügen
+plt.xlabel('training data type')
+plt.ylabel('cc gain [-]')
+plt.xticks(bar_positions + 0.3, models, rotation=15) #  rotation=45, ha='left'
+plt.legend()
+
+plt.grid(axis='y')  # Gitterlinien für die y-Achse anzeigen
+plt.tight_layout()
+#plt.savefig('plots/cc_gain_loss.png')
+#plt.show()
