@@ -211,10 +211,10 @@ def plot_data(raw_data, denoised_data, seis_data, seis_stats, data_type, saving_
 
 
 experiments = os.listdir('experiments/')
-#experiments = ['01_ablation_horizontal', '07_combined120', '09_random480']
+experiments = ['06_surface']
 #experiments = experiments[0:1]
 data_types = ['stick-slip_ablation', 'stick-slip_accumulation', 'surface_ablation', 'surface_accumulation']
-#data_types = data_types[3:4]
+data_types = data_types[1:2]
 
 # for saving the data hdf5 format is used:
 with h5py.File('evaluation/cc_gain_naive.h5', 'w') as cc_gain_h5:
@@ -274,17 +274,17 @@ with h5py.File('evaluation/cc_gain_naive.h5', 'w') as cc_gain_h5:
                 raw_data, raw_headers, raw_axis = load_das_data(folder_path =raw_folder_path, t_start = t_start, t_end = t_end, receiver = receiver, raw = True)
 
                 # load denoised DAS data
-                denoised_folder_path = 'experiments/' + experiment + '/denoisedDAS/' + data_type + '/'
+                denoised_folder_path = 'experiments/' + experiment + '/denoisedDAS_mean0/' + data_type + '/'
                 denoised_data, denoised_headers, denoised_axis = load_das_data(folder_path =denoised_folder_path, t_start = t_start, t_end = t_end, receiver = receiver, raw = False)
 
                 # plotting data:
-                saving_path = os.path.join('experiments', experiment, 'plots', data_type)
+                saving_path = os.path.join('experiments', experiment, 'plots_mean0', data_type)
                 if not os.path.isdir(saving_path):
                     os.makedirs(saving_path)
                 saving_path += '/' + seismometer_event
                 # when the plot should be depicted, set
                 # saving_path = None
-                # plot_data(raw_data.T, denoised_data.T, seis_data, seis_stats, data_type, saving_path)
+                plot_data(raw_data.T, denoised_data.T, seis_data, seis_stats, data_type, saving_path)
 
 
                 # calculate CC
@@ -312,6 +312,6 @@ with h5py.File('evaluation/cc_gain_naive.h5', 'w') as cc_gain_h5:
 
 
                 # save CC gain
-                seismometer_event_group.create_dataset('data_cc_seis_raw', data=raw_cc_seis)
-                seismometer_event_group.create_dataset('data_cc_seis_denoised', data=denoised_cc_seis)
+                #seismometer_event_group.create_dataset('data_cc_seis_raw', data=raw_cc_seis)
+                #seismometer_event_group.create_dataset('data_cc_seis_denoised', data=denoised_cc_seis)
 

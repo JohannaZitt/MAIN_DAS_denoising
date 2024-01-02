@@ -55,17 +55,16 @@ def denoise_file (file, timesamples, model, N_sub, fs_trainingdata):
     highcut = 120
     for i in range(DAS_data.shape[0]):
         # filter data
-        butter_bandpass_filter(DAS_data[i], lowcut, highcut, fs=1000, order=4)
+        # data is not filtered during training -> Do not filter here!!
+        # butter_bandpass_filter(DAS_data[i], lowcut, highcut, fs=1000, order=4)
         # normalize data
         DAS_data[i] = DAS_data[i] / DAS_data[i].std()
 
     # resampling auf 400Hz bringen. Hier gibt es teilweise auch andere sample frequencies!!!
     n_ch, n_t = DAS_data.shape
-    print('DAS_data.shape vor resampels: ', DAS_data.shape)
+    #print('DAS_data.shape vor resampels: ', DAS_data.shape)
     DAS_data = resample(DAS_data, headers['fs']/400)
-    print('DAS_data.shape nach resampels: ', DAS_data.shape)
-
-
+    #print('DAS_data.shape nach resampels: ', DAS_data.shape)
 
     n_ch, n_t = DAS_data.shape
     n_samples = int(n_t / timesamples) + 1
@@ -77,7 +76,7 @@ def denoise_file (file, timesamples, model, N_sub, fs_trainingdata):
     DAS_reconstructions = np.zeros_like(data)
     N_samples, N_ch, N_t = data.shape
 
-    # loop over every batche of 2048 sampling points
+    # loop over every batche of 1024 sampling points
     for n, eval_sample in enumerate(data):
 
         # prepare sample and masks
@@ -101,6 +100,17 @@ def denoise_file (file, timesamples, model, N_sub, fs_trainingdata):
         for i in range(N_ch - gutter, N_ch):
             masks[i, i - N_ch] = 0
             eval_samples[i, :, :, 0] = eval_sample[-N_sub:]
+
+
+        #print('EVAL_SAMPLES_SHAPE: ', eval_samples.shape)
+        #print('MASKS_SHAPE: ', masks.shape)
+        for i in range(eval_samples.shape[0]):
+        #    print('LOOKING AT CHANNEL ', i)
+            for j in range(eval_samples.shape[1]):
+                eval_samples[i, j, :] = eval_samples[i, j, :] - np.mean(eval_samples[i, j, :])
+        #        print(np.mean(eval_samples[i, j, :]))
+        #print(eval_samples)
+
 
         # Create J-invariant reconstructions
         results = model.predict((eval_samples, masks))
@@ -142,6 +152,7 @@ def deal_with_artifacts(data, filler = 0, Nt=1024):
 
 models_path = 'experiments'
 model_names = os.listdir(models_path)
+model_names = ['06_surface']
 
 raw_DAS_path = 'data/raw_DAS'
 data_types = os.listdir(raw_DAS_path)
@@ -158,7 +169,7 @@ for model_name in model_names:
     for data_type in data_types:
 
         raw_das_folder_path = os.path.join(raw_DAS_path, data_type)
-        saving_path = os.path.join('experiments', model_name, 'denoisedDAS', data_type) # Hier fliege ich immer raus, sobald
+        saving_path = os.path.join('experiments', model_name, 'denoisedDAS_mean0', data_type) # Hier fliege ich immer raus, sobald
         model_file = os.path.join('experiments', model_name, model_name + '.h5')
 
         if not os.path.isdir(saving_path):

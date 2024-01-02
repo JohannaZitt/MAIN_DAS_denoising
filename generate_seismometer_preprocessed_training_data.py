@@ -6,15 +6,12 @@ from obspy import read
 from scipy.signal import butter, lfilter
 
 
-# 1. beispiel Daten lesen und 500 auf 400 Hz downsampeln
-
 def resample(stream, ratio):
-    '''
-
+    """
     :param stream: stream object, which has to be resampled
     :param ratio: resample ratio = fs_old/fs_new
     :return: resampled data as np array
-    '''
+    """
 
     # convert stream to np array
     n_trc = len(stream)
@@ -60,6 +57,7 @@ for folder in folders:
         for i in range(n_trc):
             data[i] = stream[i].data[0:n_t]
 
+
     # parameters for calculating strain rate:
     gauge_length: int = 10 #in m
     swave_velocity = 1800 # in m/s
@@ -69,19 +67,20 @@ for folder in folders:
 
     n_trc, n_t = data.shape
     for i in range(n_trc):
-        # filter data
-        data[i] = butter_bandpass_filter(data[i], lowcut=1, highcut=120, fs=fs, order=4)
+        # filter data: Obacht: During experiment 01-09 wurde KEIN Filter angewendet!
+        # data[i] = butter_bandpass_filter(data[i], lowcut=1, highcut=120, fs=fs, order=4)
+
         # compute  ground velocity (nm/s) into strain rate
         data[i] = np.roll(data[i], rollout) - np.roll(data[i], -rollout)
         data[i] /= gauge_length * pow(10, 10)  # gauge length in nm
+
         # scale by standard deviation
         std = data[i].std()
         data[i] /= std
 
-    # cut to size
-    # data = data[:, 500:-500]
+    for i in range(n_trc):
+        print(np.mean(data[i]))
 
-    print(data.shape)
 
     savedir = 'data/training_data/preprocessed_seismometer/'
     if not os.path.isdir(savedir):
