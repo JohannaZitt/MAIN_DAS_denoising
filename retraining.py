@@ -67,15 +67,6 @@ train_generator = DataGeneratorDAS(X=train_data, N_sub=N_sub, batch_multiplier=b
 test_generator = DataGeneratorDAS(X=test_data, N_sub=N_sub, batch_multiplier=batch_multiplier, batch_size=batch_size)
 print("Done")
 
-
-# Zur Kontrolle Trainingsdatan plotten:
-
-
-
-print('Hier steht ist shape[0]=0. Das sollte definitiv nicht so sein.')
-print(train_generator.samples.shape)
-print(test_generator.samples.shape)
-
 start = time.time()
 
 # Train the model:
@@ -92,3 +83,7 @@ dur = end-start
 dur_str = str(timedelta(seconds=dur))
 x = dur_str.split(':')
 print('Programm endete um: ' + time.strftime("%H:%M:%S") + '; Laufzeit: ' + str(x[0]) + ' Stunden, ' + str(x[1]) + ' Minuten und ' + str(x[2]) + ' Sekunden')
+
+output_text = 'Retraining ' + model_name + ' took ' + str(x[0]) + ' hours, ' + str(x[1]) + ' minutes und ' + str(x[2]) + ' seconds'
+with open('runtimes.txt', 'a') as file:
+    file.write('\n' + output_text)

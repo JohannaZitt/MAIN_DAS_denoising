@@ -52,68 +52,79 @@ event06 = ['2020/07/12', '06:53:26.5', 1200, 1350]
 event07 = ['2020/07/13', '00:48:35.7', 395, 440]
 
 events = [event01, event02, event03, event04, event05, event06, event07]
-#events = [event06, event07]
-n_sub = 15
+n_sub = 15 # wird in DataGenerator dann auf n_sub = 11 mit zufälligem Start channel gecuttet
 n_t = 1024
-training_data = np.zeros((13, n_t, n_sub))
+training_data = np.zeros((39, n_t, n_sub))
 n = 0
 
-# Über Arosa WE nochmal neu trainieren!!
-# dabei TODO s: 1. checken, dass wirklich gefiltert wird, 2. mittelwert muss 0 sein, 3. Bei martijn: mittelwert 0 und werte zwischen -5 und 5
+for event in events: # for evey event
 
-for event in events:
+    for m in range(3): # m is the start channel of every
 
-    # 1. load DAS data
-    file_dir = 'data/training_data/raw_DAS/'
-    t_start = datetime.strptime(event[0] + ' ' + event[1], '%Y/%m/%d %H:%M:%S.%f')
-    t_end   = t_start + timedelta(seconds=3.5)
-    data, headers, axis = load_das_h5.load_das_custom(t_start, t_end, input_dir = file_dir, convert = False)
+        # 1. load DAS data
+        file_dir = 'data/training_data/raw_DAS/'
+        t_start = datetime.strptime(event[0] + ' ' + event[1], '%Y/%m/%d %H:%M:%S.%f')
+        t_end   = t_start + timedelta(seconds=3.5)
+        data, headers, axis = load_das_h5.load_das_custom(t_start, t_end, input_dir=file_dir, convert = False)
 
-    # 2. downsample to 12 m channel spacing -> um mehr Trainingsdaten zu erhalten, kann man hier auch aus jedem sample 3 machen mit unterschiedlichem channel gelöscht (data=data[i::3] i=0, 1, 2
-    if data.shape[1] == 4864 or data.shape[1] == 4800:
-        data = data[:, ::6]
-        startchannel = event[2] // 6
-        endchannel = event[3] // 6
-    else:
-        data = data[:, ::3]
-        startchannel = event[2] // 3
-        endchannel = event[3] // 3
-    data = data[:, startchannel:endchannel]
+        # 2. downsample to 12 m channel spacing
+        if data.shape[1] == 4864 or data.shape[1] == 4800:
+            data = data[:, m::6]
+            startchannel = event[2] // 6
+            endchannel = event[3] // 6
+        else:
+            data = data[:, m::3]
+            startchannel = event[2] // 3
+            endchannel = event[3] // 3
+        data = data[:, startchannel:endchannel]
 
-    # 3. set mean value to 0
-    for i in range(data.shape[1]):
-        mean = np.mean(data[:,i])
-        data[:,i] = data[:, i] - mean
 
-    # 4. filtering data
-    lowcut_sec = 1
-    highcut_sec = 120
-    for i in range(data.shape[0]):
-        data[i] = butter_bandpass_filter(data[i], lowcut_sec, highcut_sec, 1000, order=4)
+        # 3. set mean value to 0
+        for i in range(data.shape[1]):
+            mean = np.mean(data[:,i])
+            data[:,i] = data[:, i] - mean
 
-    # 4. downsample data in time: we need sample frequency of 400 Hz
-    data = resample(data, headers['fs']/400)
-    data = data[:n_t, :]
+        # 4. filtering data
+        lowcut_sec = 1
+        highcut_sec = 120
+        for i in range(data.shape[0]):
+            data[i] = butter_bandpass_filter(data[i], lowcut_sec, highcut_sec, 1000, order=4)
 
-    # 5. normalize data
-    for i in range(data.shape[1]):
-        data[:,i] /= data[:,i].std()
+        # 4. downsample data in time: we need sample frequency of 400 Hz
+        data = resample(data, headers['fs']/400)
+        data = data[:n_t, :]
 
-    # 6. concatenate all data in one dataset training_data
-    n_samples = int(data.shape[1] / n_sub)
-    for i in range(n_samples):
-        training_data[n] = data[:, i*n_sub:(i+1)*n_sub]
-        n += 1
+        # 5. normalize data
+        for i in range(data.shape[1]):
+            data[:,i] /= data[:,i].std()
+
+        # 6. concatenate all data in one dataset training_data
+        n_samples = int(data.shape[1] / n_sub)
+        for i in range(n_samples):
+            training_data[n] = data[:, i*n_sub:(i+1)*n_sub]
+            n += 1
 
 
 # 7. Save data:
 training_data = np.transpose(training_data, (0, 2, 1))
 np.save('data/training_data/preprocessed_DAS/retraining_data.npy', training_data)
 
-'''
-IN CASE YOU WANNA PLOT DATA
 
-for i in range(training_data.shape[0]):
-    plot_data(training_data[i])
+
 '''
+IN CASE YOU WANNA PLOT DATA to double check
+
+for j in range(training_data.shape[0]):
+    plot_data = training_data[j]
+    i = 0
+    for ch in range(15):
+        plt.plot(plot_data[ch][:] + 8 * i, '-k', alpha=0.8)
+        i += 1
+    plt.xlabel('Time[s]')
+    plt.ylabel('Offset [m]')
+
+    plt.show()
+
+'''
+
 
