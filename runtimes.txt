@@ -18,3 +18,5 @@ Runtimes of denoising data
 3. Denoising 30 Sekunden 1248 channels, mit GPU: 09.137 Sekunden oder 09.249 oder 09.176 oder 09.2066
 
 
+
+Retraining 10_retrained_08 took 0 hours, 07 minutes und 07.231790 seconds

@@ -140,6 +140,7 @@ class DataGenerator(keras.utils.Sequence):
 
             slowness = rng.random() * (s_max - s_min) + s_min
             shift = direction * gauge * slowness * fs # shift is in the range of [-6, 6] when s_min = 1 / 3900 and s_max = 1 / 1650
+            # 1. time reversal and polarity flip is performed.
             sample = sign * X[sample_ind, ::order] # without timereversals: sample = sign * X[sample_ind, :]
             # (die channel spacing length ist aufm Rhonegletscher 4m hier werden Entfernungen je nach Wellentyp zwischen 4m und 60m angenommen)
 
@@ -149,6 +150,7 @@ class DataGenerator(keras.utils.Sequence):
             amp = 2 * SNR / np.abs(sample).max()
             sample = sample * amp
 
+            # 2. waveform is duplicated and shifted
             for i in range(N_sub):
                 samples[s, i] = np.roll(sample, int(i * shift))[t_slice]
 
@@ -156,6 +158,7 @@ class DataGenerator(keras.utils.Sequence):
             blank_ind = rng.integers(low=0, high=self.N_sub)
             masks[s, blank_ind] = 0
 
+        # 3. noise is generated
         gutter = 100
         noise = rng.standard_normal((N_total * N_sub, Nt + 2 * gutter))
         noise = taper_filter(noise, fmin=1.0, fmax=120.0, samp_DAS=fs)[:, gutter:-gutter]
@@ -228,18 +231,17 @@ class DataGeneratorDAS(keras.utils.Sequence):
         # Number of subsamples to create
         n_mini = N_total // self.N_samples
 
-        # OBACHT: HIER GIBT ES JETZT KEINERLEI RANDOMNESS!! (AUẞER ORDER UND SIGN)
-        # TODO: ZEITLICH ZUFÄLLIG AUSWÄHLEN
+        # t_starts = rng.integers(low=1, high=Nt_all - Nt, size=N_total)
 
         # Loop over samples
         for s, sample in enumerate(self.X):
-            # Random selection of station indices
-            selection = [0, 1, 2]
+            # channel indices
+            channel_indices = [0, 1, 2]
             # Time reversal
             order = rng.integers(low=0, high=2) * 2 - 1
             sign = rng.integers(low=0, high=2) * 2 - 1
             # Loop over station indices
-            for k, station in enumerate(selection):
+            for k, station in enumerate(channel_indices):
                 # Selection of stations
                 station_slice = slice(k, k + self.N_sub)
                 subsample = sign * sample[station_slice, ::order]
@@ -255,6 +257,7 @@ class DataGeneratorDAS(keras.utils.Sequence):
         self.samples = samples
         self.masks = masks
         self.masked_samples = samples * (1 - masks)
+        print('Samples Shape: ', samples.shape)
         pass
 
     def generate_masks(self, samples):

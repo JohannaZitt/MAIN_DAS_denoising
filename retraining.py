@@ -1,20 +1,18 @@
 
 import os
+
+import matplotlib.pyplot as plt
 import numpy as np
 import time
-from datetime import date, timedelta
-from models import UNet, CallBacks, DataGeneratorDAS
+from datetime import timedelta
+from models import CallBacks, DataGeneratorDAS
 import tensorflow as tf
-#import matplotlib.pyplot as plt
 from tensorflow import keras
-""" Setting random seeds """
 from models import seed
-# TensorFlow
 tf.random.set_seed(seed)
-# Python
 import random as python_random
 python_random.seed(seed)
-# NumPy (random number generator used for sampling operations)
+""" Setting random seeds """
 rng = np.random.default_rng(seed)
 
 '''
@@ -25,10 +23,10 @@ test
 
 """ Parameters """
 N_sub = 11
-batch_size = 32 # Number of mini-batches
-batch_multiplier = 100
+batch_size = 32
+batch_multiplier = 50
 pretrained_model_name = "08_combined480"
-model_name = '10_retrained_08'
+model_name = '11_retrained_08'
 trainingdata = "data/training_data/preprocessed_DAS/retraining_data.npy"
 
 # Load pretrained Model:
@@ -52,20 +50,26 @@ data = np.load(trainingdata)
 N_ch = data.shape[1]
 
 # train and test set:
-test_indices = [1, 5]
+test_indices = [0, 5, 10, 15, 20, 25, 30, 35]
 train_indices = np.delete(np.arange(data.shape[0]), test_indices)
 test_data = data[test_indices,:]
 train_data = data[train_indices,:]
 
-print(test_data.shape)
-print(train_data.shape)
-
+plt.plot(test_data[1][1])
+plt.show()
 
 print("Preparing masks")
 # Prepare data generator for the train and test set
 train_generator = DataGeneratorDAS(X=train_data, N_sub=N_sub, batch_multiplier=batch_multiplier, batch_size=batch_size)
 test_generator = DataGeneratorDAS(X=test_data, N_sub=N_sub, batch_multiplier=batch_multiplier, batch_size=batch_size)
 print("Done")
+
+# TODO Aktuell wird hier noch auf zero arrays trainiert! Plotten und fixen!!
+print(test_generator.samples[1].shape)
+
+plt.plot(test_generator.samples[1])
+plt.show()
+
 
 start = time.time()
 
