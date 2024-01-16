@@ -38,7 +38,19 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=4):
     y = lfilter(b, a, data)
     return y
 
-folders = ['09_random480']
+
+"""
+
+Generates preprocessed training data for the model training from manually selected seismometer waveforms. 
+Proprocessing:
+ 1. Downsampled to 400 Hz
+ 2. Filtered between 1-120 Hz
+ 3. Compute strain rate
+ 4. Normalize with absolute maximal value
+
+"""
+
+folders = ['01_ablation_horizontal', '02_ablation_vertical', '03_accumulation_vertical', '04_accumulation_horizontal', '05_stick-slip', '06_surface', '07_combined120', '09_random480']
 
 for folder in folders:
 
@@ -59,7 +71,7 @@ for folder in folders:
 
 
     # parameters for calculating strain rate:
-    gauge_length: int = 10 #in m
+    gauge_length: int = 10 # in m
     swave_velocity = 1800 # in m/s
     t = gauge_length / swave_velocity
     rollouttotal: int = int(t * fs) + 1
@@ -67,41 +79,38 @@ for folder in folders:
 
     n_trc, n_t = data.shape
     for i in range(n_trc):
-        # filter data: Obacht: During experiment 01-09 wurde KEIN Filter angewendet!
-        # data[i] = butter_bandpass_filter(data[i], lowcut=1, highcut=120, fs=fs, order=4)
 
-        # compute  ground velocity (nm/s) into strain rate
+        # filter data
+        data[i] = butter_bandpass_filter(data[i], lowcut=1, highcut=120, fs=fs, order=4)
+
+        # compute  ground velocity into strain rate
         data[i] = np.roll(data[i], rollout) - np.roll(data[i], -rollout)
-        data[i] /= gauge_length * pow(10, 10)  # gauge length in nm
+        data[i] /= gauge_length
 
-        # scale by standard deviation
-        std = data[i].std()
-        data[i] /= std
-
-    for i in range(n_trc):
-        print(np.mean(data[i]))
+        # scale by max amplitude
+        max_amplitude = np.abs(data[i]).max()
+        data[i] /= max_amplitude
 
 
     savedir = 'data/training_data/preprocessed_seismometer/'
     if not os.path.isdir(savedir):
         os.makedirs(savedir)
-    #np.save(savedir + folder, data)
-
+    np.save(savedir + folder, data)
 
 # Compute combined800 training data set:
-'''
 loaded_arrays = []
 for i in range(4):
     loaded_array = np.load('data/training_data/preprocessed_seismometer/' + folders[i] + '.npy')
     loaded_arrays.append(loaded_array)
 combined_array = np.vstack(loaded_arrays)
 savedir = 'data/training_data/preprocessed_seismometer/'
-np.save(savedir + '8_combined480', combined_array)
-'''
+np.save(savedir + '08_combined480', combined_array)
 
 '''
-    # Plotting the training_data waveforms
-    for i in range(10, 20):
-        plt.plot(data[i])
-        plt.show()
+# Plotting the training_data waveforms
+for i in range(10, 20):
+    plt.plot(data[i])
+    plt.savefig('test/strain_rate/pic_' + str(i))
+    plt.show()
 '''
+

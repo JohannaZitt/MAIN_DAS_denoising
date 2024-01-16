@@ -1,4 +1,7 @@
 .idea
 __pycache__
-data/
+data/raw_DAS/
+data/test_data/
+data/training_data/raw_DAS/
+data/training_data/raw_seismometer/
 experiments/
