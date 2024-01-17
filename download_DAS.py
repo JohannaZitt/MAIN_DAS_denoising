@@ -44,6 +44,17 @@ def get_event_times (event_folder_path):
     return event_times
 
 
+def get_event_times_from_txt_file(name):
+    with open(name, 'r') as file:
+        events = []
+        for line in file:
+            event = line.split(',')[0].strip()
+            events.append(event)
+
+    return events
+
+
+
 
 def set_file_name (event_time, client, remote_path, range):
 
@@ -126,10 +137,14 @@ range = 6
 
 for event_folder_path in event_folder_paths:
     # Get Event times from seismometer data:
-    events = get_event_times(event_folder_path)
+    # events = get_event_times(event_folder_path)
+
+    # Get Event times from test_times_ablation or test_times accuulation
+    events = get_event_times_from_txt_file('test_times_ablation')
+
 
     # Set local path, where the data should be stored
-    local_path = 'data/raw_DAS/' + event_folder_path[-15:] + '/'
+    local_path = 'data/raw_DAS/test_ablation/'
     if not os.path.exists(local_path):
         os.makedirs(local_path)
 
@@ -143,8 +158,8 @@ for event_folder_path in event_folder_paths:
         folder2 = event_time.strftime("%Y%m%d") + '_2'
 
         # Set remote and local path:
-        remote_path = 'environment-earth/Projects/Rhonegletscher/Data/DAS_2020/' + folder
-        remote_path2 = 'environment-earth/Projects/Rhonegletscher/Data/DAS_2020/' + folder2
+        remote_path = 'environment-earth/Projects/Rhonegletscher/Data/no_backup/DAS_2020/' + folder
+        remote_path2 = 'environment-earth/Projects/Rhonegletscher/Data/no_backup/DAS_2020/' + folder2
 
 
         # Set Files we want to download
@@ -159,11 +174,17 @@ for event_folder_path in event_folder_paths:
         if len(files):
             print('download file ', files)
             for file in files:
-                client.download(remote_path=remote_path + '/' + file, local_path=local_path + file)
+                if os.path.exists(local_path+file):
+                    print('file ', file, ' already exists.')
+                else:
+                    client.download(remote_path=remote_path + '/' + file, local_path=local_path + file)
         if len(files2):
             print('download file2 ', files2)
             for file in files2:
-                client.download(remote_path=remote_path2 + '/' + file, local_path=local_path + file)
+                if os.path.exists(local_path+file):
+                    print('file ', file, ' already exists.')
+                else:
+                    client.download(remote_path=remote_path2 + '/' + file, local_path=local_path + file)
         if not len(files) and not len(files2):
             print("No data for that event time available :'(")
 
