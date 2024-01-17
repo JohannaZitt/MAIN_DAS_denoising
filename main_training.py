@@ -1,5 +1,7 @@
 import os
 import time
+
+import matplotlib.pyplot as plt
 import tensorflow as tf
 
 import shutil
@@ -11,7 +13,7 @@ import random as python_random
 
 '''
 
-Main training of the network on seismometer data or synthetic data
+Main training on seismometer data or synthetic data
 
 
 '''
@@ -27,7 +29,7 @@ N_sub = 11
 batch_size = 32
 Nt = 1024
 N_epoch = 2000
-batch_multiplier = 5 # set to 15 for 120 training samples (105*32 = 3360), set to 5 for 480 training samples (32*140 = 4480 samples per epoch)
+batch_multiplier = 15 # set to 15 for 120 training samples (105*32 = 3360), set to 5 for 480 training samples (32*140 = 4480 samples per epoch)
 model_params = {
     'use_bn': False, # batch normalization
     'use_dropout': False,
@@ -40,7 +42,7 @@ model_params = {
     'AA': True # anti aliasing
 }
 
-different_training_data = ['08_combined480', '09_random480']
+different_training_data = ['01_ablation_horizontal', '02_ablation_vertical', '03_accumulation_horizontal', '04_accumulation_vertical']
 
 for training_data in different_training_data:
 
@@ -65,36 +67,31 @@ for training_data in different_training_data:
     # Load data
     data = np.load(data_file)
     N_ch, N_t = data.shape
+
     print(data.shape)
 
-    t_slice = slice(N_t//4, 3*N_t//4)
-    scaled_data = np.zeros_like(data)
+    #t_slice = slice(N_t//4, 3*N_t//4)
+    #scaled_data = np.zeros_like(data)
 
     # normalize data
-    for i, wv in enumerate(data):
-        scaled_data[i] = wv / wv[t_slice].std()
+    #for i, wv in enumerate(data):
+    #    scaled_data[i] = wv / wv[t_slice].std()
 
     # Split data 80-20 train-test
     split = int(0.8 * N_ch)
-    train_data = scaled_data[:split]
-    test_data = scaled_data[split:]
+    train_data = data[:split]
+    test_data = data[split:]
 
     print("Preparing masks")
     train_generator = DataGenerator(X=train_data, Nt=Nt, N_sub=N_sub, batch_size=batch_size, batch_multiplier=batch_multiplier)
     test_generator = DataGenerator(X=test_data, Nt=Nt, N_sub=N_sub, batch_size=batch_size, batch_multiplier=batch_multiplier)
     print("Done")
 
-    print('Input: Data Shape: ', data.shape)
-    print('Input: Train Data Shape: ', train_data.shape)
-    print('Input: Test Data Shape: ', test_data.shape)
-
-    print('Output: Train Samples Shape: ', train_generator.samples.shape)
-    print('Output: Train Masks Shape: ', train_generator.masks.shape)
-    print('Output: Train Masked_Samples Shape: ', train_generator.masked_samples.shape)
-
-    print('Output: Test Samples Shape: ', test_generator.samples.shape)
-    print('Output: Test Masks Shape: ', test_generator.masks.shape)
-    print('Output: Test Masked_Samples Shape: ', test_generator.masked_samples.shape)
+    '''
+    for i in range(30):
+        plt.plot(train_generator.samples[i][5])
+        plt.show()
+    '''
 
     # Construct model
     net = UNet()
@@ -103,7 +100,6 @@ for training_data in different_training_data:
     # model.summary()
 
     # Model training
-    '''
     start = time.time()
     print('Start Model Training')
     model.fit(
@@ -124,4 +120,3 @@ for training_data in different_training_data:
         file.write('\n' + output_text)
 
     print(output_text)
-    '''

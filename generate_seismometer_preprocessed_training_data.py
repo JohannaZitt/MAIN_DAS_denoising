@@ -21,7 +21,7 @@ def resample(stream, ratio):
         data[i] = stream[i].data[0:n_t]
 
     # resample
-    res = np.zeros((data.shape[0], int(data.shape[1]/ ratio) +1))
+    res = np.zeros((data.shape[0], int(data.shape[1]/ ratio) + 1))
     for i in range(data.shape[0]):
         res[i] = np.interp(np.arange(0, len(data[0]), ratio), np.arange(0, len(data[0])), data[i])
 
@@ -31,10 +31,10 @@ def butter_bandpass(lowcut, highcut, fs, order=4):
     nyq = 0.5 * fs
     low = lowcut / nyq
     high = highcut / nyq
-    b, a = butter(order, [low, high], btype='band')
+    b, a = butter(order, [low, high], btype = 'band')
     return b, a
-def butter_bandpass_filter(data, lowcut, highcut, fs, order=4):
-    b, a = butter_bandpass(lowcut, highcut, fs, order=order)
+def butter_bandpass_filter(data, lowcut, highcut, fs, order = 4):
+    b, a = butter_bandpass(lowcut, highcut, fs, order = order)
     y = lfilter(b, a, data)
     return y
 
@@ -55,7 +55,7 @@ folders = ['01_ablation_horizontal', '02_ablation_vertical', '03_accumulation_ve
 for folder in folders:
 
     # Reading Data
-    stream = read('data/training_data/raw_seismometer/'+folder+'/ID*.mseed')
+    stream = read('data/training_data/raw_seismometer/' + folder + '/ID*.mseed')
     n_trc = len(stream)
     n_t = stream[0].stats.npts
 
@@ -95,7 +95,7 @@ for folder in folders:
     savedir = 'data/training_data/preprocessed_seismometer/'
     if not os.path.isdir(savedir):
         os.makedirs(savedir)
-    np.save(savedir + folder, data)
+    #np.save(savedir + folder, data)
 
 # Compute combined800 training data set:
 loaded_arrays = []
@@ -104,7 +104,7 @@ for i in range(4):
     loaded_arrays.append(loaded_array)
 combined_array = np.vstack(loaded_arrays)
 savedir = 'data/training_data/preprocessed_seismometer/'
-np.save(savedir + '08_combined480', combined_array)
+#np.save(savedir + '08_combined480', combined_array)
 
 '''
 # Plotting the training_data waveforms

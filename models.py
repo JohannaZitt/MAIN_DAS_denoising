@@ -123,8 +123,8 @@ class DataGenerator(keras.utils.Sequence):
         gauge = 10.
         fs = 400.
 
-        log_SNR_min = -2
-        log_SNR_max = 4
+        log_SNR_min = -2 #-2
+        log_SNR_max = 4 # 4
 
         # Loop over samples
         for s, t_start in enumerate(t_starts):
@@ -145,9 +145,9 @@ class DataGenerator(keras.utils.Sequence):
             # (die channel spacing length ist aufm Rhonegletscher 4m hier werden Entfernungen je nach Wellentyp zwischen 4m und 60m angenommen)
 
 
-            SNR = rng.random() * (log_SNR_max - log_SNR_min) + log_SNR_min
-            SNR = 10 ** (0.5 * SNR)
-            amp = 2 * SNR / np.abs(sample).max()
+            SNR = rng.random() * (log_SNR_max - log_SNR_min) + log_SNR_min # generiert Zahlen im Bereich [log_SNR_min, log_SNR_max] log_SNR_min and log_SNR_max in decibel scale
+            SNR = 10 ** (0.5 * SNR) # rechnen hier SNR von dezibel Skala in Verhältnis von zwei Amplituden/Wellendrücken um
+            amp = 2 * SNR / np.abs(sample).max() # amp steht für amplitude, waveforms are rescaled such that the maximum amplitude of the signal is 2 * SNR^0.5.
             sample = sample * amp
 
             # 2. waveform is duplicated and shifted
@@ -158,15 +158,17 @@ class DataGenerator(keras.utils.Sequence):
             blank_ind = rng.integers(low=0, high=self.N_sub)
             masks[s, blank_ind] = 0
 
-        # 3. noise is generated
+        # 3. generate noise and add to waveform
         gutter = 100
         noise = rng.standard_normal((N_total * N_sub, Nt + 2 * gutter))
         noise = taper_filter(noise, fmin=1.0, fmax=120.0, samp_DAS=fs)[:, gutter:-gutter]
         noise = noise.reshape(*samples.shape)
-
         noisy_samples = samples + noise
+
+        # normalize data with maximum.
         for s, sample in enumerate(noisy_samples):
-            noisy_samples[s] = sample / sample.std()
+            #noisy_samples[s] = sample / sample.std()
+            noisy_samples[s] = sample / np.abs(sample).max()
 
         self.samples = noisy_samples
         self.masks = masks
