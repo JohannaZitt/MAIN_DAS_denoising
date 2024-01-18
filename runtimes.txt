@@ -20,3 +20,8 @@ Runtimes of denoising data (alt):
 
 Runtimes of experiments (neu):
 
+
+01_ablation_horizontal: 2 Stunden, 55 Minuten und 00.634440 Sekunden
+02_ablation_vertical: 2 Stunden, 54 Minuten und 23.150465 Sekunden
+03_accumulation_horizontal: 2 Stunden, 54 Minuten und 35.293303 Sekunden
+04_accumulation_vertical: 2 Stunden, 54 Minuten und 28.278573 Sekunden
