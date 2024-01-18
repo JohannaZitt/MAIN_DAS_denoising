@@ -28,7 +28,7 @@ experiments = os.listdir('../experiments')
 output = [['model_name', 'train_last', 'validation_last', 'train_mean', 'validation_mean', 'train_min', 'validation_min']]
 
 
-with open('epoch_loss.txt', 'a') as file:
+with open('../old/evaluation/epoch_loss.txt', 'a') as file:
 
     file.write(str(output)+'\n')
 
