@@ -22,18 +22,17 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=4):
     return y
 
 def resample(data, ratio):
-    res = np.zeros((data.shape[0], int(data.shape[1]/ 2.5)))
+    # spatial axis:
+    n_ch = data.shape[0]
+    if n_ch == 4800 or n_ch == 4864:
+        data = data[::4, :]
+    else:
+        data = data[::2, :]
 
     # time axis
+    res = np.zeros((data.shape[0], int(data.shape[1] / ratio)))
     for i in range(data.shape[0]):
         res[i] = np.interp(np.arange(0, len(data[0]), ratio), np.arange(0, len(data[0])), data[i])
-
-    # spatial axis:
-    n_ch = res.shape[0]
-    if n_ch == 4800 or n_ch == 4864:
-        res=res[::4,:]
-    else:
-        res = res[::2,:]
 
     return res
 
@@ -49,23 +48,20 @@ def denoise_file (file, timesamples, model, N_sub, fs_trainingdata):
     # reshape data
     DAS_data = DAS_data.T
     DAS_data = DAS_data.astype('f')
-
+    # resample data
+    print(DAS_data.shape)
+    DAS_data = resample(DAS_data, headers['fs'] / 400)
+    print(DAS_data.shape)
     # preprocessing
     lowcut: int = 1
     highcut = 120
     for i in range(DAS_data.shape[0]):
         # filter data
-        # data is not filtered during training -> Do not filter here!!
-        # butter_bandpass_filter(DAS_data[i], lowcut, highcut, fs=1000, order=4)
+        DAS_data[i] = butter_bandpass_filter(DAS_data[i], lowcut, highcut, fs=400, order=4)
         # normalize data
-        DAS_data[i] = DAS_data[i] / DAS_data[i].std()
+        DAS_data[i] = DAS_data[i] / np.abs(DAS_data[i]).max()
 
-    # resampling auf 400Hz bringen. Hier gibt es teilweise auch andere sample frequencies!!!
-    n_ch, n_t = DAS_data.shape
-    #print('DAS_data.shape vor resampels: ', DAS_data.shape)
-    DAS_data = resample(DAS_data, headers['fs']/400)
-    #print('DAS_data.shape nach resampels: ', DAS_data.shape)
-
+    # split data in 1024 data point sections
     n_ch, n_t = DAS_data.shape
     n_samples = int(n_t / timesamples) + 1
     data = np.zeros((n_samples, n_ch, timesamples))
@@ -101,16 +97,10 @@ def denoise_file (file, timesamples, model, N_sub, fs_trainingdata):
             masks[i, i - N_ch] = 0
             eval_samples[i, :, :, 0] = eval_sample[-N_sub:]
 
-
-        #print('EVAL_SAMPLES_SHAPE: ', eval_samples.shape)
-        #print('MASKS_SHAPE: ', masks.shape)
-        for i in range(eval_samples.shape[0]):
-        #    print('LOOKING AT CHANNEL ', i)
-            for j in range(eval_samples.shape[1]):
+        # set mean = 0
+        for i in range(eval_samples.shape[0]): # for every channel
+            for j in range(eval_samples.shape[1]): # for every N_sub
                 eval_samples[i, j, :] = eval_samples[i, j, :] - np.mean(eval_samples[i, j, :])
-        #        print(np.mean(eval_samples[i, j, :]))
-        #print(eval_samples)
-
 
         # Create J-invariant reconstructions
         results = model.predict((eval_samples, masks))
@@ -121,9 +111,7 @@ def denoise_file (file, timesamples, model, N_sub, fs_trainingdata):
     for i in range(data_save.shape[0]):  # per channel
         for j in range(DAS_reconstructions.shape[0] - 1):  # per sample
             data_save[i, j * timesamples: (j + 1) * timesamples] = DAS_reconstructions[j, i, :]
-
     z = int(data_save.shape[1] / timesamples)
-
     x = z * timesamples
     y = data_save.shape[1] - x
     data_save[:, x: data_save.shape[1]] = DAS_reconstructions[DAS_reconstructions.shape[0] - 1, :, timesamples - y: timesamples]
@@ -143,7 +131,7 @@ def deal_with_artifacts(data, filler = 0, Nt=1024):
 
     for i in range(n_edges): # for every edge
         for j in range(data.shape[1]): # for every channel
-            for n in range(7):
+            for n in range(5):
                 data[Nt * i + n, j] = filler
                 data[Nt * i - (n + 1), j] = filler
 
@@ -152,10 +140,10 @@ def deal_with_artifacts(data, filler = 0, Nt=1024):
 
 models_path = 'experiments'
 model_names = os.listdir(models_path)
-model_names = ['06_surface']
+model_names = ['01_ablation_horizontal']
 
 raw_DAS_path = 'data/raw_DAS'
-data_types = os.listdir(raw_DAS_path)
+data_types = ['test_accumulation']
 
 n_sub = 11
 timesamples = 1024
@@ -169,15 +157,14 @@ for model_name in model_names:
     for data_type in data_types:
 
         raw_das_folder_path = os.path.join(raw_DAS_path, data_type)
-        saving_path = os.path.join('experiments', model_name, 'denoisedDAS_mean0', data_type) # Hier fliege ich immer raus, sobald
+        saving_path = os.path.join('experiments', model_name, 'denoisedDAS', data_type)
         model_file = os.path.join('experiments', model_name, model_name + '.h5')
 
         if not os.path.isdir(saving_path):
             os.makedirs(saving_path)
 
         files = os.listdir(raw_das_folder_path)
-
-
+        files = files[44:]
 
         for file in files:
             start = time.time()

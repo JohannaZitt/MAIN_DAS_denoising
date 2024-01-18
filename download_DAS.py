@@ -140,11 +140,11 @@ for event_folder_path in event_folder_paths:
     # events = get_event_times(event_folder_path)
 
     # Get Event times from test_times_ablation or test_times accuulation
-    events = get_event_times_from_txt_file('test_times_ablation')
+    events = get_event_times_from_txt_file('test_times_accumulation')
 
 
     # Set local path, where the data should be stored
-    local_path = 'data/raw_DAS/test_ablation/'
+    local_path = 'data/raw_DAS/test_accumulation/'
     if not os.path.exists(local_path):
         os.makedirs(local_path)
 
