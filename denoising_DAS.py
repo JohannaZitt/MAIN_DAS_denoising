@@ -143,7 +143,7 @@ model_names = os.listdir(models_path)
 model_names = ['01_ablation_horizontal']
 
 raw_DAS_path = 'data/raw_DAS'
-data_types = ['test_accumulation']
+data_types = ['test_ablation_RA87']
 
 n_sub = 11
 timesamples = 1024
@@ -164,7 +164,6 @@ for model_name in model_names:
             os.makedirs(saving_path)
 
         files = os.listdir(raw_das_folder_path)
-        files = files[44:]
 
         for file in files:
             start = time.time()
@@ -176,19 +175,25 @@ for model_name in model_names:
 
             # load model
             model = keras.models.load_model(model_file)
-            # denoise data
-            data, headers = denoise_file(file=raw_das_file_path, timesamples=timesamples, model=model, N_sub=n_sub, fs_trainingdata=fs_trainingdata)
-            if DEAL_WITH_ARTIFACTS:
-                print('deals with artifacts')
-                data = deal_with_artifacts(data)
-            write_das_h5.write_block(data, headers, saving_path + saving_filename)
-            print('Saved Data with Shape: ', data.shape)
+            # denoise data:
+            if not os.path.exists(saving_path+saving_filename):
+                data, headers = denoise_file(file=raw_das_file_path, timesamples=timesamples, model=model, N_sub=n_sub, fs_trainingdata=fs_trainingdata)
 
-            # Measuring time for one file
-            end = time.time()
-            dur = end - start
-            dur_str = str(timedelta(seconds=dur))
-            x = dur_str.split(':')
-            print('Laufzeit für file ' + str(file) + ': ' + str(x[1]) + ' Minuten und ' + str(x[2]) + ' Sekunden.')
+                # deal with artifacts:
+                if DEAL_WITH_ARTIFACTS:
+                    print('deals with artifacts')
+                    data = deal_with_artifacts(data)
+                write_das_h5.write_block(data, headers, saving_path + saving_filename)
+                print('Saved Data with Shape: ', data.shape)
+
+                # Measuring time for one file
+                end = time.time()
+                dur = end - start
+                dur_str = str(timedelta(seconds=dur))
+                x = dur_str.split(':')
+                print('Laufzeit für file ' + str(file) + ': ' + str(x[1]) + ' Minuten und ' + str(x[2]) + ' Sekunden.')
+
+            else:
+                print(saving_filename, ' does exist already. No Denoising is performed. ')
 
             gc.collect()

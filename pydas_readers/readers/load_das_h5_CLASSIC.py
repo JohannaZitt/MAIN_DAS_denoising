@@ -235,11 +235,11 @@ def load_file(file, convert=False, return_axis=True, verbose=False):
         #-- Possibly one would need to add/subtract one index to dd to get the dimensions correct.
         #-- Temporary solution? Add 1/2 a sample to the end target of np.arange, to make sure the final sample is reached
         dd = np.arange(d0, d1+dx*fm/2, dx*fm) 
-        if(len(dd)!=np.shape(data)[1]):
-            print("WARNING. Data returned does not match channel spacing calculated from metadata (dd)")
-            print("dd is {0} channels from {1} to {2}, spacing {3}".format(len(dd),dd[0],dd[-1], dd[1]-dd[0]))
-            print("Reported metadata: d0: {0}, d1:{1}".format(d0,d1))
-            print("data is {0} channels".format(np.shape(data)[1]))
+        #if(len(dd)!=np.shape(data)[1]):
+        #    print("WARNING. Data returned does not match channel spacing calculated from metadata (dd)")
+        #    print("dd is {0} channels from {1} to {2}, spacing {3}".format(len(dd),dd[0],dd[-1], dd[1]-dd[0]))
+        #    print("Reported metadata: d0: {0}, d1:{1}".format(d0,d1))
+        #    print("data is {0} channels".format(np.shape(data)[1]))
         axis['dd'] = dd
 
         #-- Set up vectors of time samples
@@ -533,11 +533,11 @@ def load_das_custom(t_start, t_end, d_start=0, d_end=0, convert=False, verbose=F
 
     #-- dd was already created when looking up indices above
     #-- (No need to recalculate it at the end; this function assumes each file read has the same channels)
-    if(len(dd)!=np.shape(data)[1]):
-        print("WARNING. Data returned does not match channel spacing calculated from metadata (dd)")
-        print("dd is {0} channels from {1} to {2}, spacing {3}".format(len(dd),dd[0],dd[-1], dd[1]-dd[0]))
-        print("Reported metadata: d0: {0}, d1:{1}".format(d0,d1))
-        print("data is {0} channels".format(np.shape(data)[1]))
+    #if(len(dd)!=np.shape(data)[1]):
+    #    print("WARNING. Data returned does not match channel spacing calculated from metadata (dd)")
+    #    print("dd is {0} channels from {1} to {2}, spacing {3}".format(len(dd),dd[0],dd[-1], dd[1]-dd[0]))
+    #    print("Reported metadata: d0: {0}, d1:{1}".format(d0,d1))
+    #    print("data is {0} channels".format(np.shape(data)[1]))
     axis['dd'] = dd
 
 

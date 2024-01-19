@@ -3,5 +3,7 @@ __pycache__
 old/
 data/raw_DAS/
 data/training_data/raw_seismometer/
+data/seismometer_test_data/
 experiments/01_ablation_horizontal/denoisedDAS/
+experiments/01_ablation_horizontal/plots
 

@@ -36,11 +36,12 @@ def get_event_times (event_folder_path):
 
     event_times = []
     for file_name in file_names:
-        date = file_name[-28:-18]
-        time = file_name[-17:-9]
+        date = file_name[-34:-24]
+        time = file_name[-23:-15]
         event_time = date + 'T' + time + '.0'
         event_times.append(event_time)
-
+    print(date)
+    print(time)
     return event_times
 
 
@@ -120,8 +121,7 @@ def set_file_name (event_time, client, remote_path, range):
 
 
 
-event_folder_paths = ['data/test_data/surface_accumulation']
-#event_folder_paths = ['data/test_data/surface_ablation']
+event_folder_paths = ['data/seismometer_test_data/ablation/0731_RA87/']
 
 # Access to Nextcloud Server via generated App Password
 options = {
@@ -137,14 +137,14 @@ range = 6
 
 for event_folder_path in event_folder_paths:
     # Get Event times from seismometer data:
-    # events = get_event_times(event_folder_path)
 
     # Get Event times from test_times_ablation or test_times accuulation
-    events = get_event_times_from_txt_file('test_times_accumulation')
+    # events = get_event_times_from_txt_file('test_times_accumulation')
+    events = get_event_times(event_folder_path)
 
 
     # Set local path, where the data should be stored
-    local_path = 'data/raw_DAS/test_accumulation/'
+    local_path = 'data/raw_DAS/ablation/test_ablation_RA87/'
     if not os.path.exists(local_path):
         os.makedirs(local_path)
 

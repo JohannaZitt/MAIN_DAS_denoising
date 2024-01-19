@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta
 import numpy as np
 import h5py
@@ -70,11 +71,11 @@ def compute_moving_coherence(data, bin_size):
 
 def get_middel_channel(receiver):
     channel = 0
-    if receiver == '_AKU':
+    if receiver == 'AKU':
         channel = 3740
-    elif receiver == '_AJP':
+    elif receiver == 'AJP':
         channel = 3460
-    elif receiver == '_ALH':
+    elif receiver == 'ALH':
         channel = 3842
     elif receiver == 'RA82':
         channel = 1300
@@ -102,32 +103,24 @@ def load_das_data(folder_path, t_start, t_end, receiver, raw):
             data = data[:, ::2]
         headers['dx'] = 8
 
-    # get start and end channel:
-    ch_middel = get_middel_channel(receiver)
 
     # 3. cut to size
-    data = data[:, ch_middel-15:ch_middel+15]
-
+    ch_middel = get_middel_channel(receiver)  # get start and end channel:
+    data = data[:, ch_middel-20:ch_middel+20]
 
     if raw:
-        # 4. bandpasfilter and normalize
-        for i in range(data.shape[1]):
-            butter_bandpass_filter(data[:,i], 1, 120, fs=headers['fs'], order=4)
-            #data[:,i] = data[:,i] / data[:,i].std()
-
-        # 5. resample time
-        data = resample(data, headers['fs']/400)
+        # 4. downsample in time
+        data = resample(data, headers['fs'] / 400)
         headers['fs'] = 400
 
-    std = data[:][:].std()
-    for i in range(data.shape[0]):
-        data[i][:] /= std
-
-
+    # 5. bandpasfilter and normalize
+    for i in range(data.shape[1]):
+        data[:, i] = butter_bandpass_filter(data[:,i], 1, 120, fs=headers['fs'], order=4)
+        data[:,i] = data[:,i] / np.abs(data[:,i]).max()
 
     return data, headers, axis
 
-def plot_data(raw_data, denoised_data, seis_data, seis_stats, data_type, saving_path):
+def plot_data(raw_data, denoised_data, seis_data, seis_stats, data_type, saving_path, id):
 
     # different fonts:
     font_s = 12
@@ -137,10 +130,9 @@ def plot_data(raw_data, denoised_data, seis_data, seis_stats, data_type, saving_
     # parameters:
     channels = raw_data.shape[0]
     fs = 400
-    normalize_trace = True
     alpha = 0.7
     alpha_dashed_line = 0.2
-    plot_title = data_type + ', ' + str(seis_stats['starttime']) + ' - ' + str(seis_stats['endtime']) + ', ' + str(seis_stats['station'])
+    plot_title = id + ': ' + data_type + ', ' + str(seis_stats['starttime']) + ' - ' + str(seis_stats['endtime']) + ', ' + str(seis_stats['station'])
 
     fig, ax = plt.subplots(2, 2, figsize=(20, 12), gridspec_kw={'height_ratios': [5, 1]})
     fig.suptitle(plot_title, x=0.2, size=font_s)
@@ -151,7 +143,7 @@ def plot_data(raw_data, denoised_data, seis_data, seis_stats, data_type, saving_
     plt.subplot(221)
     i = 0
     for ch in range(channels):
-        plt.plot(raw_data[ch][:] + 8 * i, '-k', alpha=alpha)
+        plt.plot(raw_data[ch][:] + 1.5 * i, '-k', alpha=alpha)
         i += 1
     for i in range(11):
         plt.axvline(x=(i + 1) * (fs / 2), color="black", linestyle='dashed', alpha=alpha_dashed_line)
@@ -165,7 +157,7 @@ def plot_data(raw_data, denoised_data, seis_data, seis_stats, data_type, saving_
     plt.subplot(222)
     i = 0
     for ch in range(channels):
-        plt.plot(denoised_data[ch][:] + 8 * i, '-k', alpha=alpha)
+        plt.plot(denoised_data[ch][:] + 1.5 * i, '-k', alpha=alpha)
         i += 1
     for i in range(11):
         plt.axvline(x=(i + 1) * (fs / 2), color="black", linestyle='dashed', alpha=alpha_dashed_line)
@@ -212,56 +204,69 @@ def plot_data(raw_data, denoised_data, seis_data, seis_stats, data_type, saving_
 
 #experiments = os.listdir('experiments/')
 experiments = ['01_ablation_horizontal']
-data_types = ['test_ablation']
+data_types = ['0731_RA87']
 
 
 for experiment in experiments: # for every experiment
 
     for data_type in data_types:  # for every data type
 
-        seismometer_data_path = 'data/test_data/' + data_type
-        seismometer_events = os.listdir(seismometer_data_path)
+        seis_data_path = 'data/seismometer_test_data/ablation/' + data_type
+        seismometer_events = os.listdir(seis_data_path)
+        seismometer_events = seismometer_events[2:]
 
         # for every seismometer event
         for seismometer_event in seismometer_events:
+            print('SEISMOMETER EVENT: ', seismometer_event)
+            if data_type == '0731_RA87':
+                receiver = seismometer_event[-14:-10]
+                event_time = seismometer_event[-23:-15]
+                event_date = seismometer_event[-34:-24]
+                id = ''
+            elif data_type == 'accumulation' :
+                receiver = seismometer_event[-12:-9]
+                event_time = seismometer_event[-23:-15]
+                event_date = seismometer_event[-34:-24]
+            else:
+                print('ERROR: No matching data type')
 
-            print('New Seismometer Event: ', seismometer_event)
 
-
-
-            seismometer_event_group = data_type_group.create_group(seismometer_event)
-
-            event_time = seismometer_event[-18:-10]
-            event_date = seismometer_event[-29:-19]
-            receiver = seismometer_event[-34:-30]
-
-            # evaluation time window:
+            # pick time window:
             t_start = datetime.strptime(event_date + ' ' + event_time + '.0', '%Y-%m-%d %H:%M:%S.%f')
             t_start = t_start - timedelta(seconds=3)
             t_end = t_start + timedelta(seconds=6)
 
             # load seismometer data:
-            seis_stream = read(seismometer_data_path + '/' + seismometer_event)
+            seis_stream = read(seis_data_path + '/' + seismometer_event)
             seis_data = seis_stream[0].data
             seis_stats = seis_stream[0].stats
+            seis_data = butter_bandpass_filter(seis_data, 1, 120, fs=seis_stats.sampling_rate, order=4)
 
             # load raw DAS data:
-            raw_folder_path = 'data/raw_DAS/' + data_type + '/'
+            raw_folder_path = 'data/raw_DAS/ablation/test_ablation_RA87/'
             raw_data, raw_headers, raw_axis = load_das_data(folder_path =raw_folder_path, t_start = t_start, t_end = t_end, receiver = receiver, raw = True)
 
             # load denoised DAS data
-            denoised_folder_path = 'experiments/' + experiment + '/denoisedDAS_mean0/' + data_type + '/'
+            denoised_folder_path = 'experiments/' + experiment + '/denoisedDAS/test_ablation_RA87/'
             denoised_data, denoised_headers, denoised_axis = load_das_data(folder_path =denoised_folder_path, t_start = t_start, t_end = t_end, receiver = receiver, raw = False)
 
-            # plotting data:
-            saving_path = os.path.join('experiments', experiment, 'plots_mean0', data_type)
+            saving_path = os.path.join('experiments', experiment, 'plots', data_type)
             if not os.path.isdir(saving_path):
                 os.makedirs(saving_path)
-            saving_path += '/' + seismometer_event
-            # when the plot should be depicted, set
-            # saving_path = None
-            plot_data(raw_data.T, denoised_data.T, seis_data, seis_stats, data_type, saving_path)
 
+            saving_path += '/' + seismometer_event  # when the plot should be depicted, set saving_path = None
+            saving_path = None
+
+            if saving_path is None or not os.path.exists(saving_path + '.png'):
+                id = re.search(r'ID:(\d+)_', seismometer_event).group(1)
+                plot_data(raw_data.T, denoised_data.T, seis_data, seis_stats, data_type, saving_path, id)
+            else:
+                print('Event wurde bereits geplottet')
+
+
+
+
+            '''
 
             # calculate CC
             cc_t_start = 688
@@ -290,4 +295,6 @@ for experiment in experiments: # for every experiment
             # save CC gain
             #seismometer_event_group.create_dataset('data_cc_seis_raw', data=raw_cc_seis)
             #seismometer_event_group.create_dataset('data_cc_seis_denoised', data=denoised_cc_seis)
+            
+            '''
 
