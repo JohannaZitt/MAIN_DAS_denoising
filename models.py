@@ -167,8 +167,8 @@ class DataGenerator(keras.utils.Sequence):
 
         # normalize data with maximum.
         for s, sample in enumerate(noisy_samples):
-            #noisy_samples[s] = sample / sample.std()
-            noisy_samples[s] = sample / np.abs(sample).max()
+            noisy_samples[s] = sample / sample.std()
+            #noisy_samples[s] = sample / np.abs(sample).max()
 
         self.samples = noisy_samples
         self.masks = masks

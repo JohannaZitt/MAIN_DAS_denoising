@@ -42,7 +42,7 @@ model_params = {
     'AA': True # anti aliasing
 }
 
-different_training_data = ['05_stick-slip', '06_surface', '07_combined120']
+different_training_data = ['01_ablation_horizontal_sd']
 
 for training_data in different_training_data:
 
@@ -87,11 +87,12 @@ for training_data in different_training_data:
     test_generator = DataGenerator(X=test_data, Nt=Nt, N_sub=N_sub, batch_size=batch_size, batch_multiplier=batch_multiplier)
     print("Done")
 
+    '''    plt.show()
     '''
     for i in range(30):
         plt.plot(train_generator.samples[i][5])
         plt.show()
-    '''
+
 
     # Construct model
     net = UNet()

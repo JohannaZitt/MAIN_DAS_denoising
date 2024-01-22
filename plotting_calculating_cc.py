@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import numpy as np
 import h5py
 import os
+import csv
 import matplotlib.pyplot as plt
 from obspy.core.trace import Trace
 from obspy.core.stream import Stream
@@ -204,97 +205,133 @@ def plot_data(raw_data, denoised_data, seis_data, seis_stats, data_type, saving_
 
 #experiments = os.listdir('experiments/')
 experiments = ['01_ablation_horizontal']
-data_types = ['0731_RA87']
+data_types = ['accumulation/0706_AJP']
 
 
 for experiment in experiments: # for every experiment
 
     for data_type in data_types:  # for every data type
 
-        seis_data_path = 'data/seismometer_test_data/ablation/' + data_type
+        seis_data_path = 'data/seismometer_test_data/' + data_type
         seismometer_events = os.listdir(seis_data_path)
         seismometer_events = seismometer_events[2:]
 
-        # for every seismometer event
-        for seismometer_event in seismometer_events:
-            print('SEISMOMETER EVENT: ', seismometer_event)
-            if data_type == '0731_RA87':
-                receiver = seismometer_event[-14:-10]
-                event_time = seismometer_event[-23:-15]
-                event_date = seismometer_event[-34:-24]
-                id = ''
-            elif data_type == 'accumulation' :
-                receiver = seismometer_event[-12:-9]
-                event_time = seismometer_event[-23:-15]
-                event_date = seismometer_event[-34:-24]
-            else:
-                print('ERROR: No matching data type')
+        with open('experiments/' + experiment +'/cc_evaluation_' + experiment[:2] + '.csv', mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(
+                ['id', 'mean_cc_gain', 'mean_cross_gain', 'zone', 'model'])
+
+            # es wird folgendes abgespeichert:
+            # id: id des events, wie auch in experiments/model_name/plots zu finden ist
+            # mean_cc_gain: local waveform coherence: es gibt für jedes event n (= Anzahl channel) viele gg_gain Werte.
+            #               hier von wird der Mittelwert berechnet und abgespeichert
+            # mean_cross_gain: hier wird crosscorrelation zwischen (raw und seismometer) und (denoised und seismometer) berechnet
+            # und der crosscorrelation gain berechnet. Der Mittwelwert über alle channel wird abgespeichert.
+            # zone: ablation or accumulation zone
+            # model: model mit welchem die denoisten Werte denoist wurde.
 
 
-            # pick time window:
-            t_start = datetime.strptime(event_date + ' ' + event_time + '.0', '%Y-%m-%d %H:%M:%S.%f')
-            t_start = t_start - timedelta(seconds=3)
-            t_end = t_start + timedelta(seconds=6)
+            # for every seismometer event
+            for seismometer_event in seismometer_events:
+                print('SEISMOMETER EVENT: ', seismometer_event)
+                if data_type[:2] == 'ab':
+                    receiver = seismometer_event[-14:-10]
+                    event_time = seismometer_event[-23:-15]
+                    event_date = seismometer_event[-34:-24]
+                    id = ''
+                elif data_type[:2] == 'ac':
+                    receiver = seismometer_event[-12:-9]
+                    event_time = seismometer_event[-23:-15]
+                    event_date = seismometer_event[-34:-24]
+                else:
+                    print('ERROR: No matching data type')
 
-            # load seismometer data:
-            seis_stream = read(seis_data_path + '/' + seismometer_event)
-            seis_data = seis_stream[0].data
-            seis_stats = seis_stream[0].stats
-            seis_data = butter_bandpass_filter(seis_data, 1, 120, fs=seis_stats.sampling_rate, order=4)
 
-            # load raw DAS data:
-            raw_folder_path = 'data/raw_DAS/ablation/test_ablation_RA87/'
-            raw_data, raw_headers, raw_axis = load_das_data(folder_path =raw_folder_path, t_start = t_start, t_end = t_end, receiver = receiver, raw = True)
+                # pick time window:
+                t_start = datetime.strptime(event_date + ' ' + event_time + '.0', '%Y-%m-%d %H:%M:%S.%f')
+                t_start = t_start - timedelta(seconds=3)
+                t_end = t_start + timedelta(seconds=6)
 
-            # load denoised DAS data
-            denoised_folder_path = 'experiments/' + experiment + '/denoisedDAS/test_ablation_RA87/'
-            denoised_data, denoised_headers, denoised_axis = load_das_data(folder_path =denoised_folder_path, t_start = t_start, t_end = t_end, receiver = receiver, raw = False)
+                # load seismometer data:
+                seis_stream = read(seis_data_path + '/' + seismometer_event)
+                seis_data = seis_stream[0].data
+                seis_stats = seis_stream[0].stats
+                seis_data = butter_bandpass_filter(seis_data, 1, 120, fs=seis_stats.sampling_rate, order=4)
 
-            saving_path = os.path.join('experiments', experiment, 'plots', data_type)
-            if not os.path.isdir(saving_path):
-                os.makedirs(saving_path)
+                # load raw DAS data:
+                raw_folder_path = 'data/raw_DAS/0706/'
+                raw_data, raw_headers, raw_axis = load_das_data(folder_path =raw_folder_path, t_start = t_start, t_end = t_end, receiver = receiver, raw = True)
 
-            saving_path += '/' + seismometer_event  # when the plot should be depicted, set saving_path = None
-            saving_path = None
+                # load denoised DAS data
+                denoised_folder_path = 'experiments/' + experiment + '/denoisedDAS/accumulation/0706_AJP/'
+                denoised_data, denoised_headers, denoised_axis = load_das_data(folder_path =denoised_folder_path, t_start = t_start, t_end = t_end, receiver = receiver, raw = False)
 
-            if saving_path is None or not os.path.exists(saving_path + '.png'):
+                saving_path = os.path.join('experiments', experiment, 'plots', data_type)
+                if not os.path.isdir(saving_path):
+                    os.makedirs(saving_path)
+
+                saving_path += '/' + seismometer_event  # when the plot should be depicted, set saving_path = None
+                saving_path = None
+
                 id = re.search(r'ID:(\d+)_', seismometer_event).group(1)
-                plot_data(raw_data.T, denoised_data.T, seis_data, seis_stats, data_type, saving_path, id)
-            else:
-                print('Event wurde bereits geplottet')
+                if saving_path is None or not os.path.exists(saving_path + '.png'):
+                    print('Event wird geplottet')
+                    #plot_data(raw_data.T, denoised_data.T, seis_data, seis_stats, data_type, saving_path, id)
+                else:
+                    print('Event wurde bereits geplottet')
+
+
+
+                # calculate CC
+                cc_t_start = 688
+                cc_t_end = cc_t_start + 1024
+                bin_size = 11
+
+                raw_cc = compute_moving_coherence(raw_data.T, bin_size)
+                denoised_cc = compute_moving_coherence(denoised_data.T, bin_size)
+                cc_gain = denoised_cc / raw_cc
+
+                # calculate Crosscorrelation beween DAS and seismometer data
+                # TODO: das hier nochmal überprüfen, ob das seine Richtigkeit hat..
+                shift = 20
+                raw_cc_seis = np.zeros((raw_data.shape[1], (shift * 2) + 1))
+                denoised_cc_seis = np.zeros((raw_data.shape[1], (shift * 2) + 1))
+                for i in range(raw_data.shape[1]):
+                    raw_cc_seis[i] = correlate(seis_data[cc_t_start:cc_t_end], raw_data[cc_t_start:cc_t_end][i], shift,
+                                               normalize='naive', method='fft')
+                    denoised_cc_seis[i] = correlate(seis_data[cc_t_start:cc_t_end],
+                                                    denoised_data[cc_t_start:cc_t_end][i], shift,
+                                                    normalize='naive', method='fft')
+
+
+                # mean_cc_gain und mean_cross_gain abspeichern:
+                writer.writerow([id, round(cc_gain.mean(), 5), 'cross_gain', data_type, experiment])
 
 
 
 
-            '''
-
-            # calculate CC
-            cc_t_start = 688
-            cc_t_end = cc_t_start + 1024
-            bin_size = 11
 
 
-            raw_cc = compute_moving_coherence(raw_data.T, bin_size)
-            denoised_cc = compute_moving_coherence(denoised_data.T, bin_size)
-            cc_gain = denoised_cc / raw_cc
-            # save CC gain
-            seismometer_event_group.create_dataset('data_cc', data=cc_gain)
 
 
-            # calculate crosscorrelation between seismometer data and raw_data and denoised data:
-            shift = 20
-            raw_cc_seis = np.zeros((raw_data.shape[1], (shift * 2)+1))
-            denoised_cc_seis = np.zeros((raw_data.shape[1], (shift * 2)+1))
-            for i in range(raw_data.shape[1]):
-                raw_cc_seis[i] = correlate(seis_data[cc_t_start:cc_t_end], raw_data[cc_t_start:cc_t_end][i], shift,
-                               normalize='naive', method='fft')
-                denoised_cc_seis[i] = correlate(seis_data[cc_t_start:cc_t_end], denoised_data[cc_t_start:cc_t_end][i], shift,
-                                        normalize='naive', method='fft')
-
-
-            # save CC gain
-            #seismometer_event_group.create_dataset('data_cc_seis_raw', data=raw_cc_seis)
-            #seismometer_event_group.create_dataset('data_cc_seis_denoised', data=denoised_cc_seis)
-            
-            '''
+                '''
+    
+        
+    
+                # calculate crosscorrelation between seismometer data and raw_data and denoised data:
+                shift = 20
+                raw_cc_seis = np.zeros((raw_data.shape[1], (shift * 2)+1))
+                denoised_cc_seis = np.zeros((raw_data.shape[1], (shift * 2)+1))
+                for i in range(raw_data.shape[1]):
+                    raw_cc_seis[i] = correlate(seis_data[cc_t_start:cc_t_end], raw_data[cc_t_start:cc_t_end][i], shift,
+                                   normalize='naive', method='fft')
+                    denoised_cc_seis[i] = correlate(seis_data[cc_t_start:cc_t_end], denoised_data[cc_t_start:cc_t_end][i], shift,
+                                            normalize='naive', method='fft')
+    
+    
+                # save CC gain
+                #seismometer_event_group.create_dataset('data_cc_seis_raw', data=raw_cc_seis)
+                #seismometer_event_group.create_dataset('data_cc_seis_denoised', data=denoised_cc_seis)
+                
+                '''
 
