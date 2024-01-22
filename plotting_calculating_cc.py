@@ -82,7 +82,7 @@ def get_middel_channel(receiver):
     elif receiver == 'RA87':
         channel = 1230
     elif receiver == 'RA88':
-        channel = 1460
+        channel = 1600
     else:
         print('There is no start nor end channel for receiver ' + receiver + '.')
 

@@ -50,8 +50,8 @@ Proprocessing:
 
 """
 
-folders = ['01_ablation_horizontal', '02_ablation_vertical', '03_accumulation_vertical', '04_accumulation_horizontal', '05_stick-slip', '06_surface', '07_combined120', '09_random480']
-
+#folders = ['01_ablation_horizontal', '02_ablation_vertical', '03_accumulation_vertical', '04_accumulation_horizontal', '05_stick-slip', '06_surface', '07_combined120', '09_random480']
+folders = ['01_ablation_horizontal']
 for folder in folders:
 
     # Reading Data
@@ -68,7 +68,6 @@ for folder in folders:
         data: ndarray = np.zeros((n_trc, n_t))
         for i in range(n_trc):
             data[i] = stream[i].data[0:n_t]
-
 
     # parameters for calculating strain rate:
     gauge_length: int = 10 # in m
@@ -88,15 +87,25 @@ for folder in folders:
         data[i] /= gauge_length
 
         # scale by max amplitude
-        max_amplitude = np.abs(data[i]).max()
-        data[i] /= max_amplitude
+        # max_amplitude = np.abs(data[i]).max()
+        # data[i] /= max_amplitude
+
+        # scale by sd
+        data[i] /= np.std(data[i])
+
+    for i in range(10, 20):
+        plt.plot(data[i])
+        plt.show()
+
+
 
 
     savedir = 'data/training_data/preprocessed_seismometer/'
     if not os.path.isdir(savedir):
         os.makedirs(savedir)
-    #np.save(savedir + folder, data)
+    np.save(savedir + folder + '_sd', data)
 
+'''
 # Compute combined800 training data set:
 loaded_arrays = []
 for i in range(4):
@@ -105,6 +114,7 @@ for i in range(4):
 combined_array = np.vstack(loaded_arrays)
 savedir = 'data/training_data/preprocessed_seismometer/'
 #np.save(savedir + '08_combined480', combined_array)
+'''
 
 '''
 # Plotting the training_data waveforms

@@ -42,7 +42,7 @@ model_params = {
     'AA': True # anti aliasing
 }
 
-different_training_data = ['01_ablation_horizontal', '02_ablation_vertical', '03_accumulation_horizontal', '04_accumulation_vertical']
+different_training_data = ['05_stick-slip', '06_surface', '07_combined120']
 
 for training_data in different_training_data:
 
