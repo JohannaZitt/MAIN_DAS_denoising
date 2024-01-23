@@ -1,6 +1,4 @@
 Runtimes of experiments (alt):
-
-
 01_ablation_horizontal: 2 Stunden, 58 Minuten und 44.092952 Sekunden
 02_ablation_vertical: 2 Stunden, 57 Minuten und 25.561701 Sekunden
 03_accumulation_vertical: 2 Stunden, 57 Minuten und 36.689762 Sekunden
@@ -18,17 +16,11 @@ Runtimes of denoising data (alt):
 3. Denoising 30 Sekunden 1248 channels, mit GPU: 09.137 Sekunden oder 09.249 oder 09.176 oder 09.2066
 
 
-Runtimes of experiments (neu):
-
-01_ablation_horizontal: 2 Stunden, 55 Minuten und 00.634440 Sekunden
-02_ablation_vertical: 2 Stunden, 54 Minuten und 23.150465 Sekunden
-03_accumulation_horizontal: 2 Stunden, 54 Minuten und 35.293303 Sekunden
-04_accumulation_vertical: 2 Stunden, 54 Minuten und 28.278573 Sekunden
-
-
 Runtimes of denoising DAS (neu):
 30 Sekunden 1248 DAS Channel denoisen dauert zwischen 7.5 - 8.0 Sekunden auf GPU -> das heißt 18 Minuten pro model pro data_type -> also 36 Minuten pro model
-05_stick-slip: 0 Stunden, 00 Minuten und 33.869546 Sekunden
-06_surface: 0 Stunden, 00 Minuten und 30.103573 Sekunden
-07_combined120: 0 Stunden, 00 Minuten und 29.649008 Sekunden
-01_ablation_horizontal_sd: 2 Stunden, 58 Minuten und 19.758131 Sekunden
+
+
+
+Runtimes of experiments (neu):
+01_ablation_horizontal: 2 Stunden, 55 Minuten und 00.634440 Sekunden
+

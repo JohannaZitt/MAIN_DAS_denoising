@@ -50,8 +50,8 @@ Proprocessing:
 
 """
 
-#folders = ['01_ablation_horizontal', '02_ablation_vertical', '03_accumulation_vertical', '04_accumulation_horizontal', '05_stick-slip', '06_surface', '07_combined120', '09_random480']
-folders = ['01_ablation_horizontal']
+folders = ['01_ablation_horizontal', '02_ablation_vertical', '03_accumulation_vertical', '04_accumulation_horizontal', '07_combined120', '09_random480']
+#folders = ['01_ablation_horizontal']
 for folder in folders:
 
     # Reading Data
@@ -93,28 +93,26 @@ for folder in folders:
         # scale by sd
         data[i] /= np.std(data[i])
 
-    for i in range(10, 20):
-        plt.plot(data[i])
-        plt.show()
-
-
-
+    #for i in range(10, 20):
+    #    plt.plot(data[i])
+    #    plt.show()
 
     savedir = 'data/training_data/preprocessed_seismometer/'
     if not os.path.isdir(savedir):
         os.makedirs(savedir)
-    np.save(savedir + folder + '_sd', data)
+    np.save(savedir + folder, data)
 
-'''
+''' '''
 # Compute combined800 training data set:
 loaded_arrays = []
 for i in range(4):
+    print(folders[i])
     loaded_array = np.load('data/training_data/preprocessed_seismometer/' + folders[i] + '.npy')
     loaded_arrays.append(loaded_array)
 combined_array = np.vstack(loaded_arrays)
 savedir = 'data/training_data/preprocessed_seismometer/'
-#np.save(savedir + '08_combined480', combined_array)
-'''
+np.save(savedir + '08_combined480', combined_array)
+
 
 '''
 # Plotting the training_data waveforms

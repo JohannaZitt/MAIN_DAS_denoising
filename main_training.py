@@ -28,7 +28,7 @@ tf.config.threading.set_inter_op_parallelism_threads(4)
 N_sub = 11
 batch_size = 32
 Nt = 1024
-N_epoch = 2000
+N_epoch = 10 #2000
 batch_multiplier = 15 # set to 15 for 120 training samples (105*32 = 3360), set to 5 for 480 training samples (32*140 = 4480 samples per epoch)
 model_params = {
     'use_bn': False, # batch normalization
@@ -42,7 +42,7 @@ model_params = {
     'AA': True # anti aliasing
 }
 
-different_training_data = ['01_ablation_horizontal_sd']
+different_training_data = ['02_ablation_vertical', '03_accumulation_horizontal', '04_accumulation_vertical', '07_combined120']
 
 for training_data in different_training_data:
 
@@ -87,12 +87,12 @@ for training_data in different_training_data:
     test_generator = DataGenerator(X=test_data, Nt=Nt, N_sub=N_sub, batch_size=batch_size, batch_multiplier=batch_multiplier)
     print("Done")
 
-    '''    
+    '''    '''
    
-    for i in range(30):
+    for i in range(10):
         plt.plot(train_generator.samples[i][5])
         plt.show()
-    '''
+
 
 
     # Construct model

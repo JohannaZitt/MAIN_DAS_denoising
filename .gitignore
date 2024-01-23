@@ -6,6 +6,7 @@ data/training_data/raw_seismometer/
 data/seismometer_test_data/
 experiments/01_ablation_horizontal/denoisedDAS/
 experiments/01_ablation_horizontal/plots
-experiments/01_ablation_horizontal_sd/denoisedDAS/
-experiments/01_ablation_horizontal_sd/plots/
+experiments/01_ablation_horizontal_max/denoisedDAS/
+experiments/01_ablation_horizontal_max/plots/
+
 
