@@ -59,7 +59,8 @@ def denoise_file (file, timesamples, model, N_sub, fs_trainingdata):
         # filter data
         DAS_data[i] = butter_bandpass_filter(DAS_data[i], lowcut, highcut, fs=400, order=4)
         # normalize data
-        DAS_data[i] = DAS_data[i] / np.abs(DAS_data[i]).max()
+        # DAS_data[i] = DAS_data[i] / np.abs(DAS_data[i]).max()
+        DAS_data[i] = DAS_data[i] / np.std(DAS_data[i])
 
     # split data in 1024 data point sections
     n_ch, n_t = DAS_data.shape
@@ -140,10 +141,10 @@ def deal_with_artifacts(data, filler = 0, Nt=1024):
 
 models_path = 'experiments'
 model_names = os.listdir(models_path)
-model_names = ['01_ablation_horizontal']
+model_names = ['01_ablation_horizontal_sd']
 
 raw_DAS_path = 'data/raw_DAS'
-data_types = ['test_ablation_RA87']
+data_types = ['0706']
 
 n_sub = 11
 timesamples = 1024
@@ -164,6 +165,7 @@ for model_name in model_names:
             os.makedirs(saving_path)
 
         files = os.listdir(raw_das_folder_path)
+        #files = files[1:]
 
         for file in files:
             start = time.time()

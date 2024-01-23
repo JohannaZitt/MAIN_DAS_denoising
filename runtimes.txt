@@ -31,3 +31,4 @@ Runtimes of denoising DAS (neu):
 05_stick-slip: 0 Stunden, 00 Minuten und 33.869546 Sekunden
 06_surface: 0 Stunden, 00 Minuten und 30.103573 Sekunden
 07_combined120: 0 Stunden, 00 Minuten und 29.649008 Sekunden
+01_ablation_horizontal_sd: 2 Stunden, 58 Minuten und 19.758131 Sekunden

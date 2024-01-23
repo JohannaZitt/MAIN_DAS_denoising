@@ -204,7 +204,7 @@ def plot_data(raw_data, denoised_data, seis_data, seis_stats, data_type, saving_
 
 
 #experiments = os.listdir('experiments/')
-experiments = ['01_ablation_horizontal']
+experiments = ['01_ablation_horizontal_sd']
 data_types = ['accumulation/0706_AJP']
 
 
@@ -232,6 +232,7 @@ for experiment in experiments: # for every experiment
 
 
             # for every seismometer event
+
             for seismometer_event in seismometer_events:
                 print('SEISMOMETER EVENT: ', seismometer_event)
                 if data_type[:2] == 'ab':
@@ -263,7 +264,7 @@ for experiment in experiments: # for every experiment
                 raw_data, raw_headers, raw_axis = load_das_data(folder_path =raw_folder_path, t_start = t_start, t_end = t_end, receiver = receiver, raw = True)
 
                 # load denoised DAS data
-                denoised_folder_path = 'experiments/' + experiment + '/denoisedDAS/accumulation/0706_AJP/'
+                denoised_folder_path = 'experiments/' + experiment + '/denoisedDAS/0706/'
                 denoised_data, denoised_headers, denoised_axis = load_das_data(folder_path =denoised_folder_path, t_start = t_start, t_end = t_end, receiver = receiver, raw = False)
 
                 saving_path = os.path.join('experiments', experiment, 'plots', data_type)
@@ -271,12 +272,12 @@ for experiment in experiments: # for every experiment
                     os.makedirs(saving_path)
 
                 saving_path += '/' + seismometer_event  # when the plot should be depicted, set saving_path = None
-                saving_path = None
+                #saving_path = None
 
                 id = re.search(r'ID:(\d+)_', seismometer_event).group(1)
                 if saving_path is None or not os.path.exists(saving_path + '.png'):
                     print('Event wird geplottet')
-                    #plot_data(raw_data.T, denoised_data.T, seis_data, seis_stats, data_type, saving_path, id)
+                    plot_data(raw_data.T, denoised_data.T, seis_data, seis_stats, data_type, saving_path, id)
                 else:
                     print('Event wurde bereits geplottet')
 
