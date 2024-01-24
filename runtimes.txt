@@ -24,3 +24,8 @@ Runtimes of denoising DAS (neu):
 Runtimes of experiments (neu):
 01_ablation_horizontal: 2 Stunden, 55 Minuten und 00.634440 Sekunden
 
+
+02_ablation_vertical: 2 Stunden, 56 Minuten und 03.300050 Sekunden
+03_accumulation_horizontal: 2 Stunden, 56 Minuten und 32.712672 Sekunden
+04_accumulation_vertical: 2 Stunden, 56 Minuten und 50.137685 Sekunden
+07_combined120: 2 Stunden, 55 Minuten und 54.354298 Sekunden
