@@ -24,7 +24,7 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=4):
 def resample(data, ratio):
     # spatial axis:
     n_ch = data.shape[0]
-    if n_ch == 4800 or n_ch == 4864:
+    if n_ch == 4800 or n_ch == 4864 or n_ch == 4928:
         data = data[::4, :]
     else:
         data = data[::2, :]
@@ -141,7 +141,7 @@ def deal_with_artifacts(data, filler = 0, Nt=1024):
 
 models_path = 'experiments'
 model_names = os.listdir(models_path)
-model_names = ['01_ablation_horizontal_sd']
+model_names = ['04_accumulation_vertical', '07_combined120']
 
 raw_DAS_path = 'data/raw_DAS'
 data_types = ['0706']

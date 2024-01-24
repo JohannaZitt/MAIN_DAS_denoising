@@ -8,5 +8,9 @@ experiments/01_ablation_horizontal/denoisedDAS/
 experiments/01_ablation_horizontal/plots
 experiments/01_ablation_horizontal_max/denoisedDAS/
 experiments/01_ablation_horizontal_max/plots/
+experiments/02_ablation_vertical/denoisedDAS/
+experiments/03_accumulation_horizontal/denoisedDAS/
+experiments/04_accumulation_vertical/denoisedDAS/
+experiments/07_combined120/denoisedDAS/
 
 
