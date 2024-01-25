@@ -87,12 +87,12 @@ for training_data in different_training_data:
     test_generator = DataGenerator(X=test_data, Nt=Nt, N_sub=N_sub, batch_size=batch_size, batch_multiplier=batch_multiplier)
     print("Done")
 
-    '''    '''
+    '''    
    
     for i in range(10):
         plt.plot(train_generator.samples[i][5])
         plt.show()
-
+    '''
 
 
     # Construct model

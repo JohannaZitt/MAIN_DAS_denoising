@@ -27,3 +27,5 @@ Runtimes of experiments (neu):
 03_accumulation_horizontal: 2 Stunden, 56 Minuten und 32.712672 Sekunden
 04_accumulation_vertical: 2 Stunden, 56 Minuten und 50.137685 Sekunden
 07_combined120: 2 Stunden, 55 Minuten und 54.354298 Sekunden
+08_combined480: 3 Stunden, 55 Minuten und 53.369884 Sekunden
+09_random480: 3 Stunden, 54 Minuten und 52.972702 Sekunden
