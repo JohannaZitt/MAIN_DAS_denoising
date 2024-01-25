@@ -26,9 +26,15 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=4):
     return y
 
 def resample(data, ratio):
-    res = np.zeros((int(data.shape[0]/ratio) + 1, data.shape[1]))
-    for i in range(data.shape[1]):
-        res[:,i] = np.interp(np.arange(0, len(data), ratio), np.arange(0, len(data)), data[:,i])
+    try:
+        res = np.zeros((int(data.shape[0]/ratio) + 1, data.shape[1]))
+        for i in range(data.shape[1]):
+
+            res[:,i] = np.interp(np.arange(0, len(data), ratio), np.arange(0, len(data)), data[:,i])
+    except ValueError as e:
+        res = np.zeros((int(data.shape[0] / ratio), data.shape[1]))
+        for i in range(data.shape[1]):
+            res[:, i] = np.interp(np.arange(0, len(data), ratio), np.arange(0, len(data)), data[:, i])
     return res
 
 def xcorr(x, y):
@@ -83,7 +89,7 @@ def get_middel_channel(receiver):
     elif receiver == 'RA87':
         channel = 1230
     elif receiver == 'RA88':
-        channel = 1600
+        channel = 1615 # 1600
     else:
         print('There is no start nor end channel for receiver ' + receiver + '.')
 
@@ -98,7 +104,7 @@ def load_das_data(folder_path, t_start, t_end, receiver, raw):
 
     # 2. downsample data in space:
     if raw:
-        if data.shape[1] == 4864 or data.shape[1] == 4800 :
+        if data.shape[1] == 4864 or data.shape[1] == 4800 or data.shape[1] == 4928 :
             data = data[:,::4]
         else:
             data = data[:, ::2]
@@ -204,9 +210,9 @@ def plot_data(raw_data, denoised_data, seis_data, seis_stats, data_type, saving_
 
 
 #experiments = os.listdir('experiments/')
-experiments = ['01_ablation_horizontal_sd']
-data_types = ['accumulation/0706_AJP']
-
+experiments = ['04_accumulation_vertical', '07_combined120']
+#experiments = ['01_ablation_horizontal']
+data_types = ['ablation/0706_RA88']
 
 for experiment in experiments: # for every experiment
 
@@ -232,7 +238,6 @@ for experiment in experiments: # for every experiment
 
 
             # for every seismometer event
-
             for seismometer_event in seismometer_events:
                 print('SEISMOMETER EVENT: ', seismometer_event)
                 if data_type[:2] == 'ab':
