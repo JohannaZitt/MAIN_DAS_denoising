@@ -5,7 +5,60 @@ import matplotlib.pyplot as plt
 from scipy.signal import butter, lfilter
 from datetime import datetime, timedelta
 from obspy import UTCDateTime
+from pydas_readers.readers import load_das_h5_CLASSIC as load_das_h5
 
+def resample(data, ratio):
+    try:
+        res = np.zeros((int(data.shape[0]/ratio) + 1, data.shape[1]))
+        for i in range(data.shape[1]):
+
+            res[:,i] = np.interp(np.arange(0, len(data), ratio), np.arange(0, len(data)), data[:,i])
+    except ValueError as e:
+        res = np.zeros((int(data.shape[0] / ratio), data.shape[1]))
+        for i in range(data.shape[1]):
+            res[:, i] = np.interp(np.arange(0, len(data), ratio), np.arange(0, len(data)), data[:, i])
+    return res
+
+def load_das_data(folder_path, t_start, t_end, raw):
+
+    # 1. load data
+    data, headers, axis = load_das_h5.load_das_custom(t_start, t_end, input_dir=folder_path, convert=False)
+    data = data.astype('f')
+
+    # 2. downsample data in space:
+    if raw:
+        if data.shape[1] == 4864 or data.shape[1] == 4800 or data.shape[1] == 4928 :
+            data = data[:,::4]
+        else:
+            data = data[:, ::2]
+        headers['dx'] = 8
+
+    # 3. cut to size
+    ch_middel = int(3460/4) # get start and end channel:
+    data = data[:, ch_middel-40:ch_middel+40]
+
+    if raw:
+        # 4. downsample in time
+        print('in if')
+        data = resample(data, headers['fs'] / 400)
+        headers['fs'] = 400
+
+    # 5. bandpasfilter and normalize
+    for i in range(data.shape[1]):
+        data[:, i] = butter_bandpass_filter(data[:,i], 1, 120, fs=headers['fs'], order=4)
+        data[:,i] = data[:,i] / np.abs(data[:,i]).max()
+
+    return data, headers, axis
+
+def plot_das_data(data):
+    channels = data.shape[0]
+    alpha=0.7
+    i = 0
+    plt.figure(figsize=(20, 12))
+    for ch in range(channels):
+        plt.plot(data[ch][:] + 1.5 * i, '-k', alpha=alpha)
+        i += 1
+    plt.show()
 
 def butter_bandpass(lowcut, highcut, fs, order=4):
     nyq = 0.5 * fs
@@ -38,12 +91,32 @@ SNR_values = [0, 1, 2, 3, 4]
 
 
 '''
+GENERATE SYNTHETIC DATA FROM DAS DATA:
+'''
+
+das_folder_path = 'data/raw_DAS/0706/'
+event_times = ['19:32:35.0', '20:41:46.0', '20:18:58.0', '19:42:24.0']
+ids = [0, 17, 34, 44]
+
+for event_time in event_times:
+    print(event_time)
+    t_start = datetime.strptime('2020-07-06 ' + event_time, '%Y-%m-%d %H:%M:%S.%f')
+    t_end = t_start + timedelta(seconds=6)
+    das_data, headers, axis = load_das_data(das_folder_path, t_start, t_end, raw=True)
+    das_data = das_data.T
+
+    plot_das_data(das_data)
+
+
+
+
+'''
 GENERATE SYNTHETIC DATA FROM SEISMOMETERS:
 '''
 
 
 # 1. einlesen der Daten:
-folder_path = '/data/synthetic_DAS/raw_seismometer/'
+folder_path = 'data/synthetic_DAS/raw_seismometer/'
 data_paths = os.listdir(folder_path)
 for data_path in data_paths:
     stream = read(folder_path + '/' + data_path)
@@ -86,18 +159,11 @@ for data_path in data_paths:
         #np.save('/home/johanna/PycharmProjects/MAIN_DAS_denoising/data/synthetic_DAS/' + file_name, synthetic_data)
 
 
-'''
-GENERATE SYNTHETIC DATA FROM DAS DATA:
-'''
-
-das_folder_path = '/data/raw_DAS/0706'
 
 
-# DAS data Zeitpunkte:
-# 2020-07-06T19:32:41.0 ID 0
-# 2020-07-06T20:41:46.0 ID 17
-# 2020-07-06T20:18:58.0 ID 34
-# 2020-07-06T10:42:24.0 ID 44
+
+
+
 
 
 
