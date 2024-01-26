@@ -186,8 +186,10 @@ for data_path in data_paths:
 
         #plot_das_data(synthetic_data)
 
+        print('SHAPE: ', synthetic_data.shape)
+
         # savedata
-        file_name = data_path.split('/')[-1][0:5] + '_SNR:' + str(round(SNR, 1)) + '.npy'
-        np.save('/home/johanna/PycharmProjects/MAIN_DAS_denoising/data/synthetic_DAS/from_seis_data/' + file_name, synthetic_data)
+        # file_name = data_path.split('/')[-1][0:5] + '_SNR:' + str(round(SNR, 1)) + '.npy'
+        # np.save('/home/johanna/PycharmProjects/MAIN_DAS_denoising/data/synthetic_DAS/from_seis_data/' + file_name, synthetic_data)
 
 
