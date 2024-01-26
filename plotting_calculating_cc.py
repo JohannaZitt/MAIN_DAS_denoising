@@ -123,7 +123,7 @@ def load_das_data(folder_path, t_start, t_end, receiver, raw):
     # 5. bandpasfilter and normalize
     for i in range(data.shape[1]):
         data[:, i] = butter_bandpass_filter(data[:,i], 1, 120, fs=headers['fs'], order=4)
-        # TODO: OBACHT hier mit max amplitude normalisiert
+        # TODO: OBACHT hier mit max amplitude normalisiert zum Plotten. Für Berechnung von cc_gain und correlation std verwenden
         data[:,i] = data[:,i] / np.abs(data[:,i]).max()
         #data[:, i] = data[:,i] / np.std(data[:, i])
 
@@ -213,9 +213,8 @@ def plot_data(raw_data, denoised_data, seis_data, seis_stats, data_type, saving_
 
 #experiments = os.listdir('experiments/')
 #experiments = ['04_accumulation_vertical', '07_combined120']
-experiments = ['02_ablation_vertical']
-#data_types = ['ablation/0706_RA88']
-data_types = ['accumulation/0706_AJP']
+experiments = ['08_combined480', '09_random480']
+data_types = ['accumulation/0706_AJP', 'ablation/0706_RA88']
 
 for experiment in experiments: # for every experiment
 

@@ -142,7 +142,7 @@ def deal_with_artifacts(data, filler = 0, Nt=1024):
 models_path = 'experiments'
 #model_names = os.listdir(models_path)
 #model_names = ['02_ablation_vertical', '03_accumulation_horizontal', '04_accumulation_vertical', '07_combined120']
-model_names = ['08_combined480', '09_random480']
+model_names = ['09_random480']
 
 raw_DAS_path = 'data/raw_DAS'
 data_types = ['0706']
