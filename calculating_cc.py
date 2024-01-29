@@ -1,14 +1,10 @@
 import re
 from datetime import datetime, timedelta
 import numpy as np
-import h5py
 import os
 import csv
 import matplotlib.pyplot as plt
-from obspy.core.trace import Trace
-from obspy.core.stream import Stream
 from obspy import read
-from obspy.signal.cross_correlation import correlate, xcorr_max
 from pydas_readers.readers import load_das_h5_CLASSIC as load_das_h5
 from scipy.signal import butter, lfilter
 
@@ -129,23 +125,20 @@ def compute_moving_coherence(data, bin_size):
     return cc
 
 
-#experiments = os.listdir('experiments/')
-#experiments = ['04_accumulation_vertical', '07_combined120']
-experiments = ['08_combined480', '09_random480']
+experiments = os.listdir('experiments/')
 data_types = ['accumulation/0706_AJP', 'ablation/0706_RA88']
 
 for experiment in experiments: # for every experiment
 
-    for data_type in data_types:  # for every data type
+    with open('experiments/' + experiment + '/cc_evaluation_' + experiment[:2] + '.csv', mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(
+            ['id', 'mean_cc_gain', 'mean_cross_gain', 'zone', 'model'])
 
-        seis_data_path = 'data/seismometer_test_data/' + data_type
-        seismometer_events = os.listdir(seis_data_path)
-        seismometer_events = seismometer_events[1:2]
+        for data_type in data_types:  # for every data type
 
-        with open('experiments/' + experiment +'/cc_evaluation_' + experiment[:2] + '.csv', mode='w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(
-                ['id', 'mean_cc_gain', 'mean_cross_gain', 'zone', 'model'])
+            seis_data_path = 'data/seismometer_test_data/' + data_type
+            seismometer_events = os.listdir(seis_data_path)
 
             '''
             
@@ -160,19 +153,22 @@ for experiment in experiments: # for every experiment
 
             # for every seismometer event
             for seismometer_event in seismometer_events:
-                print('SEISMOMETER EVENT: ', seismometer_event)
-                if data_type[:2] == 'ab':
+                print("SEISMOMETER EVENT: ", seismometer_event)
+
+                event_time = seismometer_event[-23:-15]
+                event_date = seismometer_event[-34:-24]
+                id = re.search(r'ID:(\d+)', seismometer_event).group(1)
+                receiver = ''
+                zone = ''
+
+                if data_type[:2] == "ab":
                     receiver = seismometer_event[-14:-10]
-                    event_time = seismometer_event[-23:-15]
-                    event_date = seismometer_event[-34:-24]
-                    id = re.search(r'ID:(\d+)', seismometer_event).group(1)
-                elif data_type[:2] == 'ac':
+                    zone = 'ablation'
+                elif data_type[:2] == "ac":
                     receiver = seismometer_event[-12:-9]
-                    event_time = seismometer_event[-23:-15]
-                    event_date = seismometer_event[-34:-24]
-                    id = re.search(r'ID:(\d+)', seismometer_event).group(1)
+                    zone = 'accumulation'
                 else:
-                    print('ERROR: No matching data type')
+                    print("ERROR: No matching data type")
 
 
                 # pick time window:
@@ -184,10 +180,13 @@ for experiment in experiments: # for every experiment
                 seis_stream = read(seis_data_path + '/' + seismometer_event)
                 seis_data = seis_stream[0].data
                 seis_stats = seis_stream[0].stats
+
+                # perform resampling if sample frequency is 500 Hz
                 if seis_stats.sampling_rate == 500:
                     seis_data = np.interp(np.arange(0, len(seis_data), 500/400), np.arange(0, len(seis_data)), seis_data)
                     seis_stats.sampling_rate = 400.0
                     seis_stats.npts = seis_data.shape[0]
+                # filter and normalize seismometer data:
                 seis_data = butter_bandpass_filter(seis_data, 1, 120, fs=seis_stats.sampling_rate, order=4)
                 seis_data = seis_data / np.std(seis_data)
 
@@ -200,46 +199,36 @@ for experiment in experiments: # for every experiment
                 denoised_data, denoised_headers, denoised_axis = load_das_data(folder_path =denoised_folder_path, t_start = t_start, t_end = t_end, receiver = receiver, raw = False)
 
 
-
                 '''
                 Calculate CC Gain
                 '''
 
-                cc_t_start = 688
-                cc_t_end = cc_t_start + 1024
+                t_window_start = 688
+                t_window_end = t_window_start + 1024
                 bin_size = 11
 
-                raw_cc = compute_moving_coherence(raw_data[cc_t_start:cc_t_end].T, bin_size)
-                denoised_cc = compute_moving_coherence(denoised_data[cc_t_start:cc_t_end].T, bin_size)
+                raw_cc = compute_moving_coherence(raw_data[t_window_start:t_window_end].T, bin_size)
+                denoised_cc = compute_moving_coherence(denoised_data[t_window_start:t_window_end].T, bin_size)
                 cc_gain = denoised_cc / raw_cc
 
 
                 '''
                 Calculate CC between DAS and Seismometer: 
                 '''
+                raw_cc_seis_total = []
+                denoised_cc_seis_total = []
 
                 for i in range(raw_data.shape[1]):
-                    cc = xcorr(raw_data.T[i], seis_data)
-                    print('CC: ', cc)
+                    raw_cc_seis = xcorr(raw_data.T[i], seis_data)
+                    denoised_cc_seis = xcorr(denoised_data.T[i], seis_data)
+                    raw_cc_seis_total.append(raw_cc_seis)
+                    denoised_cc_seis_total.append(denoised_cc_seis)
+
+                cc_gain_seis = np.array(denoised_cc_seis_total) / np.array(raw_cc_seis_total)
 
                 # Save values:
-                writer.writerow(
-                    [id, 'mean_cc_gain', 'mean_cross_gain', 'zone', experiment])
+                #writer.writerow(
+                #    [id, cc_gain.mean(), cc_gain_seis.mean(), zone, experiment])
 
 
 
-
-
-
-
-                '''
-                # calculate crosscorrelation between seismometer data and raw_data and denoised data:
-                shift = 20
-                raw_cc_seis = np.zeros((raw_data.shape[1], (shift * 2)+1))
-                denoised_cc_seis = np.zeros((raw_data.shape[1], (shift * 2)+1))
-                for i in range(raw_data.shape[1]):
-                    raw_cc_seis[i] = correlate(seis_data[cc_t_start:cc_t_end], raw_data[cc_t_start:cc_t_end][i], shift,
-                                   normalize='naive', method='fft')
-                    denoised_cc_seis[i] = correlate(seis_data[cc_t_start:cc_t_end], denoised_data[cc_t_start:cc_t_end][i], shift,
-                                            normalize='naive', method='fft')
-                '''
