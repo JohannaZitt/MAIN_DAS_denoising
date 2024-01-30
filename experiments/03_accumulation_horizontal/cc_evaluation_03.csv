@@ -142,7 +142,6 @@ id,mean_cc_gain,mean_cross_gain,zone,model
 102,1.906919871196506,1.9913161673289195,accumulation,03_accumulation_horizontal
 175,1.9633425382960816,2.0905269004098495,accumulation,03_accumulation_horizontal
 132,2.157101704543512,2.5819525403187127,accumulation,03_accumulation_horizontal
-50,1.4988994208160118,1.6150546829988457,accumulation,03_accumulation_horizontal
 165,1.6818167832293363,1.6466180527533436,accumulation,03_accumulation_horizontal
 83,1.6831279000778003,1.8141563490284276,accumulation,03_accumulation_horizontal
 67,1.3615095474212358,1.3299133745548586,accumulation,03_accumulation_horizontal

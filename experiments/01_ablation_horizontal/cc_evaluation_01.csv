@@ -142,7 +142,6 @@ id,mean_cc_gain,mean_cross_gain,zone,model
 102,1.4737675141303943,1.3641242680287395,accumulation,01_ablation_horizontal
 175,1.4711094498386124,1.4983040614804966,accumulation,01_ablation_horizontal
 132,1.612129976205067,1.8683120026919524,accumulation,01_ablation_horizontal
-50,1.3354168974492602,1.057615969196431,accumulation,01_ablation_horizontal
 165,1.4571330146516015,1.1591146748218777,accumulation,01_ablation_horizontal
 83,1.4620288924225116,1.326814272927805,accumulation,01_ablation_horizontal
 67,1.3560115480427588,1.067677783089095,accumulation,01_ablation_horizontal

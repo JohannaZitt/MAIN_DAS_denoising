@@ -18,6 +18,8 @@ for experiment in experiments:
 
         category_size = len(os.listdir(os.path.join(ablation_path, category)))
         category_sum += category_size
-        print(category_size)
+        #print(category_size)
 
     print("SUM: ", experiment, category_sum)
+
+
