@@ -73,9 +73,9 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=4):
 
 def compute_shift(gauge = 10, slowness_max = True, fs = 400):
     if slowness_max:
-        slowness = 1 / 1650
+        slowness = 1 / 1650 # S-wave slowness
     else:
-        slowness = 1 / 3900
+        slowness = 1 / 3900 # P-wave slowness
 
     shift = gauge * slowness * fs
     return int(shift)
