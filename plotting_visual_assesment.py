@@ -6,9 +6,9 @@ import numpy as np
 
 '''
 
-TODO: 
-1. fix legend combined plot
-3. single plots with skip in y-axis
+What TODO, to make it even preatier:
+1. single and combined plots with skip in y-axis
+2. mpatches mit zwei Farben in Legend bei combined plots
 
 here you can find sample code, where you can skip a part of the y-axis: https://matplotlib.org/stable/gallery/subplots_axes_and_figures/broken_axis.html
 
