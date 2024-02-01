@@ -120,7 +120,7 @@ Betrachten Eisbeben 90 und 106 von accumulation zone als wiggle plot mit cc gain
 '''
 
 accumulation_zone = True
-event_times = {90: "2020-07-06 19:10:54.0",
+event_times = {90: "2020-07-06 19:10:51.0",
                106: "2020-07-06 19:11:34.0"} #29
 experiments = ["07_combined120", "08_combined420"]
 experiment = experiments[0]
@@ -128,11 +128,11 @@ experiment = experiments[0]
 raw_data_path = os.path.join("data", "raw_DAS", "0706/")
 denoised1_data_path = os.path.join("experiments", experiment, "denoisedDAS", "0706/")
 
-id = 106
+id = 90
 event_time = event_times[id]
 
 t_start = datetime.strptime(event_time, '%Y-%m-%d %H:%M:%S.%f') #+ timedelta(seconds=6)
-t_end = t_start + timedelta(seconds=1)
+t_end = t_start + timedelta(seconds=6)
 
 print(t_start)
 print(t_end)
