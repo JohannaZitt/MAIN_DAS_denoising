@@ -163,14 +163,16 @@ Betrachten Eisbeben 90 und 106 von accumulation zone als wiggle plot mit cc gain
 '''
 
 # Choose id experiment:
-id = 90
+id = 84
 experiment = "08_combined480"
 
 event_times = { "id": ["event_time",  "start_time", "duration", "start_channel", "end_channel", "category"],
                 90: ["2020-07-06 19:10:54.0", "2020-07-06 19:10:53.0", 2.5, 20, 50, 2],
+                6:  ["2020-07-06 20:31:20.0", "2020-07-06 20:31:21.5", 2.5, 10, 50, 1],
+                84: ["2020-07-06 20:38:47.0", 3],
                106: ["2020-07-06 19:11:34.0", 2]}
 
-start_channel = 20
+start_channel = 10
 end_channel = 50
 
 # Data Paths:
@@ -180,7 +182,7 @@ seismometer_path = os.path.join("data", "seismometer_test_data", "accumulation",
 
 # Set Time:
 event_time = event_times[id][0]
-t_start = datetime.strptime(event_time, '%Y-%m-%d %H:%M:%S.%f') - timedelta(seconds=1)
+t_start = datetime.strptime(event_time, '%Y-%m-%d %H:%M:%S.%f') - timedelta(seconds=1.5)
 t_end = t_start + timedelta(seconds=2.5)
 
 # Load DAS Data:
@@ -194,7 +196,7 @@ seis_stream = read(seismometer_path + '/' + get_seismometer_event(id, seismomete
 seis_data = seis_stream[0].data
 seis_stats = seis_stream[0].stats
 seis_data = butter_bandpass_filter(seis_data, 1, 120, fs=seis_stats.sampling_rate, order=4)
-seis_data = seis_data[800:1800]
+seis_data = seis_data[600:1600]
 
 print(raw_das_data.shape)
 print(denoised1_das_data.shape)
@@ -204,7 +206,7 @@ print(seis_data.shape)
 #plot_das_data(denoised1_das_data)
 
 #saving_path=None
-saving_path="plots/single_waveforms/" + str(id) + "_sectionplot.png"
+saving_path="plots/single_waveforms/" + str(id) + "_sectionplot"
 plot_data(raw_das_data, denoised1_das_data, seis_data, seis_stats, saving_path, str(id))
 
 
