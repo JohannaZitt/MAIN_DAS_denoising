@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.lines import Line2D
 import os
 from scipy.signal import butter, lfilter
 from pydas_readers.readers import load_das_h5_CLASSIC as load_das_h5
@@ -163,7 +164,7 @@ Betrachten Eisbeben 90 und 106 von accumulation zone als wiggle plot mit cc gain
 '''
 
 # Choose id experiment:
-id = 84
+id = 6
 experiment = "08_combined480"
 
 event_times = { "id": ["event_time",  "start_time", "duration", "start_channel", "end_channel", "category"],
@@ -196,7 +197,9 @@ seis_stream = read(seismometer_path + '/' + get_seismometer_event(id, seismomete
 seis_data = seis_stream[0].data
 seis_stats = seis_stream[0].stats
 seis_data = butter_bandpass_filter(seis_data, 1, 120, fs=seis_stats.sampling_rate, order=4)
-seis_data = seis_data[600:1600]
+seis_data = seis_data/np.std(seis_data)
+seis_data = seis_data[600:1601]
+# TODO: OBACHT noch nicht in strain rate umgerechnet
 
 print(raw_das_data.shape)
 print(denoised1_das_data.shape)
@@ -206,7 +209,78 @@ print(seis_data.shape)
 #plot_das_data(denoised1_das_data)
 
 #saving_path=None
-saving_path="plots/single_waveforms/" + str(id) + "_sectionplot"
-plot_data(raw_das_data, denoised1_das_data, seis_data, seis_stats, saving_path, str(id))
+#saving_path="plots/single_waveforms/" + str(id) + "_sectionplot"
+#plot_data(raw_das_data, denoised1_das_data, seis_data, seis_stats, saving_path, str(id))
 
 
+''' Wiggle For Wiggle Comparison: '''
+
+channel = 32 #20 good example 23 bad example
+linewidth=0.8
+fontsize = 12
+
+fig, axs = plt.subplots(2, 1, figsize=(11, 4))
+
+# first plot:
+axs[0].plot(denoised1_das_data[channel], linewidth=linewidth, color='red', label="Denoised Data")
+axs[0].plot(raw_das_data[channel], linewidth=linewidth, color='black', label="Raw DAS Data")
+axs[0].set_yticks([])
+axs[0].set_ylabel("Strain Rate [norm]", fontsize=fontsize-1)
+axs[0].set_xticks([])
+custom_lines = [Line2D([2], [0.5], color='red'),
+                Line2D([2], [0.5], color='black'),
+                Line2D([2], [0.5], color='green')]
+plt.legend(custom_lines, ["Denoised DAS Data", "Raw DAS Data", "Seismometer Data"],
+           fontsize=fontsize, frameon=False, ncol=3, loc='upper left', bbox_to_anchor=(0.1, 2.48))
+
+
+# second plot:
+axs[1].plot(denoised1_das_data[channel], linewidth=linewidth, color='red', label="Denoised Data")
+axs[1].plot(seis_data*0.5, linewidth=linewidth, color='green', label="Seismometer Data")
+axs[1].set_yticks([])
+axs[1].set_ylabel("Strain Rate [norm]", fontsize=fontsize-1)
+axs[1].set_xticks([0, 200, 400, 600, 800, 1000], [0, 0.5, 1, 1.5, 2, 2.5], fontsize=fontsize-2)
+axs[1].set_xlabel("Time [s]", fontsize=fontsize)
+
+
+plt.show()
+#plt.savefig("plots/single_waveforms/" + str(id) + "_" + str(channel) + "_wigglecomparison.png")
+'''
+fig, axs = plt.subplots(1, len(event_names), figsize=(18, 4))
+
+# Laden der Daten
+data = np.load(os.path.join(data_path, event_name))[channel, t_start:t_end]
+denoised_data = np.load(os.path.join(denoised_data_path, denoised_event_names[i]))[channel, t_start:t_end]
+
+# Plot Data
+axs[i].plot(data, color="black", linewidth=1, label="Noise Coruppted")
+axs[i].plot(denoised_data, color="red", linewidth=1, label="Denoised")
+
+# Achses
+axs[i].set_ylim([-22, 22])
+axs[i].set_ylim([-22, 22])
+axs[i].set_yticks([])
+if i == 0:
+    axs[i].set_ylabel("Strain Rate [norm]", fontsize=fontsize)
+    axs[i].legend(fontsize=fontsize-2, loc="lower left")
+
+axs[i].set_xticks([0, 100, 200], [0, 0.25, 0.5], fontsize=fontsize)
+axs[i].set_xlabel("Time [s]", fontsize=fontsize)
+
+
+# Beschriftungen
+#letters = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p"]
+#snr_values = ["No Noise Added", "SNR: 10", "SNR: 3.2", "SNR: 1.0", "SNR: 0.3"]
+#letter_params = {
+#    "fontsize": fontsize,
+#    "verticalalignment": "top",
+#    "bbox": {"edgecolor": "k", "linewidth": 1, "facecolor": "w",}
+#}
+
+#axs[i].text(x=0.0, y=1.0, transform=axs[i].transAxes, s=letters[i], **letter_params)
+#axs[i].text(x=0.5, y=1.03, transform=axs[i].transAxes, s=snr_values[i], fontsize=fontsize + 2, ha="center")
+
+plt.tight_layout()
+plt.savefig("plots/synthetics/seis_wiggle_comparison.png")
+#plt.show()
+'''
