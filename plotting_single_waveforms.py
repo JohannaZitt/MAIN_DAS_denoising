@@ -199,6 +199,7 @@ seis_stats = seis_stream[0].stats
 seis_data = butter_bandpass_filter(seis_data, 1, 120, fs=seis_stats.sampling_rate, order=4)
 seis_data = seis_data/np.std(seis_data)
 seis_data = seis_data[600:1601]
+print(seis_stats)
 # TODO: OBACHT noch nicht in strain rate umgerechnet
 
 print(raw_das_data.shape)

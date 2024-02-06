@@ -81,6 +81,131 @@ for experiment in experiments:
 print("Accumulation: ", values_acc)
 print("Ablation: ", values_abl)
 
+
+
+
+'''
+
+Combined Plot: 6 Legend
+
+
+'''
+
+# Die Daten für die beiden Plots
+categories = ["Ablation\nHorizontal", "Ablation\nVertical", "Accumulation\nHorizontal", "Accumulation\nVertical",
+              "Combined 120", "Combined 480", "Random 480"]
+
+raw_visible_acc = [data['1_raw:visible_denoised:better_visible'] for data in values_acc.values()]
+denoised_successfull_acc = [data['2_raw:not_visible_denoised:visible'] for data in values_acc.values()]
+not_visible_acc = [data['3_raw:not_visible:denoised:not_visible'] for data in values_acc.values()]
+
+raw_visible_abl = [data['1_raw:visible_denoised:better_visible'] for data in values_abl.values()]
+denoised_successfull_abl = [data['2_raw:not_visible_denoised:visible'] for data in values_abl.values()]
+not_visible_abl = [data['3_raw:not_visible:denoised:not_visible'] for data in values_abl.values()]
+
+# Breite der Balken
+col_acc = "#008B93"
+col_abl = "#DF575F"
+fontsize=15
+bar_width = 0.25
+bar_gap = 0.05
+bar_positions_abl = np.arange(len(categories))
+bar_positions_acc = bar_positions_abl + bar_width + bar_gap # Verschiebe die Positionen für Ablation
+
+fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(12, 7), gridspec_kw={
+                           'width_ratios': [1],
+                           'height_ratios': [1, 6]})
+fig.subplots_adjust(hspace=0.05)
+
+''' Erster Oberer Subplot'''
+# Accumulation Data:
+ax1.bar(bar_positions_acc, denoised_successfull_acc, bar_width, label='denoised successfully', color=col_acc, alpha=1)
+ax1.bar(bar_positions_acc, not_visible_acc, bar_width, bottom=np.array(denoised_successfull_acc),
+        label='not visible on raw nor denoised', color=col_acc, alpha=0.5)
+ax1.bar(bar_positions_acc, raw_visible_acc, bar_width,
+        bottom=np.array(denoised_successfull_acc) + np.array(not_visible_acc), label='visible on raw data', color=col_acc,
+        alpha=0.3)
+
+# Ablation Data:
+ax1.bar(bar_positions_abl, denoised_successfull_abl, bar_width, label='denoised successfully', color=col_abl, alpha=1)
+ax1.bar(bar_positions_abl, not_visible_abl, bar_width, bottom=np.array(denoised_successfull_abl),
+        label='not visible on raw nor denoised', color=col_abl, alpha=0.5)
+ax1.bar(bar_positions_abl, raw_visible_abl, bar_width,
+        bottom=np.array(denoised_successfull_abl) + np.array(not_visible_abl), label='visible on raw data', color=col_abl,
+        alpha=0.3)
+
+''' Zweiter Unterer Subplot'''
+# Accumulation Data:
+ax2.bar(bar_positions_acc, denoised_successfull_acc, bar_width, label='denoised successfully', color=col_acc, alpha=1)
+ax2.bar(bar_positions_acc, not_visible_acc, bar_width, bottom=np.array(denoised_successfull_acc),
+        label='not visible on raw nor denoised', color=col_acc, alpha=0.5)
+ax2.bar(bar_positions_acc, raw_visible_acc, bar_width,
+        bottom=np.array(denoised_successfull_acc) + np.array(not_visible_acc), label='visible on raw data', color=col_acc,
+        alpha=0.3)
+
+# Ablation Data
+ax2.bar(bar_positions_abl, denoised_successfull_abl, bar_width, label='denoised successfully', color=col_abl, alpha=1)
+ax2.bar(bar_positions_abl, not_visible_abl, bar_width, bottom=np.array(denoised_successfull_abl),
+        label='not visible on raw nor denoised', color=col_abl, alpha=0.5)
+ax2.bar(bar_positions_abl, raw_visible_abl, bar_width,
+        bottom=np.array(denoised_successfull_abl) + np.array(not_visible_abl), label='visible on raw data', color=col_abl,
+        alpha=0.3)
+
+''' Ticks and Spines:'''
+ax1.set_ylim(114, 121)
+ax1.set_yticks([115, 120], [115, 120], fontsize=fontsize)
+ax1.spines.bottom.set_visible(False)
+ax1.xaxis.set_visible(False)
+
+ax2.set_ylim(0, 37)
+ax2.xaxis.tick_bottom()
+ax2.spines.top.set_visible(False)
+ax2.set_ylabel('# Events', y=0.51, ha = 'left',  fontsize=fontsize +1 )
+
+plt.yticks(fontsize=fontsize)
+plt.xticks(bar_positions_abl + bar_width / 2 + bar_gap / 2, categories, fontsize=fontsize, rotation=15)
+
+
+''' Generate Separation Lines: '''
+d = .5  # proportion of vertical to horizontal extent of the slanted line
+kwargs = dict(marker=[(-1, -d), (1, d)], markersize=12,
+              linestyle="none", color='k', mec='k', mew=1, clip_on=False)
+ax1.plot([0, 1], [0, 0], transform=ax1.transAxes, **kwargs)
+ax2.plot([0, 1], [1, 1], transform=ax2.transAxes, **kwargs)
+
+
+# Custom Legend:
+custom_lines = [mpatches.Patch(facecolor=col_abl, alpha=1, edgecolor='black'),
+                mpatches.Patch(facecolor=col_acc, alpha=1, edgecolor='black'),
+                mpatches.Patch(facecolor="black", alpha=1, edgecolor='black'),
+                mpatches.Patch(facecolor="black", alpha=0.3, edgecolor='black'),
+                mpatches.Patch(facecolor="black", alpha=0.1, edgecolor='black')
+                ]
+
+legend1 = ax1.legend(custom_lines[0:2], ["Ablation                     ", "Accumulation"],
+                    fontsize=fontsize, frameon=False, ncol=2, loc='upper left', bbox_to_anchor=(0.028, 1.5), handlelength=5)
+legend2 = ax1.legend(custom_lines[2:5], ["Denoising Sucssesfull", "Denoising Unsucssesfull", "Visible on Raw", "Visible on Raw"],
+                    fontsize=fontsize, frameon=False, ncol=3, loc='upper left', bbox_to_anchor=(0.028, 1.8))
+
+ax1.add_artist(legend1)
+ax1.add_artist(legend2)
+
+
+#plt.ylabel('# Events', fontsize=fontsize + 1)
+
+
+#ax1.grid(axis="y")
+#ax2.grid(axis="y")
+
+# Den gesamten Plot speichern
+plt.tight_layout()
+#plt.savefig("plots/visual_assesment/combined_plot:6legend.png", bbox_inches="tight", pad_inches = 0.1)
+
+# Den Plot anzeigen
+plt.show()
+
+
+
 '''
 
 Plotting Data - Accumulation
@@ -151,77 +276,6 @@ plt.savefig("plots/visual_assesment/ablation.png")
 #plt.show()
 '''
 
-
-'''
-
-Combined Plot: 6 Legend
-
-
-
-
-# Die Daten für die beiden Plots
-categories = ["Ablation\nHorizontal", "Ablation\nVertical", "Accumulation\nHorizontal", "Accumulation\nVertical",
-              "Combined 120", "Combined 480", "Random 480"]
-
-raw_visible_acc = [data['1_raw:visible_denoised:better_visible'] for data in values_acc.values()]
-denoised_successfull_acc = [data['2_raw:not_visible_denoised:visible'] for data in values_acc.values()]
-not_visible_acc = [data['3_raw:not_visible:denoised:not_visible'] for data in values_acc.values()]
-
-raw_visible_abl = [data['1_raw:visible_denoised:better_visible'] for data in values_abl.values()]
-denoised_successfull_abl = [data['2_raw:not_visible_denoised:visible'] for data in values_abl.values()]
-not_visible_abl = [data['3_raw:not_visible:denoised:not_visible'] for data in values_abl.values()]
-
-# Breite der Balken
-col_acc = "#008B93"
-col_abl = "#DF575F"
-fontsize=12
-bar_width = 0.25
-bar_gap = 0.05
-bar_positions_acc = np.arange(len(categories))
-bar_positions_abl = bar_positions_acc + bar_width + bar_gap # Verschiebe die Positionen für Ablation
-
-# Erster Plot (Accumulation)
-plt.figure(figsize=(10, 6))
-
-plt.bar(bar_positions_acc, denoised_successfull_acc, bar_width, label='denoised successfully', color=col_acc, alpha=1)
-plt.bar(bar_positions_acc, not_visible_acc, bar_width, bottom=np.array(denoised_successfull_acc),
-        label='not visible on raw nor denoised', color=col_acc, alpha=0.5)
-plt.bar(bar_positions_acc, raw_visible_acc, bar_width,
-        bottom=np.array(denoised_successfull_acc) + np.array(not_visible_acc), label='visible on raw data', color=col_acc,
-        alpha=0.3)
-
-# Zweiter Plot (Ablation)
-plt.bar(bar_positions_abl, denoised_successfull_abl, bar_width, label='denoised successfully', color=col_abl, alpha=1)
-plt.bar(bar_positions_abl, not_visible_abl, bar_width, bottom=np.array(denoised_successfull_abl),
-        label='not visible on raw nor denoised', color=col_abl, alpha=0.5)
-plt.bar(bar_positions_abl, raw_visible_abl, bar_width,
-        bottom=np.array(denoised_successfull_abl) + np.array(not_visible_abl), label='visible on raw data', color=col_abl,
-        alpha=0.3)
-
-plt.ylabel('# Events', fontsize=fontsize + 1)
-plt.yticks(fontsize=fontsize)
-plt.xticks(bar_positions_acc + bar_width / 2 + bar_gap / 2, categories, fontsize=fontsize, rotation=15)
-
-
-# Custom Legend:
-custom_lines = [mpatches.Patch(facecolor=col_abl, alpha=1, edgecolor='black'),
-                mpatches.Patch(facecolor=col_acc, alpha=1, edgecolor='black'),
-                mpatches.Patch(facecolor=col_abl, alpha=0.5, edgecolor='black'),
-                mpatches.Patch(facecolor=col_acc, alpha=0.5, edgecolor='black'),
-                mpatches.Patch(facecolor=col_abl, alpha=0.3, edgecolor='black'),
-                mpatches.Patch(facecolor=col_acc, alpha=0.3, edgecolor='black')
-                ]
-
-
-plt.legend(custom_lines, ["Ablation: Denoising Successfull", "Accumulation: Denoising Successfull", "Denoising Unsucssesfull", "Denoising Unsucssesfull", "Visible on Raw", "Visible on Raw"], fontsize=fontsize-1, frameon=False, ncol=3, loc='upper left', bbox_to_anchor=(0.028, 1.15))
-
-# Den gesamten Plot speichern
-plt.tight_layout()
-plt.savefig("plots/visual_assesment/combined_plot:6legend.png", bbox_inches="tight", pad_inches = 0.1)
-
-# Den Plot anzeigen
-# plt.show()
-'''
 
 '''
 
