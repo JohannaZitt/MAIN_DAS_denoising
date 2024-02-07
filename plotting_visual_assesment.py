@@ -104,63 +104,66 @@ denoised_successfull_abl = [data['2_raw:not_visible_denoised:visible'] for data 
 not_visible_abl = [data['3_raw:not_visible:denoised:not_visible'] for data in values_abl.values()]
 
 # Breite der Balken
-col_acc = "#008B93"
-col_abl = "#DF575F"
-fontsize=15
+col_acc1 = "#008B93"
+col_acc2 = "#7FC4C8"
+col_acc3 = "#CCE7E9"
+col_abl1 = "#DF575F"
+col_abl2 = "#EEAAAE"
+col_abl3 = "#F5CCCE"
+zorder = 3
+fontsize=12
 bar_width = 0.25
 bar_gap = 0.05
 bar_positions_abl = np.arange(len(categories))
 bar_positions_acc = bar_positions_abl + bar_width + bar_gap # Verschiebe die Positionen für Ablation
 
-fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(12, 7), gridspec_kw={
+fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(10, 6), gridspec_kw={
                            'width_ratios': [1],
                            'height_ratios': [1, 6]})
 fig.subplots_adjust(hspace=0.05)
 
 ''' Erster Oberer Subplot'''
 # Accumulation Data:
-ax1.bar(bar_positions_acc, denoised_successfull_acc, bar_width, label='denoised successfully', color=col_acc, alpha=1)
+ax1.bar(bar_positions_acc, denoised_successfull_acc, bar_width, label='denoised successfully', color=col_acc1, zorder=zorder)
 ax1.bar(bar_positions_acc, not_visible_acc, bar_width, bottom=np.array(denoised_successfull_acc),
-        label='not visible on raw nor denoised', color=col_acc, alpha=0.5)
+        label='not visible on raw nor denoised', color=col_acc2, zorder=zorder)
 ax1.bar(bar_positions_acc, raw_visible_acc, bar_width,
-        bottom=np.array(denoised_successfull_acc) + np.array(not_visible_acc), label='visible on raw data', color=col_acc,
-        alpha=0.3)
+        bottom=np.array(denoised_successfull_acc) + np.array(not_visible_acc), label='visible on raw data', color=col_acc3, zorder=zorder)
 
 # Ablation Data:
-ax1.bar(bar_positions_abl, denoised_successfull_abl, bar_width, label='denoised successfully', color=col_abl, alpha=1)
+ax1.bar(bar_positions_abl, denoised_successfull_abl, bar_width, label='denoised successfully', color=col_abl1, zorder=zorder)
 ax1.bar(bar_positions_abl, not_visible_abl, bar_width, bottom=np.array(denoised_successfull_abl),
-        label='not visible on raw nor denoised', color=col_abl, alpha=0.5)
+        label='not visible on raw nor denoised', color=col_abl2, zorder=zorder)
 ax1.bar(bar_positions_abl, raw_visible_abl, bar_width,
-        bottom=np.array(denoised_successfull_abl) + np.array(not_visible_abl), label='visible on raw data', color=col_abl,
-        alpha=0.3)
+        bottom=np.array(denoised_successfull_abl) + np.array(not_visible_abl), label='visible on raw data', color=col_abl3, zorder=zorder)
 
 ''' Zweiter Unterer Subplot'''
 # Accumulation Data:
-ax2.bar(bar_positions_acc, denoised_successfull_acc, bar_width, label='denoised successfully', color=col_acc, alpha=1)
+ax2.bar(bar_positions_acc, denoised_successfull_acc, bar_width, label='denoised successfully', color=col_acc1, zorder=zorder)
 ax2.bar(bar_positions_acc, not_visible_acc, bar_width, bottom=np.array(denoised_successfull_acc),
-        label='not visible on raw nor denoised', color=col_acc, alpha=0.5)
+        label='not visible on raw nor denoised', color=col_acc2, zorder=zorder)
 ax2.bar(bar_positions_acc, raw_visible_acc, bar_width,
-        bottom=np.array(denoised_successfull_acc) + np.array(not_visible_acc), label='visible on raw data', color=col_acc,
-        alpha=0.3)
+        bottom=np.array(denoised_successfull_acc) + np.array(not_visible_acc), label='visible on raw data', color=col_acc3, zorder=zorder)
 
 # Ablation Data
-ax2.bar(bar_positions_abl, denoised_successfull_abl, bar_width, label='denoised successfully', color=col_abl, alpha=1)
+ax2.bar(bar_positions_abl, denoised_successfull_abl, bar_width, label='denoised successfully', color=col_abl1, zorder=zorder)
 ax2.bar(bar_positions_abl, not_visible_abl, bar_width, bottom=np.array(denoised_successfull_abl),
-        label='not visible on raw nor denoised', color=col_abl, alpha=0.5)
+        label='not visible on raw nor denoised', color=col_abl2, zorder=zorder)
 ax2.bar(bar_positions_abl, raw_visible_abl, bar_width,
-        bottom=np.array(denoised_successfull_abl) + np.array(not_visible_abl), label='visible on raw data', color=col_abl,
-        alpha=0.3)
+        bottom=np.array(denoised_successfull_abl) + np.array(not_visible_abl), label='visible on raw data', color=col_abl3, zorder=zorder)
 
 ''' Ticks and Spines:'''
-ax1.set_ylim(114, 121)
+ax1.set_ylim(113, 121)
 ax1.set_yticks([115, 120], [115, 120], fontsize=fontsize)
 ax1.spines.bottom.set_visible(False)
 ax1.xaxis.set_visible(False)
+ax1.grid(axis="y", zorder=0)
 
 ax2.set_ylim(0, 37)
 ax2.xaxis.tick_bottom()
 ax2.spines.top.set_visible(False)
-ax2.set_ylabel('# Events', y=0.51, ha = 'left',  fontsize=fontsize +1 )
+ax2.set_ylabel('# Events', y=0.51, ha = 'left',  fontsize=fontsize)
+ax2.grid(axis="y", zorder=0)
 
 plt.yticks(fontsize=fontsize)
 plt.xticks(bar_positions_abl + bar_width / 2 + bar_gap / 2, categories, fontsize=fontsize, rotation=15)
@@ -175,8 +178,8 @@ ax2.plot([0, 1], [1, 1], transform=ax2.transAxes, **kwargs)
 
 
 # Custom Legend:
-custom_lines = [mpatches.Patch(facecolor=col_abl, alpha=1, edgecolor='black'),
-                mpatches.Patch(facecolor=col_acc, alpha=1, edgecolor='black'),
+custom_lines = [mpatches.Patch(facecolor=col_abl1, alpha=1, edgecolor='black'),
+                mpatches.Patch(facecolor=col_acc1, alpha=1, edgecolor='black'),
                 mpatches.Patch(facecolor="black", alpha=1, edgecolor='black'),
                 mpatches.Patch(facecolor="black", alpha=0.3, edgecolor='black'),
                 mpatches.Patch(facecolor="black", alpha=0.1, edgecolor='black')
@@ -190,19 +193,11 @@ legend2 = ax1.legend(custom_lines[2:5], ["Denoising Sucssesfull", "Denoising Uns
 ax1.add_artist(legend1)
 ax1.add_artist(legend2)
 
-
-#plt.ylabel('# Events', fontsize=fontsize + 1)
-
-
-#ax1.grid(axis="y")
-#ax2.grid(axis="y")
-
-# Den gesamten Plot speichern
 plt.tight_layout()
-#plt.savefig("plots/visual_assesment/combined_plot:6legend.png", bbox_inches="tight", pad_inches = 0.1)
 
-# Den Plot anzeigen
+# Den Plot anzeigen oder speichern
 plt.show()
+#plt.savefig("plots/visual_assesment/combined_plot:6legend.png", bbox_inches="tight", pad_inches = 0.1)
 
 
 

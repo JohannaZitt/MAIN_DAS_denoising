@@ -21,15 +21,31 @@ def plot_das_data(data):
     i = 0
     plt.figure(figsize=(10, 8))
     for ch in range(channels):
-        plt.plot(data[ch][:] + 12 * i, '-k', alpha=alpha)
+        plt.plot(data[ch][:] + 15 * i, '-k', alpha=alpha)
         i += 1
+
     plt.show()
+
+
+'''
+Estemate Velocity of waveform
+
+'''
+
+data_path = "data/synthetic_DAS/from_DAS/cleanDAS_ID:34_SNR:0.npy"
+data = np.load(os.path.join(data_path))
+data = data[47:55,1080:1115]
+
+print(data.shape)
+plot_das_data(data)
+
+
 
 '''
 
 Single Waveform Comparison - Seis
 
-'''
+
 
 event_id = 46 # 37, 46, 48, 96
 SNR_values = [0.0, 0.3, 1.0, 3.2, 10.0] # 0.0, 0.3, 1.0, 3.2, 10.0, 31.6, 100.0
@@ -105,10 +121,10 @@ for i, event_name in enumerate(event_names):
     axs[i].text(x=0.5, y=1.03, transform=axs[i].transAxes, s=snr_values[i], fontsize=fontsize + 2, ha="center")
 
 plt.tight_layout()
-plt.savefig("plots/synthetics/seis_wiggle_comparison.png")
-#plt.show()
+#plt.savefig("plots/synthetics/seis_wiggle_comparison.png")
+plt.show()
 
-
+'''
 
 '''
 
@@ -543,7 +559,7 @@ for event_name in event_names:
 
 t_start = 800
 t_end = 1500
-ch_start = 18
+ch_start = 20
 ch_end = 62
 alpha = 0.8
 fontsize = 14
@@ -580,7 +596,7 @@ for i, event_name in enumerate(event_names):
     axs[i, 1].set_yticks([])
     axs[i, 2].set_yticks([])
     axs[i, 0].set_ylabel("Offset [m]", fontsize=fontsize)
-    axs[i, 0].set_yticks(range(0, 501, 100), range(0, 9*12*5+1, 9*12), fontsize=fontsize)
+    axs[i, 0].set_yticks(range(0, 501, 100), range(0, 8*12*5+1, 8*12), fontsize=fontsize)
 
     # x-Achsen:
     for j in range(3):
@@ -592,21 +608,39 @@ for i, event_name in enumerate(event_names):
 
 
 # Beschriftung Plot
-axs[0, 0].text(30, 470, "No Noise Added", bbox=dict(facecolor='white'), fontsize=fontsize)
-axs[1, 0].text(30, 470, "SNR: 10.0", bbox=dict(facecolor='white'), fontsize=fontsize)
-axs[2, 0].text(30, 470, "SNR: 3.2", bbox=dict(facecolor='white'), fontsize=fontsize)
-axs[3, 0].text(30, 470, "SNR: 1.0", bbox=dict(facecolor='white'), fontsize=fontsize)
+x = 30
+y = 498
+axs[0, 0].text(x, y, "No Noise Added", bbox=dict(facecolor='white'), fontsize=fontsize)
+axs[1, 0].text(x, y, "SNR: 10.0", bbox=dict(facecolor='white'), fontsize=fontsize)
+axs[2, 0].text(x, y, "SNR: 3.2", bbox=dict(facecolor='white'), fontsize=fontsize)
+axs[3, 0].text(x, y, "SNR: 1.0", bbox=dict(facecolor='white'), fontsize=fontsize)
 
 axs[0, 0].text(40, 560, "Synthetic Corrupted Data", fontsize=fontsize)
 axs[0, 1].text(60, 560, "Denoised with " + experiment1[3:].capitalize(), fontsize=fontsize)
 axs[0, 2].text(60, 560, "Denoised with " + experiment2[3:].capitalize(), fontsize=fontsize)
 
+# Beschriftungen
+letters = ["a", "b", "c", "d", "e", "f", "g", "h", "j", "k", "l", "m", "n", "o", "p"]
+letter_params = {
+    "fontsize": fontsize,
+    "verticalalignment": "top",
+    "bbox": {"edgecolor": "k", "linewidth": 1, "facecolor": "w",}
+}
+
+for i in range(4):
+    for j in range(3):
+        axs[i, j].text(x=0.0, y=1.0, transform=axs[i, j].transAxes, s=letters[i*3+j], **letter_params)
+
 
 
 plt.tight_layout()
-plt.savefig("plots/synthetics/DAS_synthetic_denoised1_denoised2.png")
-#plt.show()
+#plt.savefig("plots/synthetics/DAS_synthetic_denoised1_denoised2.png")
+plt.show()
 
 '''
+
+
+
+
 
 

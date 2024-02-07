@@ -127,8 +127,8 @@ for datatype in datatypes:
 
     plt.figure(figsize=(10, 6))
     plt.grid(axis='y', zorder = 0)
-    plt.bar(x - 0.5 * width, acc_cc_gain, width=width, label='Accumulation', color = col_acc, zorder = 3)
-    plt.bar(x + 0.5 * width, abl_cc_gain, width=width, label='Ablation', color = col_abl, zorder = 3)
+    plt.bar(x - 0.5 * width, abl_cc_gain, width=width, label='Ablation', color=col_abl, zorder=3)
+    plt.bar(x + 0.5 * width, acc_cc_gain, width=width, label='Accumulation', color = col_acc, zorder = 3)
 
     plt.axhline(y=1, color = "blue", zorder=4)
     # Achsenbeschriftungen und Titel hinzufügen
@@ -138,7 +138,7 @@ for datatype in datatypes:
     plt.legend(fontsize=fontsize, frameon = False, ncol = 2)
 
     # Diagramm anzeigen
-    # plt.show()
+    #plt.show()
     plt.savefig("plots/cc/" + datatype + ".png")
 
 

@@ -71,14 +71,14 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=4):
     y = lfilter(b, a, data)
     return y
 
-def compute_shift(gauge = 10, slowness_max = True, fs = 400):
+def compute_shift(gauge = 8, slowness_max = True, fs = 400): # gauge is here channel spacing!
     if slowness_max:
         slowness = 1 / 1650 # S-wave slowness
     else:
         slowness = 1 / 3900 # P-wave slowness
 
     shift = gauge * slowness * fs
-    return int(shift)
+    return round(shift)
 
 
 fs = 400
