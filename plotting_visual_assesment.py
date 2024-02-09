@@ -111,7 +111,7 @@ col_abl1 = "#DF575F"
 col_abl2 = "#EEAAAE"
 col_abl3 = "#F5CCCE"
 zorder = 3
-fontsize=12
+fontsize=13
 bar_width = 0.25
 bar_gap = 0.05
 bar_positions_abl = np.arange(len(categories))
@@ -176,28 +176,11 @@ kwargs = dict(marker=[(-1, -d), (1, d)], markersize=12,
 ax1.plot([0, 1], [0, 0], transform=ax1.transAxes, **kwargs)
 ax2.plot([0, 1], [1, 1], transform=ax2.transAxes, **kwargs)
 
-
-# Custom Legend:
-custom_lines = [mpatches.Patch(facecolor=col_abl1, alpha=1, edgecolor='black'),
-                mpatches.Patch(facecolor=col_acc1, alpha=1, edgecolor='black'),
-                mpatches.Patch(facecolor="black", alpha=1, edgecolor='black'),
-                mpatches.Patch(facecolor="black", alpha=0.3, edgecolor='black'),
-                mpatches.Patch(facecolor="black", alpha=0.1, edgecolor='black')
-                ]
-
-legend1 = ax1.legend(custom_lines[0:2], ["Ablation                     ", "Accumulation"],
-                    fontsize=fontsize, frameon=False, ncol=2, loc='upper left', bbox_to_anchor=(0.028, 1.5), handlelength=5)
-legend2 = ax1.legend(custom_lines[2:5], ["Denoising Sucssesfull", "Denoising Unsucssesfull", "Visible on Raw", "Visible on Raw"],
-                    fontsize=fontsize, frameon=False, ncol=3, loc='upper left', bbox_to_anchor=(0.028, 1.8))
-
-ax1.add_artist(legend1)
-ax1.add_artist(legend2)
-
 plt.tight_layout()
 
 # Den Plot anzeigen oder speichern
-plt.show()
-#plt.savefig("plots/visual_assesment/combined_plot:6legend.png", bbox_inches="tight", pad_inches = 0.1)
+#plt.show()
+plt.savefig("plots/visual_assesment/combined_plot_brocken_axis.pdf", bbox_inches="tight", pad_inches = 0.1)
 
 
 
