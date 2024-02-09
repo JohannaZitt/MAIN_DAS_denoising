@@ -50,7 +50,7 @@ Proprocessing:
 
 """
 
-folders = ['03_accumulation_horizontal', '04_accumulation_vertical']
+folders = ['10_random_borehole']
 #folders = ['01_ablation_horizontal']
 #folders = ['01_ablation_horizontal', '02_ablation_vertical', '03_accumulation_vertical', '04_accumulation_horizontal', '07_combined120', '09_random480']
 #
@@ -61,6 +61,8 @@ for folder in folders:
     n_trc = len(stream)
     n_t = stream[0].stats.npts
 
+    print(stream[0].data.shape)
+
     # downsample data to 400 Hz and convert to np array:
     fs_old = stream[0].stats.sampling_rate
     fs = 400
@@ -70,6 +72,8 @@ for folder in folders:
         data: ndarray = np.zeros((n_trc, n_t))
         for i in range(n_trc):
             data[i] = stream[i].data[0:n_t]
+
+    print(data.shape)
 
     # parameters for calculating strain rate:
     gauge_length: int = 10 # in m
