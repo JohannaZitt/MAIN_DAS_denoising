@@ -50,8 +50,10 @@ Proprocessing:
 
 """
 
-folders = ['01_ablation_horizontal', '02_ablation_vertical', '03_accumulation_vertical', '04_accumulation_horizontal', '07_combined120', '09_random480']
+folders = ['03_accumulation_horizontal', '04_accumulation_vertical']
 #folders = ['01_ablation_horizontal']
+#folders = ['01_ablation_horizontal', '02_ablation_vertical', '03_accumulation_vertical', '04_accumulation_horizontal', '07_combined120', '09_random480']
+#
 for folder in folders:
 
     # Reading Data
@@ -102,7 +104,7 @@ for folder in folders:
         os.makedirs(savedir)
     np.save(savedir + folder, data)
 
-''' '''
+''' 
 # Compute combined800 training data set:
 loaded_arrays = []
 for i in range(4):
@@ -112,7 +114,7 @@ for i in range(4):
 combined_array = np.vstack(loaded_arrays)
 savedir = 'data/training_data/preprocessed_seismometer/'
 np.save(savedir + '08_combined480', combined_array)
-
+'''
 
 '''
 # Plotting the training_data waveforms
