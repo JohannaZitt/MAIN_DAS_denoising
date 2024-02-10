@@ -228,8 +228,8 @@ for experiment in experiments: # for every experiment
                 cc_gain_seis = np.array(denoised_cc_seis_total) / np.array(raw_cc_seis_total)
 
                 # Save values:
-                #writer.writerow(
-                #    [id, cc_gain.mean(), cc_gain_seis.mean(), zone, experiment])
+                writer.writerow(
+                    [id, cc_gain.mean(), cc_gain_seis.mean(), zone, experiment])
 
 
 

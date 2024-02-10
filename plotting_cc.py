@@ -43,6 +43,7 @@ for experiment in experiments:
     values_accumulation_cc_gain[experiment[3:]] = np.mean(accumulation_cc_gain)
     values_accumulation_cc_gain_seis[experiment[3:]] = np.mean(accumulation_cc_gain_seis)
 
+print(values_ablation_cc_gain)
 
 '''
 
@@ -107,7 +108,7 @@ for datatype in datatypes:
 
     # Data:
     labels = ["Ablation\nHorizontal", "Ablation\nVertical", "Accumulation\nHorizontal", "Accumulation\nVertical"
-              , "Combined 120", "Combined 480", "Random 480"]
+              , "Combined 120", "Combined 480", "Random 480", "Random\nBorehole 480"]
 
     if datatype == "local":
         acc_cc_gain = list(values_accumulation_cc_gain.values())
@@ -138,8 +139,8 @@ for datatype in datatypes:
     plt.legend(fontsize=fontsize, frameon = False, ncol = 2)
 
     # Diagramm anzeigen
-    #plt.show()
-    plt.savefig("plots/cc/" + datatype + ".png")
+    plt.show()
+    #plt.savefig("plots/cc/" + datatype + ".png")
 
 
 
