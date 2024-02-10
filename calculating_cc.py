@@ -125,7 +125,8 @@ def compute_moving_coherence(data, bin_size):
     return cc
 
 
-experiments = os.listdir('experiments/')
+#experiments = os.listdir('experiments/')
+experiments = ["03_accumulation_horizontal", "04_accumulation_vertical", "10_random_borehole"]
 data_types = ['accumulation/0706_AJP', 'ablation/0706_RA88']
 
 for experiment in experiments: # for every experiment
