@@ -168,7 +168,7 @@ def plot_data(raw_data, denoised_data, seis_data, seis_stats, data_type, saving_
 
 
 #experiments = os.listdir('experiments/')
-experiments = ['08_combined480', '09_random480']
+experiments = ['03_accumulation_horizontal', "04_accumulation_vertical", "10_random_borehole"]
 data_types = ['accumulation/0706_AJP', 'ablation/0706_RA88']
 
 for experiment in experiments: # for every experiment
@@ -177,7 +177,7 @@ for experiment in experiments: # for every experiment
 
         seis_data_path = 'data/seismometer_test_data/' + data_type
         seismometer_events = os.listdir(seis_data_path)
-        seismometer_events = seismometer_events[1:2]
+        #seismometer_events = seismometer_events[1:2]
 
 
         # for every seismometer event
@@ -219,8 +219,8 @@ for experiment in experiments: # for every experiment
             if not os.path.isdir(saving_path):
                 os.makedirs(saving_path)
 
-            #saving_path += '/' + seismometer_event  # when the plot should be depicted, set saving_path = None
-            saving_path = None
+            saving_path += '/' + seismometer_event  # when the plot should be depicted, set saving_path = None
+            #saving_path = None
 
             # Plotting Data
             id = re.search(r'ID:(\d+)_', seismometer_event).group(1)
