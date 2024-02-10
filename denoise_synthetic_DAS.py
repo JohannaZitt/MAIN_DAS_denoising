@@ -86,7 +86,8 @@ def deal_with_artifacts(data, filler = 0, Nt=1024):
     return data
 
 
-model_names = os.listdir('experiments')
+#model_names = os.listdir('experiments')
+model_names = ["03_accumulation_horizontal", "04_accumulation_vertical", "10_random_borehole"]
 
 data_path = 'data/synthetic_DAS/from_DAS/'
 data_files = os.listdir(data_path)
@@ -94,7 +95,7 @@ data_files = os.listdir(data_path)
 for model_name in model_names:
 
     # 1. Load model
-    model = keras.models.load_model('experiments/' + model_name + '/' + model_name + '.h5')
+    model = keras.models.load_model("experiments/" + model_name + '/' + model_name + '.h5')
 
     for data_file in data_files:
 

@@ -28,5 +28,6 @@ experiments/09_random480/denoisedDAS
 experiments/09_random480/denoised_synthetic_DAS
 experiments/09_random480/plots
 experiments/10_random_borehole/denoisedDAS
+experiments/10_random_borehole/denoised_synthetic_DAS
 
 
