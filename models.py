@@ -9,6 +9,7 @@ from tensorflow.keras.layers import Activation
 from tensorflow.keras.layers import GaussianDropout
 from tensorflow.keras.optimizers import Adam
 from scipy.signal import butter, filtfilt, tukey
+import math
 
 
 '''
@@ -120,7 +121,7 @@ class DataGenerator(keras.utils.Sequence):
         s_min = 1 / 3900.
         s_max = 1 / 1650.
 
-        gauge = 10.
+        gauge = 12. # gauge is channel spacing
         fs = 400.
 
         log_SNR_min = -2 #-2
@@ -175,6 +176,144 @@ class DataGenerator(keras.utils.Sequence):
         self.masked_samples = noisy_samples * (1 - masks)
         pass
 
+
+class DataGeneratorSeismometer(keras.utils.Sequence):
+
+    def __init__(self, X, Nt=2048, N_sub=10, batch_size=32, batch_multiplier=10):
+        # Data matrix
+        self.X = X
+        # Number of Trainingsamples
+        self.Nx = X.shape[0]
+        # Number of time sampling points in data
+        self.Nt_all = X.shape[1]
+        # Number of time sampling points in a slice
+        self.Nt = Nt
+        # Number of stations per batch sample
+        self.N_sub = N_sub
+        # Batch size
+        self.batch_size = batch_size
+        self.batch_multiplier = batch_multiplier
+
+        self.on_epoch_end()
+        self.compute_moveout()
+
+    def __len__(self):
+        """ Number of mini-batches per epoch """
+        return int(self.batch_multiplier * self.Nx * self.Nt_all / float(self.batch_size * self.Nt))
+
+    def on_epoch_end(self):
+        """ Modify data """
+        self.__data_generation()
+        pass
+
+    def __getitem__(self, idx):
+        """ Select a mini-batch """
+        batch_size = self.batch_size
+        selection = slice(idx * batch_size, (idx + 1) * batch_size)
+        samples = np.expand_dims(self.samples[selection], -1)
+        masked_samples = np.expand_dims(self.masked_samples[selection], -1)
+        masks = np.expand_dims(self.masks[selection], -1)
+        return (samples, masks), masked_samples
+
+    def compute_moveout(fs):
+        receiver_names = ["RA81", "RA82", "RA83", "RA84", "RA85", "RA86", "RA87", "RA88"]
+        receiver_positions = [[672254, 161419, 2514], [672438, 161365, 2497], [672412, 161139, 2475],
+                              [672279, 161057, 2463],
+                              [672113, 161145, 2480], [672103, 161365, 2510], [672262, 161252, 2488],
+                              [672250, 161572, 2537]]
+        initial_source_location = [672000, 160950, 2450]
+
+        # choose source location randomly on grid space. synthetic locations are 50 m apart:
+        x = [50 * rng.randint(0, 11), 50 * rng.randint(0, 14), - 50 * rng.randint(0, 4)]
+
+        src_loc = np.array(initial_source_location) + np.array(x)
+
+        # compute distance from source to receiver position:
+        distances = []
+        for receiver_position in receiver_positions:
+            distance = math.sqrt((receiver_position[0]-src_loc[0]) ** 2 + (receiver_position[1]-src_loc[1]) ** 2 + (receiver_position[1]-src_loc[1]) ** 2)
+            distances.append(distance)
+
+        # choose velocity randomly
+        vel_max = 3900.
+        vel_min = 1650.
+        velocity = rng.randint(1650, 3900)
+        slowness = 1 / velocity
+
+        shifts = []
+        for distance in distances:
+            shift = distance * slowness * fs
+            shifts.append(int(shift))
+
+        return shifts
+
+    def __data_generation(self):
+        """ Generate a total batch """
+        # Number of mini-batches
+        N_batch = self.__len__()
+        N_total = N_batch * self.batch_size
+        Nt = self.Nt
+        N_sub = self.N_sub
+        Nt_all = self.Nt_all
+        # Buffer for mini-batches
+        samples = np.zeros((N_total, N_sub, Nt))
+        # Buffer for masks
+        masks = np.ones_like(samples)
+
+        t_starts = rng.integers(low=1, high=Nt_all-Nt, size=N_total)
+        X = self.X
+
+        log_SNR_min = -2 #-2
+        log_SNR_max = 4 # 4
+
+        fs = 400
+
+        # Loop over samples
+        for s, t_start in enumerate(t_starts):
+            sample_ind = rng.integers(low=0, high=self.Nx)
+            t_slice = slice(t_start, t_start + Nt)
+
+            # Time reversal
+            order = rng.integers(low=0, high=2) * 2 - 1
+            # Polarity flip
+            sign = rng.integers(low=0, high=2) * 2 - 1
+
+            # 1. time reversal and polarity flip is performed.
+            sample = sign * X[sample_ind, ::order] # without timereversals: sample = sign * X[sample_ind, :]
+            # (die channel spacing length ist aufm Rhonegletscher 4m hier werden Entfernungen je nach Wellentyp zwischen 4m und 60m angenommen)
+
+            SNR = rng.random() * (log_SNR_max - log_SNR_min) + log_SNR_min # generiert Zahlen im Bereich [log_SNR_min, log_SNR_max] log_SNR_min and log_SNR_max in decibel scale
+            SNR = 10 ** (0.5 * SNR) # rechnen hier SNR von dezibel Skala in Verhältnis von zwei Amplituden/Wellendrücken um
+            amp = 2 * SNR / np.abs(sample).max() # amp steht für amplitude, waveforms are rescaled such that the maximum amplitude of the signal is 2 * SNR^0.5.
+            sample = sample * amp
+
+            shifts = self.compute_moveout(fs=fs)
+            print("MOVEOUT:", shifts)
+
+            # 2. waveform is duplicated and shifted
+            for i in range(N_sub):
+                samples[s, i] = np.roll(sample, shifts[i])[t_slice]
+
+            # Select one waveform to blank
+            blank_ind = rng.integers(low=0, high=self.N_sub)
+            masks[s, blank_ind] = 0
+
+        # 3. generate noise and add to waveform
+        gutter = 100
+        noise = rng.standard_normal((N_total * N_sub, Nt + 2 * gutter))
+        noise = taper_filter(noise, fmin=1.0, fmax=120.0, samp_DAS=fs)[:, gutter:-gutter]
+        noise = noise.reshape(*samples.shape)
+        noisy_samples = samples + noise
+
+        # normalize data with maximum.
+        for s, sample in enumerate(noisy_samples):
+            noisy_samples[s] = sample / sample.std()
+            #noisy_samples[s] = sample / np.abs(sample).max()
+
+        self.samples = noisy_samples
+        self.masks = masks
+        self.masked_samples = noisy_samples * (1 - masks)
+        pass
 
 class DataGeneratorDAS(keras.utils.Sequence):
 
