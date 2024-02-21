@@ -195,7 +195,7 @@ class DataGeneratorSeismometer(keras.utils.Sequence):
         self.batch_multiplier = batch_multiplier
 
         self.on_epoch_end()
-        self.compute_moveout()
+        self.compute_moveout(400)
 
     def __len__(self):
         """ Number of mini-batches per epoch """
@@ -215,7 +215,7 @@ class DataGeneratorSeismometer(keras.utils.Sequence):
         masks = np.expand_dims(self.masks[selection], -1)
         return (samples, masks), masked_samples
 
-    def compute_moveout(fs):
+    def compute_moveout(self, fs):
         receiver_names = ["RA81", "RA82", "RA83", "RA84", "RA85", "RA86", "RA87", "RA88"]
         receiver_positions = [[672254, 161419, 2514], [672438, 161365, 2497], [672412, 161139, 2475],
                               [672279, 161057, 2463],
@@ -224,7 +224,8 @@ class DataGeneratorSeismometer(keras.utils.Sequence):
         initial_source_location = [672000, 160950, 2450]
 
         # choose source location randomly on grid space. synthetic locations are 50 m apart:
-        x = [50 * rng.randint(0, 11), 50 * rng.randint(0, 14), - 50 * rng.randint(0, 4)]
+        # rng.integers(low, high) zieht zahlen n für die gilt low<=n<high
+        x = [50 * rng.integers(0, 12), 50 * rng.integers(0, 15), - 50 * rng.integers(0, 5)]
 
         src_loc = np.array(initial_source_location) + np.array(x)
 
@@ -235,9 +236,7 @@ class DataGeneratorSeismometer(keras.utils.Sequence):
             distances.append(distance)
 
         # choose velocity randomly
-        vel_max = 3900.
-        vel_min = 1650.
-        velocity = rng.randint(1650, 3900)
+        velocity = rng.integers(1650, 3901)
         slowness = 1 / velocity
 
         shifts = []
@@ -286,9 +285,7 @@ class DataGeneratorSeismometer(keras.utils.Sequence):
             SNR = 10 ** (0.5 * SNR) # rechnen hier SNR von dezibel Skala in Verhältnis von zwei Amplituden/Wellendrücken um
             amp = 2 * SNR / np.abs(sample).max() # amp steht für amplitude, waveforms are rescaled such that the maximum amplitude of the signal is 2 * SNR^0.5.
             sample = sample * amp
-
             shifts = self.compute_moveout(fs=fs)
-            print("MOVEOUT:", shifts)
 
             # 2. waveform is duplicated and shifted
             for i in range(N_sub):

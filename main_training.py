@@ -3,7 +3,7 @@ import time
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import numpy as np
-from models import UNet, CallBacks, DataGenerator
+from models import UNet, CallBacks, DataGenerator, DataGeneratorSeismometer
 from datetime import date, timedelta
 from models import seed
 import random as python_random
@@ -22,10 +22,10 @@ rng = np.random.default_rng(seed)
 tf.config.threading.set_inter_op_parallelism_threads(4)
 
 """ Parameters """
-N_sub = 11
+N_sub = 8
 batch_size = 32
 Nt = 1024
-N_epoch = 2000
+N_epoch = 200
 batch_multiplier = 5 # set to 15 for 120 training samples (105*32 = 3360), set to 5 for 480 training samples (32*140 = 4480 samples per epoch)
 model_params = {
     'use_bn': False, # batch normalization
@@ -39,7 +39,7 @@ model_params = {
     'AA': True # anti aliasing
 }
 
-different_training_data = ['10_random_borehole']
+different_training_data = ['11_seismometer_denoising_with_borehole480']
 
 for training_data in different_training_data:
 
@@ -80,14 +80,15 @@ for training_data in different_training_data:
     test_data = data[split:]
 
     print("Preparing masks")
-    train_generator = DataGenerator(X=train_data, Nt=Nt, N_sub=N_sub, batch_size=batch_size, batch_multiplier=batch_multiplier)
-    test_generator = DataGenerator(X=test_data, Nt=Nt, N_sub=N_sub, batch_size=batch_size, batch_multiplier=batch_multiplier)
+    train_generator = DataGeneratorSeismometer(X=train_data, Nt=Nt, N_sub=N_sub, batch_size=batch_size, batch_multiplier=batch_multiplier)
+    test_generator = DataGeneratorSeismometer(X=test_data, Nt=Nt, N_sub=N_sub, batch_size=batch_size, batch_multiplier=batch_multiplier)
     print("Done")
 
 
    
     for i in range(10):
-        plt.plot(train_generator.samples[i][5])
+        for j in range(8):
+            plt.plot(train_generator.samples[i][j] + 12*j, color="black", alpha=0.5)
         plt.show()
 
 

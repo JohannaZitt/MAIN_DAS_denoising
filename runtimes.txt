@@ -32,3 +32,4 @@ Runtimes of experiments (neu):
 03_accumulation_horizontal: 2 Stunden, 58 Minuten und 02.319566 Sekunden
 04_accumulation_vertical: 2 Stunden, 57 Minuten und 41.449170 Sekunden
 10_random_borehole: 3 Stunden, 56 Minuten und 05.114682 Sekunden
+11_seismometer_denoising_with_borehole480: 0 Stunden, 17 Minuten und 49.200306 Sekunden
