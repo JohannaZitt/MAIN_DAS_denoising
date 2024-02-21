@@ -1,10 +1,7 @@
 import os
 import time
-
 import matplotlib.pyplot as plt
 import tensorflow as tf
-
-import shutil
 import numpy as np
 from models import UNet, CallBacks, DataGenerator
 from datetime import date, timedelta
