@@ -51,16 +51,14 @@ Proprocessing:
 """
 
 
-folders = ['09_borehole_seismometer']
+folders = ["01_ablation_horizontal", "02_ablation_vertical", "03_accumulation_horizontal", "04_accumulation_vertical", "09_borehole_seismometer"]
 
 for folder in folders:
 
     # Reading Data
-    stream = read('data/training_data/raw_seismometer_trainingdata/' + folder + '/ID*.mseed')
+    stream = read("data/training_data/raw_seismometer_trainingdata/" + folder + "/ID*.mseed")
     n_trc = len(stream)
     n_t = stream[0].stats.npts
-
-    print(stream[0].data.shape)
 
     # downsample data to 400 Hz and convert to np array:
     fs_old = stream[0].stats.sampling_rate
@@ -71,8 +69,6 @@ for folder in folders:
         data: ndarray = np.zeros((n_trc, n_t))
         for i in range(n_trc):
             data[i] = stream[i].data[0:n_t]
-
-    print(data.shape)
 
     # parameters for calculating strain rate:
     gauge_length: int = 10 # in m
@@ -98,22 +94,33 @@ for folder in folders:
     #    plt.plot(data[i])
     #    plt.show()
 
-    savedir = 'data/training_data/preprocessed_seismometer/'
+    savedir = "data/training_data/preprocessed_seismometer/"
     if not os.path.isdir(savedir):
         os.makedirs(savedir)
     np.save(savedir + folder, data)
 
-''' 
-# Compute combined800 training data set:
-loaded_arrays = []
+
+
+# Compute combined400.npy
+arrays200 = []
 for i in range(4):
-    print(folders[i])
-    loaded_array = np.load('data/training_data/preprocessed_seismometer/' + folders[i] + '.npy')
-    loaded_arrays.append(loaded_array)
-combined_array = np.vstack(loaded_arrays)
-savedir = 'data/training_data/preprocessed_seismometer/'
-np.save(savedir + '08_combined480', combined_array)
-'''
+    array200 = np.load("data/training_data/preprocessed_seismometer/" + folders[i] + ".npy")
+    array200 = array200[0:50]
+    arrays200.append(array200)
+combined_array200 = np.vstack(arrays200)
+savedir = "data/training_data/preprocessed_seismometer/"
+np.save(savedir + "05_combined200", combined_array200)
+
+# Compute combined800.npy
+arrays = []
+for i in range(4):
+    array = np.load("data/training_data/preprocessed_seismometer/" + folders[i] + ".npy")
+    arrays.append(array)
+combined_array = np.vstack(arrays)
+savedir = "data/training_data/preprocessed_seismometer/"
+np.save(savedir + "06_combined800", combined_array)
+
+
 
 '''
 # Plotting the training_data waveforms
