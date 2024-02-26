@@ -50,7 +50,7 @@ model 9: 36, 58, 112, 116
 
 
 
-experiments = os.listdir("experiments")
+experiments = os.listdir("old/experiments")
 experiments.sort()
 values_acc = {}
 values_abl = {}
@@ -58,8 +58,8 @@ values_abl = {}
 
 for experiment in experiments:
 
-    ablation_path = os.path.join("experiments", experiment, "plots", "ablation", "0706_RA88")
-    accumulation_path = os.path.join("experiments", experiment, "plots", "accumulation", "0706_AJP")
+    ablation_path = os.path.join("old/experiments", experiment, "plots", "ablation", "0706_RA88")
+    accumulation_path = os.path.join("old/experiments", experiment, "plots", "accumulation", "0706_AJP")
 
     categories = ["1_raw:visible_denoised:better_visible",
                   "2_raw:not_visible_denoised:visible",

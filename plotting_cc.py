@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
-experiments = os.listdir("experiments")
+experiments = os.listdir("old/experiments")
 experiments.sort()
 values_ablation_cc_gain = {}
 values_ablation_cc_gain_seis = {}
@@ -18,7 +18,7 @@ Extract Data:
 '''
 for experiment in experiments:
 
-    csv_path = os.path.join("experiments", experiment, "cc_evaluation_" + experiment[0:2] + ".csv")
+    csv_path = os.path.join("old/experiments", experiment, "cc_evaluation_" + experiment[0:2] + ".csv")
 
     with open(csv_path, "r") as file:
 

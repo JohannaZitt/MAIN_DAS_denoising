@@ -139,7 +139,7 @@ def deal_with_artifacts(data, filler = 0, Nt=1024):
     return data
 
 
-models_path = 'experiments'
+models_path = 'old/experiments'
 #model_names = os.listdir(models_path)
 #model_names = ['02_ablation_vertical', '03_accumulation_horizontal', '04_accumulation_vertical', '07_combined120']
 model_names = ['03_accumulation_horizontal', '04_accumulation_vertical', '10_random_borehole']
@@ -159,8 +159,8 @@ for model_name in model_names:
     for data_type in data_types:
 
         raw_das_folder_path = os.path.join(raw_DAS_path, data_type)
-        saving_path = os.path.join('experiments', model_name, 'denoisedDAS', data_type)
-        model_file = os.path.join('experiments', model_name, model_name + '.h5')
+        saving_path = os.path.join('old/experiments', model_name, 'denoisedDAS', data_type)
+        model_file = os.path.join('old/experiments', model_name, model_name + '.h5')
 
         if not os.path.isdir(saving_path):
             os.makedirs(saving_path)

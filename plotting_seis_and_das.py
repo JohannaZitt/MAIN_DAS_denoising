@@ -215,7 +215,7 @@ for experiment in experiments: # for every experiment
             denoised_folder_path = 'experiments/' + experiment + '/denoisedDAS/0706/'
             denoised_data, denoised_headers, denoised_axis = load_das_data(folder_path =denoised_folder_path, t_start = t_start, t_end = t_end, receiver = receiver, raw = False)
 
-            saving_path = os.path.join('experiments', experiment, 'plots', data_type)
+            saving_path = os.path.join('old/experiments', experiment, 'plots', data_type)
             if not os.path.isdir(saving_path):
                 os.makedirs(saving_path)
 

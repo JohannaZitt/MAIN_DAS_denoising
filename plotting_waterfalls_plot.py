@@ -126,7 +126,7 @@ experiments = ["07_combined120", "08_combined420"]
 experiment = experiments[0]
 
 raw_data_path = os.path.join("data", "raw_DAS", "0706/")
-denoised1_data_path = os.path.join("experiments", experiment, "denoisedDAS", "0706/")
+denoised1_data_path = os.path.join("old/experiments", experiment, "denoisedDAS", "0706/")
 
 id = 90
 event_time = event_times[id]

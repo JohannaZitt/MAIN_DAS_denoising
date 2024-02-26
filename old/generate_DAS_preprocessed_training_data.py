@@ -62,7 +62,7 @@ for event in events: # for evey event
     for m in range(3): # m is the start channel of every
 
         # 1. load DAS data
-        file_dir = 'data/training_data/raw_DAS/'
+        file_dir = 'old_old/data/training_data/raw_DAS/'
         t_start = datetime.strptime(event[0] + ' ' + event[1], '%Y/%m/%d %H:%M:%S.%f')
         t_end   = t_start + timedelta(seconds=3.5)
         data, headers, axis = load_das_h5.load_das_custom(t_start, t_end, input_dir=file_dir, convert = False)
@@ -107,7 +107,7 @@ for event in events: # for evey event
 
 # 7. Save data:
 training_data = np.transpose(training_data, (0, 2, 1))
-np.save('data/training_data/preprocessed_DAS/retraining_data.npy', training_data)
+np.save('old_old/data/training_data/preprocessed_DAS/retraining_data.npy', training_data)
 
 
 

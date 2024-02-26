@@ -178,7 +178,7 @@ end_channel = 50
 
 # Data Paths:
 raw_data_path = os.path.join("data", "raw_DAS", "0706/")
-denoised1_data_path = os.path.join("experiments", experiment, "denoisedDAS", "0706/")
+denoised1_data_path = os.path.join("old/experiments", experiment, "denoisedDAS", "0706/")
 seismometer_path = os.path.join("data", "seismometer_test_data", "accumulation", "0706_AJP")
 
 # Set Time:

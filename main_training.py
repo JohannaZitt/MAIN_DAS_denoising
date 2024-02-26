@@ -35,7 +35,7 @@ model_params = {
     'f0': 4, # dimension of output space (i.e. the number of output filters in the convolution)
     'LR': 1e-4, # learning rate
     'data_shape': (N_sub, Nt, 1),
-    'kernel': (3, 5),
+    'kernel': (3, 50),
     'AA': True # anti aliasing
 }
 
@@ -45,12 +45,12 @@ for training_data in different_training_data:
 
     """ Saving Paths """
     cwd = os.getcwd()
-    savedir = os.path.join('experiments', training_data)
+    savedir = os.path.join('old/experiments', training_data)
     if not os.path.isdir(savedir):
         os.makedirs(savedir)
 
     """Saving Path log"""
-    logdir = os.path.join('experiments', training_data, 'logs')
+    logdir = os.path.join('old/experiments', training_data, 'logs')
     if not os.path.isdir(logdir):
         os.makedirs(logdir)
 

@@ -50,14 +50,13 @@ Proprocessing:
 
 """
 
-folders = ['10_random_borehole']
-#folders = ['01_ablation_horizontal']
-#folders = ['01_ablation_horizontal', '02_ablation_vertical', '03_accumulation_vertical', '04_accumulation_horizontal', '07_combined120', '09_random480']
-#
+
+folders = ['09_borehole_seismometer']
+
 for folder in folders:
 
     # Reading Data
-    stream = read('data/training_data/raw_seismometer/' + folder + '/ID*.mseed')
+    stream = read('data/training_data/raw_seismometer_trainingdata/' + folder + '/ID*.mseed')
     n_trc = len(stream)
     n_t = stream[0].stats.npts
 
@@ -91,10 +90,6 @@ for folder in folders:
         # compute  ground velocity into strain rate
         data[i] = np.roll(data[i], rollout) - np.roll(data[i], -rollout)
         data[i] /= gauge_length
-
-        # scale by max amplitude
-        # max_amplitude = np.abs(data[i]).max()
-        # data[i] /= max_amplitude
 
         # scale by sd
         data[i] /= np.std(data[i])

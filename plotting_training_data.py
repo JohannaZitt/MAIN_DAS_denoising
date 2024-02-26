@@ -41,7 +41,7 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order = 4):
     y = lfilter(b, a, data)
     return y
 
-event_path="data/training_data/raw_seismometer/"
+event_path= "old/raw_seismometer/"
 events=["ablation_horizontal_stick_slip/ID:59_2020-08-04_00:27:46_RA88_EH2.mseed", "ablation_horizontal_surface/ID:46_2020-07-30_11:52:46_RA88_EH3.mseed",
         "ablation_vertical_stick_slip/ID:12_2020-08-03_23:44:33_RA88_EHZ.mseed", "ablation_vertical_surface/ID:12_2020-07-23_11:39:19_RA82_EHZ.mseed",
         "accumulation_horizontal_stick_slip/ID:29_2020-07-12_00:09:12_c0AKU_p2.mseed", "accumulation_horizontal_surface/ID:20_2020-07-27_13:27:42_c0ALH_p2.mseed",

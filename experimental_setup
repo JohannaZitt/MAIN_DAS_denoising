@@ -1,43 +1,29 @@
-################# Training Samples: #########################
+Use Training data as well as Test from the 205-216 (07.23-08.03)
 
-01_ablation_horizontal: 60 stick-slip + 60 surface = 120
-02_ablation_vertical: 60 stick-slip + 60 surface = 120
-03_accumulation_horizontal: 60 stick-slip + 60 surface = 120
-04_accumulation_vertical: 60 stick-slip + 60 surface = 120
-05_stick-slip: 30 ablation_horizontal + 30 ablation_vertical + 30 accumulation_horizontal + 30 accumulation_vertical = 120
-06_surface: 30 ablation_horizontal + 30 ablation_vertical + 30 accumulation_horizontal + 30 accumulation_vertical = 120
-07_combined120: 15 ablation_horizontal_stick_slip + 15 ablation_vertical_stick_slip + 15 accumulation_horizontal_stick_slip + accumulation_vertical_stick_slip +
-               15 ablation_horizontal_surface + 15 ablation_vertical_surface + 15 accumulation_horizontal_surface + 15 accumulation_vertical_surface = 120
-08_combined480: all training samples from model 1-4
-09_random480: training data not manually selected: took the first 120 events picked by IcequakePicking from AJP 07-12 p0, AJP 07-12 p2, RA87 07-28 EH2, and RA87 07-28 EHZ
-10_retrain_DAS : TODO
+################# Training #########################
 
+# DAS Denoising:
 
-################# Samples per epoch #########################
-01_ablation_horizontal: 105*32 = 3360 (batch multiplier = 15)
-02_ablation_vertical: 105*32 = 3360 (batch multiplier = 15)
-03_accumulation_horizontal: 105*32 = 3360 (batch multiplier = 15)
-04_accumulation_vertical: 105*32 = 3360 (batch multiplier = 15)
-05_stick-slip: 105*32 = 3360 (batch multiplier = 15)
-06_surface: 105*32 = 3360 (batch multiplier = 15)
-07_combined120: 105*32 = 3360 (batch multiplier = 15)
-08_combined480: 32*140 = 4480 (batch multiplier = 5)
-09_random480: 32*140 = 4480 (batch multiplier = 5)
-10_retrain_DAS : TODO
+01 – ablation horizontal 200 (data of 205-208)
+02 – ablation vertical 200 (data of 205-208)
+03 – accumulation horizontal 200 (data of 205-208)
+04 – accumulation vertical 200 (data of 205-208)
 
-################# Runtime #########################
-see at experiments/runtime.txt
+05 – combined 200 (comprises of data from 01, 02, 03, 04)
+06 – combined 800 (data of 01, 02, 03, 04)
+
+07 – combined 200 retrained on DAS (7 icequakes of multiple days)
+08 – combined 800 retrained on DAS (7 icequakes of multiple days)
+
+09 – borehole 200 (data from the 205-208)
 
 
 
-#################  #########################
-01_ablation_horizontal:
-02_ablation_vertical:
-03_accumulation_horizontal:
-04_accumulation_vertical:
-05_stick-slip:
-06_surface:
-07_combined120:
-08_combined480:
-09_random480:
-10_retrain_DAS :
+# Seismometer Denoising:
+
+10 – borehole Kernel (3, 5) (same training data as 09)
+11 – borehole Kernel (5, 20) (same training data as 09)
+12 – borehole Kernel (8, 50) (same training data as 09)
+
+
+################# Evaluation Data #########################
