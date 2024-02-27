@@ -393,7 +393,7 @@ class DataGeneratorDAS(keras.utils.Sequence):
         self.samples = samples
         self.masks = masks
         self.masked_samples = samples * (1 - masks)
-        print('Samples Shape: ', samples.shape)
+        print("Samples Shape: ", samples.shape)
         pass
 
     def generate_masks(self, samples):

@@ -1,6 +1,10 @@
 import os
 import re
+import os
 
+from obspy import UTCDateTime
+from webdav3.client import Client
+import numpy as np
 
 '''
 eight_path = os.path.join("../experiments", '08_combined480', "plots", "ablation", "0706_RA88")
@@ -38,7 +42,7 @@ for i in eight_ids:
     if not i in nine_ids:
         print('Hier: ', i)
         
-'''
+
 
 path = "../old/raw_seismometer/"
 folders = ["ablation_horizontal_surface", "ablation_vertical_surface", "accumulation_horizontal_surface", "accumulation_vertical_surface"]
@@ -50,6 +54,24 @@ with open("../surface_event_times.txt", "w") as file:
         event_times = os.listdir(path + folder)
         for event_time in event_times:
             file.write(str(event_time) + "\n")
+            
+'''
 
+""" Download DAS test
 
+# Access to Nextcloud Server via generated App Password
+options = {
+    'webdav_hostname': 'https://cloud.scadsai.uni-leipzig.de/remote.php/dav/files/jz76tevi/',
+    'webdav_login': 'jz76tevi',
+    'webdav_password': 'AyJ5r-qpbxe-doxPc-sMKss-9KJ48'
+}
+client = Client(options)
+
+file = "rhone1khz_UTC_20200804_001220.542.h5"
+
+remote_path = 'environment-earth/Projects/Rhonegletscher/Data/no_backup/DAS_2020/20200804/' + file
+local_path = "helper_folder/" + file
+
+client.download(remote_path=remote_path , local_path=local_path)
+"""
 
