@@ -60,6 +60,7 @@ def taper_filter(arr, fmin, fmax, samp_DAS):
     arr_wind_filt = filtfilt(b_DAS, a_DAS, arr_wind, axis=-1)
     return arr_wind_filt
 
+'''
 class DataGenerator(keras.utils.Sequence):
 
     def __init__(self, X, Nt=2048, N_sub=10, batch_size=32, batch_multiplier=10):
@@ -173,8 +174,8 @@ class DataGenerator(keras.utils.Sequence):
         self.masks = masks
         self.masked_samples = noisy_samples * (1 - masks)
         pass
-
-
+'''
+'''
 class DataGeneratorSeismometer(keras.utils.Sequence):
 
     def __init__(self, X, Nt=2048, N_sub=10, batch_size=32, batch_multiplier=10):
@@ -309,10 +310,11 @@ class DataGeneratorSeismometer(keras.utils.Sequence):
         self.masks = masks
         self.masked_samples = noisy_samples * (1 - masks)
         pass
+'''
 
 class DataGeneratorDAS(keras.utils.Sequence):
 
-    def __init__(self, X, N_sub=10, batch_size=16, batch_multiplier=10):
+    def __init__(self, X, N_sub=10, Nt=1024, batch_size=16, batch_multiplier=10):
 
         # Data matrix
         self.X = X
@@ -320,8 +322,10 @@ class DataGeneratorDAS(keras.utils.Sequence):
         self.N_samples = X.shape[0]
         # Number of stations
         self.Nx = X.shape[1]
-        # Number of time sampling points
-        self.Nt = X.shape[2]
+        # Output time sample points
+        self.Nt = Nt
+        # Number of time sampling points in data
+        self.Nt_all = X.shape[2]
         # Number of stations per batch sample
         self.N_sub = N_sub
         # Starting indices of the slices
@@ -356,6 +360,8 @@ class DataGeneratorDAS(keras.utils.Sequence):
         # Number of mini-batches
         N_batch = self.__len__()
         N_total = N_batch * self.batch_size
+        Nt = self.Nt
+        Nt_all = self.Nt_all
         # Buffer for mini-batches
         samples = np.zeros((N_total, self.N_sub, self.Nt))
         # Buffer for masks
@@ -367,10 +373,15 @@ class DataGeneratorDAS(keras.utils.Sequence):
         # Number of subsamples to create
         n_mini = N_total // self.N_samples
 
-        # t_starts = rng.integers(low=1, high=Nt_all - Nt, size=N_total)
+        #N_mid = self.Nt_all // 2
+        #t_start = rng.integers(low=N_mid - Nt, high=N_mid - Nt // 2, size=N_total)
+
+        #print("T_START: ", t_start)
+        # print(Nt_all - Nt)
 
         # Loop over samples
         for s, sample in enumerate(self.X):
+
             # channel indices
             channel_indices = [0, 1, 2]
             # Time reversal
@@ -378,9 +389,12 @@ class DataGeneratorDAS(keras.utils.Sequence):
             sign = rng.integers(low=0, high=2) * 2 - 1
             # Loop over station indices
             for k, station in enumerate(channel_indices):
+                t_start = rng.integers(low=0, high=Nt_all - Nt)
                 # Selection of stations
                 station_slice = slice(k, k + self.N_sub)
-                subsample = sign * sample[station_slice, ::order]
+                #print("STATION_SLICE: ", station_slice)
+                subsample = sign * sample[station_slice, t_start:t_start+Nt]
+                subsample = subsample[:, ::order]
                 # Get random index of this batch sample
                 batch_ind = batch_inds[s * n_mini + k]
                 # Store waveforms
@@ -393,7 +407,6 @@ class DataGeneratorDAS(keras.utils.Sequence):
         self.samples = samples
         self.masks = masks
         self.masked_samples = samples * (1 - masks)
-        print("Samples Shape: ", samples.shape)
         pass
 
     def generate_masks(self, samples):

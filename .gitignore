@@ -5,7 +5,8 @@ data/raw_DAS
 data/training_data/raw_seismometer_trainingdata
 data/training_data/raw_DAS
 data/seismometer_test_data
-experiments/test_retraining_model
+experiments/test_model
+experiments/test_model_retrained
 
 
 
