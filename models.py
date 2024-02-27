@@ -118,14 +118,16 @@ class DataGenerator(keras.utils.Sequence):
         # s-wave velocity: 1700-1950 m/s
         # rayleigh wave velocity: 1650 - 1668 m/s
         # -> between 1650 - 3900
-        s_min = 1 / 3900.
-        s_max = 1 / 1650.
+        v_min = 1650
+        v_max = 3900
+        velocity = rng.integers(v_min, v_max+1)
+        slowness = 1/velocity
 
         gauge = 12. # gauge is channel spacing
         fs = 400.
 
-        log_SNR_min = -2 #-2
-        log_SNR_max = 4 # 4
+        log_SNR_min = -2
+        log_SNR_max = 4
 
         # Loop over samples
         for s, t_start in enumerate(t_starts):
@@ -139,12 +141,8 @@ class DataGenerator(keras.utils.Sequence):
             # Move-out direction
             direction = rng.integers(low=0, high=2) * 2 - 1
 
-            slowness = rng.random() * (s_max - s_min) + s_min
-            shift = direction * gauge * slowness * fs # shift is in the range of [-6, 6] when s_min = 1 / 3900 and s_max = 1 / 1650
-            # 1. time reversal and polarity flip is performed.
-            sample = sign * X[sample_ind, ::order] # without timereversals: sample = sign * X[sample_ind, :]
-            # (die channel spacing length ist aufm Rhonegletscher 4m hier werden Entfernungen je nach Wellentyp zwischen 4m und 60m angenommen)
-
+            shift = direction * gauge * slowness * fs
+            sample = sign * X[sample_ind, ::order]
 
             SNR = rng.random() * (log_SNR_max - log_SNR_min) + log_SNR_min # generiert Zahlen im Bereich [log_SNR_min, log_SNR_max] log_SNR_min and log_SNR_max in decibel scale
             SNR = 10 ** (0.5 * SNR) # rechnen hier SNR von dezibel Skala in Verhältnis von zwei Amplituden/Wellendrücken um
