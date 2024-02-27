@@ -1,0 +1,4 @@
+
+09_borehole_seismometer_(3,5): 1 Stunden, 51 Minuten und 10.675944 Sekunden
+09_borehole_seismometer_(5,20): 3 Stunden, 33 Minuten und 14.912218 Sekunden
+09_borehole_seismometer_(8,50): 9 Stunden, 16 Minuten und 11.935963 Sekunden

@@ -8,12 +8,12 @@ from datetime import date, timedelta
 from models import seed
 import random as python_random
 
-'''
+"""
 
 Main training on seismometer data or synthetic data
 
 
-'''
+"""
 
 # NumPy (random number generator used for sampling operations)
 tf.random.set_seed(seed)
@@ -25,98 +25,105 @@ tf.config.threading.set_inter_op_parallelism_threads(4)
 N_sub = 8
 batch_size = 32
 Nt = 1024
-N_epoch = 200
-batch_multiplier = 5 # set to 15 for 120 training samples (105*32 = 3360), set to 5 for 480 training samples (32*140 = 4480 samples per epoch)
-model_params = {
-    'use_bn': False, # batch normalization
-    'use_dropout': False,
-    'dropout_rate': 0.1,
-    'N_blocks': 4,
-    'f0': 4, # dimension of output space (i.e. the number of output filters in the convolution)
-    'LR': 1e-4, # learning rate
-    'data_shape': (N_sub, Nt, 1),
-    'kernel': (3, 50),
-    'AA': True # anti aliasing
-}
+N_epoch = 1500
+batch_multiplier = 10 # set to 10 for 200 training samples (117*32 = 3744)
+kernels = [(3,5), (5, 20), (8, 50)]
 
-different_training_data = ['11_seismometer_denoising_with_borehole480']
+for kernel in kernels:
 
-for training_data in different_training_data:
+    model_params = {
+        "use_bn": False, # batch normalization
+        "use_dropout": False,
+        "dropout_rate": 0.1,
+        "N_blocks": 4,
+        "f0": 4, # dimension of output space (i.e. the number of output filters in the convolution)
+        "LR": 1e-4, # learning rate
+        "data_shape": (N_sub, Nt, 1),
+        "kernel": kernel,
+        "AA": True # anti aliasing
+    }
 
-    """ Saving Paths """
-    cwd = os.getcwd()
-    savedir = os.path.join('old/experiments', training_data)
-    if not os.path.isdir(savedir):
-        os.makedirs(savedir)
+    print(model_params["kernel"])
 
-    """Saving Path log"""
-    logdir = os.path.join('old/experiments', training_data, 'logs')
-    if not os.path.isdir(logdir):
-        os.makedirs(logdir)
+    different_training_data = ["09_borehole_seismometer"]
 
-    """ Callbacks """
-    tensorboard_callback = CallBacks.tensorboard(logdir)
-    checkpoint_callback = CallBacks.checkpoint(os.path.join(savedir, training_data + '.h5'))
+    for training_data in different_training_data:
 
-    """ Trainingdata """
-    data_file = os.path.join(cwd, 'data', 'training_data', 'preprocessed_seismometer', training_data + '.npy')
+        """ Saving Paths """
+        cwd = os.getcwd()
+        savedir = os.path.join("experiments", training_data + "_" + str(kernel))
+        if not os.path.isdir(savedir):
+            os.makedirs(savedir)
 
-    # Load data
-    data = np.load(data_file)
-    N_ch, N_t = data.shape
+        """Saving Path log"""
+        logdir = os.path.join("experiments", training_data + "_" + str(kernel), "logs")
+        if not os.path.isdir(logdir):
+            os.makedirs(logdir)
 
-    print(data.shape)
+        """ Callbacks """
+        tensorboard_callback = CallBacks.tensorboard(logdir)
+        checkpoint_callback = CallBacks.checkpoint(os.path.join(savedir, training_data + "_" + str(kernel) + ".h5"))
 
-    #t_slice = slice(N_t//4, 3*N_t//4)
-    #scaled_data = np.zeros_like(data)
+        """ Trainingdata """
+        data_file = os.path.join(cwd, "data", "training_data", "preprocessed_seismometer", training_data + ".npy")
 
-    # normalize data
-    #for i, wv in enumerate(data):
-    #    scaled_data[i] = wv / wv[t_slice].std()
+        # Load data
+        data = np.load(data_file)
+        N_ch, N_t = data.shape
 
-    # Split data 80-20 train-test
-    split = int(0.8 * N_ch)
-    train_data = data[:split]
-    test_data = data[split:]
+        print(data.shape)
 
-    print("Preparing masks")
-    train_generator = DataGeneratorSeismometer(X=train_data, Nt=Nt, N_sub=N_sub, batch_size=batch_size, batch_multiplier=batch_multiplier)
-    test_generator = DataGeneratorSeismometer(X=test_data, Nt=Nt, N_sub=N_sub, batch_size=batch_size, batch_multiplier=batch_multiplier)
-    print("Done")
+        #t_slice = slice(N_t//4, 3*N_t//4)
+        #scaled_data = np.zeros_like(data)
 
+        # normalize data
+        #for i, wv in enumerate(data):
+        #    scaled_data[i] = wv / wv[t_slice].std()
 
-   
-    for i in range(10):
-        for j in range(8):
-            plt.plot(train_generator.samples[i][j] + 12*j, color="black", alpha=0.5)
-        plt.show()
+        # Split data 80-20 train-test
+        split = int(0.8 * N_ch)
+        train_data = data[:split]
+        test_data = data[split:]
 
+        print("Preparing masks")
+        train_generator = DataGeneratorSeismometer(X=train_data, Nt=Nt, N_sub=N_sub, batch_size=batch_size, batch_multiplier=batch_multiplier)
+        test_generator = DataGeneratorSeismometer(X=test_data, Nt=Nt, N_sub=N_sub, batch_size=batch_size, batch_multiplier=batch_multiplier)
+        print("Done")
 
 
-    # Construct model
-    net = UNet()
-    net.set_params(model_params)
-    model = net.construct()
-    # model.summary()
+        # visualize training data:
+        """
+        for i in range(10):
+            for j in range(8):
+                plt.plot(train_generator.samples[i][j] + 12*j, color="black", alpha=0.5)
+            plt.show()
+        """
 
-    # Model training
-    start = time.time()
-    print('Start Model Training')
-    model.fit(
-        x=train_generator,
-        validation_data=test_generator,
-        callbacks=[tensorboard_callback, checkpoint_callback],
-        verbose=1, epochs=N_epoch,
-    )
 
-    # Generate output and measure runtime
-    end = time.time()
-    dur = end-start
-    dur_str = str(timedelta(seconds=dur))
-    x = dur_str.split(':')
-    output_text = training_data + ': ' + str(x[0]) + ' Stunden, ' + str(x[1]) + ' Minuten und ' + str(x[2]) + ' Sekunden'
+        # Construct model
+        net = UNet()
+        net.set_params(model_params)
+        model = net.construct()
+        # model.summary()
 
-    with open('runtimes.txt', 'a') as file:
-        file.write('\n' + output_text)
+        # Model training
+        start = time.time()
+        print("Start Model Training")
+        model.fit(
+            x=train_generator,
+            validation_data=test_generator,
+            callbacks=[tensorboard_callback, checkpoint_callback],
+            verbose=1, epochs=N_epoch,
+        )
 
-    print(output_text)
+        # Generate output and measure runtime
+        end = time.time()
+        dur = end-start
+        dur_str = str(timedelta(seconds=dur))
+        x = dur_str.split(":")
+        output_text = training_data + ": " + str(x[0]) + " Stunden, " + str(x[1]) + " Minuten und " + str(x[2]) + " Sekunden"
+
+        with open("runtimes.txt", "a") as file:
+            file.write("\n" + output_text)
+
+        print(output_text)
