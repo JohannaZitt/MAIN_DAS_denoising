@@ -9,3 +9,4 @@
 04_accumulation_vertical: 3 Stunden, 16 Minuten und 25.907447 Sekunden
 05_combined200: 3 Stunden, 16 Minuten und 19.898600 Sekunden
 Retraining 07_retrained_combined200 took 0 hours, 02 minutes und 24.196342 seconds
+09_borehole_seismometer: 3 Stunden, 15 Minuten und 38.632027 Sekunden

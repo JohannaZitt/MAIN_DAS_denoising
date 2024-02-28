@@ -97,7 +97,7 @@ for training_data in different_training_data:
     """ visualize training data:  """
     for i in range(10):
         for j in range(11):
-            plt.plot(train_generator.masked_samples[i][j] + 12*j, color="black", alpha=0.5)
+            plt.plot(train_generator.samples[i][j] + 12*j, color="black", alpha=0.5)
         plt.show()
 
 
