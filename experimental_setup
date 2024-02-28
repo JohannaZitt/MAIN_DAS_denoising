@@ -12,8 +12,8 @@ Use Training data as well as Test from the 205-216 (07.23-08.03)
 05 – combined 200 (comprises of data from 01, 02, 03, 04)
 06 – combined 800 (data of 01, 02, 03, 04)
 
-07 – combined 200 retrained on DAS (7 icequakes of multiple days)
-08 – combined 800 retrained on DAS (7 icequakes of multiple days)
+07 – combined 200 retrained on DAS (14 icequakes of multiple days)
+08 – combined 800 retrained on DAS (14 icequakes of multiple days)
 
 09 – borehole 200 (data from the 205-208)
 
@@ -27,3 +27,6 @@ Use Training data as well as Test from the 205-216 (07.23-08.03)
 
 
 ################# Evaluation Data #########################
+Seismometer Data from 209 (z component)
+Borehole Seismometer Data from 209 (z component)
+

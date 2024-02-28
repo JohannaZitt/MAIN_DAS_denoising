@@ -121,7 +121,7 @@ def set_file_name (event_time, client, remote_path, range):
 
 
 
-event_folder_paths = ['data/seismometer_test_data/ablation/0706_RA88/']
+event_folder_paths = ['data/test_data/accumulation/']
 
 # Access to Nextcloud Server via generated App Password
 options = {
@@ -144,7 +144,7 @@ for event_folder_path in event_folder_paths:
 
 
     # Set local path, where the data should be stored
-    local_path = 'data/raw_DAS/0706/'
+    local_path = 'data/raw_DAS/'
     if not os.path.exists(local_path):
         os.makedirs(local_path)
 
