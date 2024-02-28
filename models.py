@@ -60,7 +60,7 @@ def taper_filter(arr, fmin, fmax, samp_DAS):
     arr_wind_filt = filtfilt(b_DAS, a_DAS, arr_wind, axis=-1)
     return arr_wind_filt
 
-'''
+''''''
 class DataGenerator(keras.utils.Sequence):
 
     def __init__(self, X, Nt=2048, N_sub=10, batch_size=32, batch_multiplier=10):
@@ -174,8 +174,8 @@ class DataGenerator(keras.utils.Sequence):
         self.masks = masks
         self.masked_samples = noisy_samples * (1 - masks)
         pass
-'''
-'''
+
+''''''
 class DataGeneratorSeismometer(keras.utils.Sequence):
 
     def __init__(self, X, Nt=2048, N_sub=10, batch_size=32, batch_multiplier=10):
@@ -310,7 +310,7 @@ class DataGeneratorSeismometer(keras.utils.Sequence):
         self.masks = masks
         self.masked_samples = noisy_samples * (1 - masks)
         pass
-'''
+
 
 class DataGeneratorDAS(keras.utils.Sequence):
 

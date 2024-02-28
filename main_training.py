@@ -44,8 +44,8 @@ model_params = {
 }
 
 
-#different_training_data = ["01_ablation_horizontal", "02_ablation_vertical", "03_accumulation_horizontal", "04_accumulation_vertical", "05_combined200", "09_borehole_seismometer"]
-different_training_data = ["06_combined800"]
+different_training_data = ["01_ablation_horizontal", "02_ablation_vertical", "03_accumulation_horizontal", "04_accumulation_vertical", "05_combined200", "09_borehole_seismometer"]
+#different_training_data = ["06_combined800"]
 #different_training_data = ["09_borehole_seismometer"]
 
 for training_data in different_training_data:
