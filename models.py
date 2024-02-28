@@ -175,7 +175,6 @@ class DataGenerator(keras.utils.Sequence):
         self.masked_samples = noisy_samples * (1 - masks)
         pass
 
-''''''
 class DataGeneratorSeismometer(keras.utils.Sequence):
 
     def __init__(self, X, Nt=2048, N_sub=10, batch_size=32, batch_multiplier=10):
@@ -320,7 +319,7 @@ class DataGeneratorDAS(keras.utils.Sequence):
         self.X = X
         # Number of samples
         self.N_samples = X.shape[0]
-        # Number of stations
+        # Number of receivers
         self.Nx = X.shape[1]
         # Output time sample points
         self.Nt = Nt
@@ -362,47 +361,31 @@ class DataGeneratorDAS(keras.utils.Sequence):
         N_total = N_batch * self.batch_size
         Nt = self.Nt
         Nt_all = self.Nt_all
+        Nx = self.Nx
+        N_sub = self.N_sub
         # Buffer for mini-batches
         samples = np.zeros((N_total, self.N_sub, self.Nt))
         # Buffer for masks
         masks = np.ones_like(samples)
 
-        batch_inds = np.arange(N_total)
-        np.random.shuffle(batch_inds)
 
-        # Number of subsamples to create
-        n_mini = N_total // self.N_samples
+        t_starts = rng.integers(low=0, high=Nt_all - Nt, size=N_total)
 
-        #N_mid = self.Nt_all // 2
-        #t_start = rng.integers(low=N_mid - Nt, high=N_mid - Nt // 2, size=N_total)
-
-        #print("T_START: ", t_start)
-        # print(Nt_all - Nt)
-
-        # Loop over samples
-        for s, sample in enumerate(self.X):
-
+        for s, t_start in enumerate(t_starts):
+            #choose random sample:
+            sample_ind = rng.integers(low=0, high=self.N_samples)
             # channel indices
-            channel_indices = [0, 1, 2]
-            # Time reversal
-            order = rng.integers(low=0, high=2) * 2 - 1
-            sign = rng.integers(low=0, high=2) * 2 - 1
-            # Loop over station indices
-            for k, station in enumerate(channel_indices):
-                t_start = rng.integers(low=0, high=Nt_all - Nt)
-                # Selection of stations
-                station_slice = slice(k, k + self.N_sub)
-                #print("STATION_SLICE: ", station_slice)
-                subsample = sign * sample[station_slice, t_start:t_start+Nt]
-                subsample = subsample[:, ::order]
-                # Get random index of this batch sample
-                batch_ind = batch_inds[s * n_mini + k]
-                # Store waveforms
-                samples[batch_ind] = subsample
-                # Select one waveform to blank
-                blank_ind = rng.integers(low=0, high=self.N_sub)
-                # Create mask
-                masks[batch_ind, blank_ind] = 0
+            channel_indices = rng.integers(low=0, high=Nx - N_sub + 1)
+            channel_slice = slice(channel_indices, channel_indices + N_sub)
+            # Time window
+            t_slice = slice(t_start, t_start + Nt)
+
+            sample = self.X[sample_ind, channel_slice, t_slice]
+            samples[s] = sample
+
+            blank_ind = rng.integers(low=0, high=self.N_sub)
+            masks[s, blank_ind] = 0
+
 
         self.samples = samples
         self.masks = masks

@@ -25,8 +25,8 @@ N_sub = 11
 batch_size = 32
 batch_multiplier = 10
 N_epoch = 200
-pretrained_model_name = "test_model"
-model_name = "test_model_retrained"
+pretrained_model_name = "05_combined200"
+model_name = "07_retrained_combined200_2"
 trainingdata = "data/training_data/preprocessed_DAS/retraining_data.npy"
 
 # Load pretrained Model:
@@ -54,25 +54,16 @@ train_indices = np.delete(np.arange(data.shape[0]), test_indices)
 test_data = data[test_indices,:]
 train_data = data[train_indices,:]
 
-plt.plot(test_data[1][1])
-plt.show()
-
 print("Preparing masks")
 # Prepare data generator for the train and test set
 train_generator = DataGeneratorDAS(X=train_data, N_sub=N_sub, batch_multiplier=batch_multiplier, batch_size=batch_size)
 test_generator = DataGeneratorDAS(X=test_data, N_sub=N_sub, batch_multiplier=batch_multiplier, batch_size=batch_size)
 print("Done")
 
-# TODO Aktuell wird hier noch auf zero arrays trainiert! Plotten und fixen!!
-print(test_generator.samples[1].shape)
-
-for i in range(10):
-    for j in range(11):
-        plt.plot(train_generator.samples[i][j] + 12 * j, color="black", alpha=0.5)
-    plt.show()
-
-#plt.plot(test_generator.samples[1])
-#plt.show()
+#for i in range(630, 640):
+#    for j in range(11):
+#        plt.plot(train_generator.samples[i][j] + 8 * j, color="black", alpha=0.5)
+#    plt.show()
 
 
 start = time.time()
