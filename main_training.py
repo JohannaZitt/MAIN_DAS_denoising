@@ -26,7 +26,7 @@ N_sub = 11
 batch_size = 32
 Nt = 1024
 N_epoch = 2000
-batch_multiplier = 10 # set to 10 for 200 training samples (117*32 = 3744), set to 3 for 800 training samples (140*32 = 4480)
+batch_multiplier = 3 # set to 10 for 200 training samples (117*32 = 3744), set to 3 for 800 training samples (140*32 = 4480)
 #kernels = [(3,5), (5, 20), (8, 50)]
 
 
@@ -45,8 +45,8 @@ model_params = {
 
 
 #different_training_data = ["01_ablation_horizontal", "02_ablation_vertical", "03_accumulation_horizontal", "04_accumulation_vertical", "05_combined200", "09_borehole_seismometer"]
-#different_training_data = ["06_combined800"]
-different_training_data = ["09_borehole_seismometer"]
+different_training_data = ["06_combined800"]
+#different_training_data = ["09_borehole_seismometer"]
 
 for training_data in different_training_data:
 
