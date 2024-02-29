@@ -18,7 +18,7 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=4):
 
 def resample(data, ratio):
     """
-    :param data: data, which has to be resampled
+    :param data: data to resample
     :param ratio: resample ratio = fs_old/fs_new
     :return: resampled data as np array
     """

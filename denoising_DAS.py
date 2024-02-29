@@ -13,7 +13,7 @@ def butter_bandpass(lowcut, highcut, fs, order=4):
     nyq = 0.5 * fs
     low = lowcut / nyq
     high = highcut / nyq
-    b, a = butter(order, [low, high], btype='band')
+    b, a = butter(order, [low, high], btype="band")
     return b, a
 
 def butter_bandpass_filter(data, lowcut, highcut, fs, order=4):
@@ -25,9 +25,9 @@ def resample(data, ratio):
     # spatial axis:
     n_ch = data.shape[0]
     if n_ch == 4800 or n_ch == 4864 or n_ch == 4928:
-        data = data[::4, :]
+        data = data[::6, :]
     else:
-        data = data[::2, :]
+        data = data[::3, :]
 
     # time axis
     res = np.zeros((data.shape[0], int(data.shape[1] / ratio)))
@@ -47,10 +47,10 @@ def denoise_file (file, timesamples, model, N_sub, fs_trainingdata):
 
     # reshape data
     DAS_data = DAS_data.T
-    DAS_data = DAS_data.astype('f')
+    DAS_data = DAS_data.astype("f")
     # resample data
     print(DAS_data.shape)
-    DAS_data = resample(DAS_data, headers['fs'] / 400)
+    DAS_data = resample(DAS_data, headers["fs"] / 400)
     print(DAS_data.shape)
     # preprocessing
     lowcut: int = 1
@@ -59,7 +59,6 @@ def denoise_file (file, timesamples, model, N_sub, fs_trainingdata):
         # filter data
         DAS_data[i] = butter_bandpass_filter(DAS_data[i], lowcut, highcut, fs=400, order=4)
         # normalize data
-        # DAS_data[i] = DAS_data[i] / np.abs(DAS_data[i]).max()
         DAS_data[i] = DAS_data[i] / np.std(DAS_data[i])
 
     # split data in 1024 data point sections
@@ -103,8 +102,14 @@ def denoise_file (file, timesamples, model, N_sub, fs_trainingdata):
             for j in range(eval_samples.shape[1]): # for every N_sub
                 eval_samples[i, j, :] = eval_samples[i, j, :] - np.mean(eval_samples[i, j, :])
 
+
+        print(masks.shape)
+        print(eval_samples.shape)
+
         # Create J-invariant reconstructions
         results = model.predict((eval_samples, masks))
+
+        print(results.shape)
         DAS_reconstructions[n] = np.sum(results, axis=1)[:, :, 0]
 
     # reshape data into original shape
@@ -119,10 +124,10 @@ def denoise_file (file, timesamples, model, N_sub, fs_trainingdata):
     data_save = data_save.T
 
     # Update Headers:
-    headers['npts'] = data_save.shape[0]
-    headers['nchan'] = data_save.shape[1]
-    headers['fs'] = fs_trainingdata
-    headers['dx'] = 8
+    headers["npts"] = data_save.shape[0]
+    headers["nchan"] = data_save.shape[1]
+    headers["fs"] = fs_trainingdata
+    headers["dx"] = 12
 
     return data_save, headers
 
@@ -139,13 +144,14 @@ def deal_with_artifacts(data, filler = 0, Nt=1024):
     return data
 
 
-models_path = 'old/experiments'
+models_path = 'experiments'
 #model_names = os.listdir(models_path)
-#model_names = ['02_ablation_vertical', '03_accumulation_horizontal', '04_accumulation_vertical', '07_combined120']
-model_names = ['03_accumulation_horizontal', '04_accumulation_vertical', '10_random_borehole']
+#model_names = ["01_ablation_horizontal", "02_ablation_vertical", "03_accumulation_horizontal", "04_accumulation_vertical",
+#               "05_combined200", "06_combined800", "07_retrained_combined200", "09_borehole_seismometer"]
+model_names = ["06_combined800", "07_retrained_combined200", "09_borehole_seismometer"]
 
-raw_DAS_path = 'data/raw_DAS'
-data_types = ['0706']
+
+raw_das_folder_path = "data/raw_DAS"
 
 n_sub = 11
 timesamples = 1024
@@ -155,48 +161,44 @@ DEAL_WITH_ARTIFACTS = True
 # every model:
 for model_name in model_names:
 
-    # for every raw data folder
-    for data_type in data_types:
+    saving_path = os.path.join("experiments", model_name, "denoisedDAS")
+    model_file = os.path.join("experiments", model_name, model_name + ""'.h5')
 
-        raw_das_folder_path = os.path.join(raw_DAS_path, data_type)
-        saving_path = os.path.join('old/experiments', model_name, 'denoisedDAS', data_type)
-        model_file = os.path.join('old/experiments', model_name, model_name + '.h5')
+    if not os.path.isdir(saving_path):
+        os.makedirs(saving_path)
 
-        if not os.path.isdir(saving_path):
-            os.makedirs(saving_path)
+    files = os.listdir(raw_das_folder_path)
+    #files = files[1:]
 
-        files = os.listdir(raw_das_folder_path)
-        #files = files[1:]
+    for file in files:
+        start = time.time()
+        print("------------ File: ", file, " is denoising --------------------")
 
-        for file in files:
-            start = time.time()
-            print('------------ File: ', file, ' is denoising --------------------')
+        # Path to raw DAS data
+        raw_das_file_path = os.path.join(raw_das_folder_path, file)
+        saving_filename = "/denoised_" + file
 
-            # Path to raw DAS data
-            raw_das_file_path = os.path.join(raw_das_folder_path, file)
-            saving_filename = '/denoised_' + file
+        # load model
+        model = keras.models.load_model(model_file)
+        # denoise data:
+        if not os.path.exists(saving_path+saving_filename):
+            data, headers = denoise_file(file=raw_das_file_path, timesamples=timesamples, model=model, N_sub=n_sub, fs_trainingdata=fs_trainingdata)
 
-            # load model
-            model = keras.models.load_model(model_file)
-            # denoise data:
-            if not os.path.exists(saving_path+saving_filename):
-                data, headers = denoise_file(file=raw_das_file_path, timesamples=timesamples, model=model, N_sub=n_sub, fs_trainingdata=fs_trainingdata)
+            # deal with artifacts:
+            if DEAL_WITH_ARTIFACTS:
+                print("deals with artifacts")
+                data = deal_with_artifacts(data)
+            write_das_h5.write_block(data, headers, saving_path + saving_filename)
+            print("Saved Data with Shape: ", data.shape)
 
-                # deal with artifacts:
-                if DEAL_WITH_ARTIFACTS:
-                    print('deals with artifacts')
-                    data = deal_with_artifacts(data)
-                write_das_h5.write_block(data, headers, saving_path + saving_filename)
-                print('Saved Data with Shape: ', data.shape)
+            # Measuring time for one file
+            end = time.time()
+            dur = end - start
+            dur_str = str(timedelta(seconds=dur))
+            x = dur_str.split(':')
+            print("Laufzeit für file " + str(file) + ": " + str(x[1]) + " Minuten und " + str(x[2]) + " Sekunden.")
 
-                # Measuring time for one file
-                end = time.time()
-                dur = end - start
-                dur_str = str(timedelta(seconds=dur))
-                x = dur_str.split(':')
-                print('Laufzeit für file ' + str(file) + ': ' + str(x[1]) + ' Minuten und ' + str(x[2]) + ' Sekunden.')
+        else:
+            print(saving_filename, " does exist already. No Denoising is performed. ")
 
-            else:
-                print(saving_filename, ' does exist already. No Denoising is performed. ')
-
-            gc.collect()
+        gc.collect()

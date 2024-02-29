@@ -5,3 +5,9 @@ data/raw_DAS
 data/training_data/raw_seismometer_trainingdata
 data/training_data/raw_DAS
 data/test_data
+experiments/01_ablation_horizontal/denoisedDAS
+experiments/02_ablation_vertical/denoisedDAS
+experiments/03_accumulation_horizontal/denoisedDAS
+experiments/04_accumulation_vertical/denoisedDAS
+experiments/05_combined200/denoisedDAS
+experiments/06_combined800/denoisedDAS
