@@ -52,7 +52,7 @@ def get_middel_channel(receiver):
     else:
         print("There is no start nor end channel for receiver " + receiver + '.')
 
-    channel = int(channel/4)
+    channel = int(channel/6)
     return channel
 
 def load_das_data(folder_path, t_start, t_end, receiver, raw):
@@ -64,15 +64,15 @@ def load_das_data(folder_path, t_start, t_end, receiver, raw):
     # 2. downsample data in space:
     if raw:
         if data.shape[1] == 4864 or data.shape[1] == 4800 or data.shape[1] == 4928 :
-            data = data[:,::4]
+            data = data[:,::6]
         else:
-            data = data[:, ::2]
-        headers["dx"] = 8
+            data = data[:, ::3]
+        headers["dx"] = 12
 
 
     # 3. cut to size
     ch_middel = get_middel_channel(receiver)  # get start and end channel:
-    data = data[:, ch_middel-20:ch_middel+20]
+    data = data[:, ch_middel-40:ch_middel+40]
 
     if raw:
         # 4. downsample in time
@@ -170,14 +170,14 @@ def plot_data(raw_data, denoised_data, seis_data, seis_stats, data_type, saving_
 
 
 #experiments = os.listdir('experiments/')
-experiments = ["03_accumulation_horizontal", "04_accumulation_vertical", "10_random_borehole"]
-data_types = ["accumulation/0706_AJP", "ablation/0706_RA88"]
+experiments = ["01_ablation_horizontal"]
+data_types = ["ablation"]
 
 for experiment in experiments: # for every experiment
 
     for data_type in data_types:  # for every data type
 
-        seis_data_path = "data/seismometer_test_data/" + data_type
+        seis_data_path = "data/test_data/" + data_type
         seismometer_events = os.listdir(seis_data_path)
         #seismometer_events = seismometer_events[1:2]
 
@@ -199,7 +199,7 @@ for experiment in experiments: # for every experiment
 
 
             # pick time window:
-            t_start = datetime.strptime(event_date + ' ' + event_time + ".0", "%Y-%m-%d %H:%M:%S.%f")
+            t_start = datetime.strptime(event_date + " " + event_time + ".0", "%Y-%m-%d %H:%M:%S.%f")
             t_start = t_start - timedelta(seconds=3)
             t_end = t_start + timedelta(seconds=6)
 
@@ -210,19 +210,19 @@ for experiment in experiments: # for every experiment
             seis_data = butter_bandpass_filter(seis_data, 1, 120, fs=seis_stats.sampling_rate, order=4)
 
             # load raw DAS data:
-            raw_folder_path = "data/raw_DAS/0706/"
+            raw_folder_path = "data/raw_DAS/"
             raw_data, raw_headers, raw_axis = load_das_data(folder_path =raw_folder_path, t_start = t_start, t_end = t_end, receiver = receiver, raw = True)
 
             # load denoised DAS data
-            denoised_folder_path = "experiments/" + experiment + "/denoisedDAS/0706/"
+            denoised_folder_path = "experiments/" + experiment + "/denoisedDAS/"
             denoised_data, denoised_headers, denoised_axis = load_das_data(folder_path =denoised_folder_path, t_start = t_start, t_end = t_end, receiver = receiver, raw = False)
 
             saving_path = os.path.join("old/experiments", experiment, "plots", data_type)
             if not os.path.isdir(saving_path):
                 os.makedirs(saving_path)
 
-            saving_path += "/" + seismometer_event  # when the plot should be depicted, set saving_path = None
-            #saving_path = None
+            #saving_path += "/" + seismometer_event  # when the plot should be depicted, set saving_path = None
+            saving_path = None
 
             # Plotting Data
             id = re.search(r"ID:(\d+)_", seismometer_event).group(1)

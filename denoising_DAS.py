@@ -141,10 +141,11 @@ def deal_with_artifacts(data, filler = 0, Nt=1024):
 
 
 models_path = 'experiments'
-model_names = os.listdir(models_path)
+
 model_names = ["01_ablation_horizontal", "02_ablation_vertical", "03_accumulation_horizontal", "04_accumulation_vertical",
-               "05_combined200", "06_combined800", "07_retrained_combined200", "09_borehole_seismometer"]
-#model_names = ["08_retrained_combined800"]
+               "05_combined200", "06_combined800", "07_retrained_combined200", "08_retrained_combined800", "09_borehole_seismometer"]
+model_names = ["03_accumulation_horizontal", "04_accumulation_vertical", "05_combined200", "06_combined800", "07_retrained_combined200", "08_retrained_combined800", "09_borehole_seismometer"]
+
 
 
 raw_das_folder_path = "data/raw_DAS"
@@ -156,6 +157,14 @@ DEAL_WITH_ARTIFACTS = True
 
 # every model:
 for model_name in model_names:
+
+    print("#################################################################################")
+    print("#################################################################################")
+    print("#################################################################################")
+    print("#####################" + model_name + "##################################")
+    print("#################################################################################")
+    print("#################################################################################")
+    print("#################################################################################")
 
     saving_path = os.path.join("experiments", model_name, "denoisedDAS")
     model_file = os.path.join("experiments", model_name, model_name + ""'.h5')

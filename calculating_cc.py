@@ -129,12 +129,22 @@ def compute_moving_coherence(data, bin_size):
 
 
 #experiments = os.listdir('experiments/')
-experiments = ["01_ablation_horizontal", "02_ablation_vertical", "03_accumulation_horizontal", "04_accumulation_horizontal",
-               "05_combined200", "06_combined800", "07_retrained_combined200", "08_retrained_combined800"]
-experiments = experiments[0:1]
-data_types = ["accumulation"]
+#experiments = ["01_ablation_horizontal", "02_ablation_vertical", "03_accumulation_horizontal", "04_accumulation_horizontal",
+#               "05_combined200", "06_combined800", "07_retrained_combined200", "08_retrained_combined800", "09_borehole_seismometer"]
+experiments = ["04_accumulation_vertical",
+               "05_combined200", "06_combined800", "07_retrained_combined200", "08_retrained_combined800", "09_borehole_seismometer"]
+
+data_types = ["ablation", "accumulation"]
 
 for experiment in experiments: # for every experiment
+
+    print("#################################################################################")
+    print("#################################################################################")
+    print("#################################################################################")
+    print("#####################" + experiment + "##################################")
+    print("#################################################################################")
+    print("#################################################################################")
+    print("#################################################################################")
 
     with open("experiments/" + experiment + "/cc_evaluation_" + experiment[:2] + ".csv", mode="w", newline="") as file:
         writer = csv.writer(file)
