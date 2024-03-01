@@ -13,7 +13,7 @@ def butter_bandpass(lowcut, highcut, fs, order=4):
     nyq = 0.5 * fs
     low = lowcut / nyq
     high = highcut / nyq
-    b, a = butter(order, [low, high], btype='band')
+    b, a = butter(order, [low, high], btype="band")
     return b, a
 
 def butter_bandpass_filter(data, lowcut, highcut, fs, order=4):
@@ -35,51 +35,54 @@ def resample(data, ratio):
 
 def get_middel_channel(receiver):
     channel = 0
-    if receiver == 'AKU':
+    if receiver == "AKU":
         channel = 3740
-    elif receiver == 'AJP':
+    elif receiver == "AJP":
         channel = 3460
-    elif receiver == 'ALH':
+    elif receiver == "ALH":
         channel = 3842
-    elif receiver == 'RA82':
+    elif receiver == "RA82":
         channel = 1300
-    elif receiver == 'RA87':
+    elif receiver == "RA87":
         channel = 1230
-    elif receiver == 'RA88':
+    elif receiver == "RA88":
         channel = 1615 # 1600
     else:
-        print('There is no start nor end channel for receiver ' + receiver + '.')
+        print("There is no start nor end channel for receiver " + receiver + '.')
 
-    channel = int(channel/4)
+    channel = int(channel/6)
     return channel
 
 def load_das_data(folder_path, t_start, t_end, receiver, raw):
 
     # 1. load data
     data, headers, axis = load_das_h5.load_das_custom(t_start, t_end, input_dir=folder_path, convert=False)
-    data = data.astype('f')
+    data = data.astype("f")
+
+
 
     # 2. downsample data in space:
     if raw:
         if data.shape[1] == 4864 or data.shape[1] == 4800 or data.shape[1] == 4928 :
-            data = data[:,::4]
+            data = data[:,::6]
         else:
-            data = data[:, ::2]
-        headers['dx'] = 8
+            data = data[:, ::3]
+        headers["dx"] = 12
 
 
     # 3. cut to size
+
     ch_middel = get_middel_channel(receiver)  # get start and end channel:
     data = data[:, ch_middel-20:ch_middel+20]
 
     if raw:
         # 4. downsample in time
-        data = resample(data, headers['fs'] / 400)
-        headers['fs'] = 400
+        data = resample(data, headers["fs"] / 400)
+        headers["fs"] = 400
 
     # 5. bandpasfilter and normalize
     for i in range(data.shape[1]):
-        data[:, i] = butter_bandpass_filter(data[:,i], 1, 120, fs=headers['fs'], order=4)
+        data[:, i] = butter_bandpass_filter(data[:,i], 1, 120, fs=headers["fs"], order=4)
         #data[:,i] = data[:,i] / np.abs(data[:,i]).max()
         data[:, i] = data[:,i] / np.std(data[:, i])
 
@@ -126,22 +129,24 @@ def compute_moving_coherence(data, bin_size):
 
 
 #experiments = os.listdir('experiments/')
-experiments = ["03_accumulation_horizontal", "04_accumulation_vertical", "10_random_borehole"]
-data_types = ['accumulation/0706_AJP', 'ablation/0706_RA88']
+experiments = ["01_ablation_horizontal", "02_ablation_vertical", "03_accumulation_horizontal", "04_accumulation_horizontal",
+               "05_combined200", "06_combined800", "07_retrained_combined200", "08_retrained_combined800"]
+experiments = experiments[0:1]
+data_types = ["accumulation"]
 
 for experiment in experiments: # for every experiment
 
-    with open('experiments/' + experiment + '/cc_evaluation_' + experiment[:2] + '.csv', mode='w', newline='') as file:
+    with open("experiments/" + experiment + "/cc_evaluation_" + experiment[:2] + ".csv", mode="w", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(
-            ['id', 'mean_cc_gain', 'mean_cross_gain', 'zone', 'model'])
+            ["id", "mean_cc_gain", "mean_cross_gain", "zone", "model"])
 
         for data_type in data_types:  # for every data type
 
-            seis_data_path = 'data/seismometer_test_data/' + data_type
+            seis_data_path = "data/test_data/" + data_type
             seismometer_events = os.listdir(seis_data_path)
 
-            '''
+            """
             
             id:                 id des events, wie auch in experiments/model_name/plots zu finden ist
             mean_cc_gain:       local waveform coherence: es gibt für jedes event n (= Anzahl channel) viele gg_gain Werte.
@@ -150,7 +155,7 @@ for experiment in experiments: # for every experiment
                                 und der crosscorrelation gain berechnet. Der Mittwelwert über alle channel wird abgespeichert.
             zone:               ablation or accumulation zone
             model:              model mit welchem die denoisten Werte denoist wurde.
-            '''
+            """
 
             # for every seismometer event
             for seismometer_event in seismometer_events:
@@ -158,27 +163,27 @@ for experiment in experiments: # for every experiment
 
                 event_time = seismometer_event[-23:-15]
                 event_date = seismometer_event[-34:-24]
-                id = re.search(r'ID:(\d+)', seismometer_event).group(1)
-                receiver = ''
-                zone = ''
+                id = re.search(r"ID:(\d+)", seismometer_event).group(1)
+                receiver = ""
+                zone = ""
 
                 if data_type[:2] == "ab":
                     receiver = seismometer_event[-14:-10]
-                    zone = 'ablation'
+                    zone = "ablation"
                 elif data_type[:2] == "ac":
                     receiver = seismometer_event[-12:-9]
-                    zone = 'accumulation'
+                    zone = "accumulation"
                 else:
                     print("ERROR: No matching data type")
 
 
                 # pick time window:
-                t_start = datetime.strptime(event_date + ' ' + event_time + '.0', '%Y-%m-%d %H:%M:%S.%f')
+                t_start = datetime.strptime(event_date + " " + event_time + ".0", "%Y-%m-%d %H:%M:%S.%f")
                 t_start = t_start - timedelta(seconds=3)
                 t_end = t_start + timedelta(seconds=6)
 
                 # load seismometer data:
-                seis_stream = read(seis_data_path + '/' + seismometer_event)
+                seis_stream = read(seis_data_path + "/" + seismometer_event)
                 seis_data = seis_stream[0].data
                 seis_stats = seis_stream[0].stats
 
@@ -192,17 +197,17 @@ for experiment in experiments: # for every experiment
                 seis_data = seis_data / np.std(seis_data)
 
                 # load raw DAS data:
-                raw_folder_path = 'data/raw_DAS/0706/'
+                raw_folder_path = "data/raw_DAS/"
                 raw_data, raw_headers, raw_axis = load_das_data(folder_path =raw_folder_path, t_start = t_start, t_end = t_end, receiver = receiver, raw = True)
 
                 # load denoised DAS data
-                denoised_folder_path = 'experiments/' + experiment + '/denoisedDAS/0706/'
+                denoised_folder_path = "experiments/" + experiment + "/denoisedDAS/"
                 denoised_data, denoised_headers, denoised_axis = load_das_data(folder_path =denoised_folder_path, t_start = t_start, t_end = t_end, receiver = receiver, raw = False)
 
 
-                '''
+                """
                 Calculate CC Gain
-                '''
+                """
 
                 t_window_start = 688
                 t_window_end = t_window_start + 1024
@@ -213,9 +218,9 @@ for experiment in experiments: # for every experiment
                 cc_gain = denoised_cc / raw_cc
 
 
-                '''
+                """
                 Calculate CC between DAS and Seismometer: 
-                '''
+                """
                 raw_cc_seis_total = []
                 denoised_cc_seis_total = []
 

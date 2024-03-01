@@ -1,8 +1,5 @@
 """
 
-Denoising Seismometer Data:
-We want to denoise the data from receiver RA82 -> the corresponding channel is alwas masked
-
 
 """
 import os
@@ -47,7 +44,7 @@ for event in events:
 
     starttime = UTCDateTime("2020-07-27T" + event_time + ".0")
     starttime = starttime - timedelta(seconds=3)
-    endtime = starttime + timedelta(seconds=6)
+    endtime = starttime + timedelta(seconds=8)
 
     # Loading corresponding data to denoise:
     stream = read(seismometer_path + "4D.RA81..EHZ.D.2020.209", starttime=starttime, endtime=endtime)
@@ -80,7 +77,7 @@ for event in events:
 
     plt.figure(figsize=(15, 10))
     for i in range(data.shape[0]):
-        plt.plot(data[i]+12 * i, color="black", alpha=0.6)
+        plt.plot(data[i]+12 * i, color="black", alpha=0.6, )
     plt.plot(data_borehole + 12 * (data.shape[0] + 1), color="red")
     plt.show()
 
@@ -99,29 +96,42 @@ for event in events:
     for i in range(N_ch):
         masks[i, i] = 0
 
-    # Generate eval_samples: (shape bei denoising_DAS ist (832, 11, 1024, 1))
-    # wir brauchen Shape (8, 8, 1024, 1)
-    data = data[:, 400:400+1024]
-    data = np.expand_dims(data, -1)
-    print(data.shape)
-    eval_samples = np.zeros_like(masks)
-    for i in range(8):
-        eval_samples[i] = data
 
-    print(eval_samples.shape)
+    res = np.zeros((N_ch, 3*1024))
+    for n in range(3):
+        # Generate eval_samples:
+        sub_section = data[:, n*1024:(1+n)*1024]
+        sub_section = np.expand_dims(sub_section, -1)
+        eval_samples = np.zeros_like(masks)
+        for i in range(N_ch):
+            eval_samples[i] = sub_section
+
+        # Denoise data
+        model_output=model.predict((eval_samples, masks)) # denoised_data ist auch gleicher shape wie oben
+        model_output = np.squeeze(model_output)
+        seismometer_reconstructions = np.zeros((N_ch, N_t))
+        for i in range(N_ch):
+            seismometer_reconstructions[i] = np.sum(model_output[i], axis=0)
+
+        res[:, n*1024:(1+n)*1024] = seismometer_reconstructions
 
 
+    for i in range(res.shape[0]):
+        print(i)
+        res[i] = butter_bandpass_filter(res[i], 1, 120, fs=400, order=4)
+        res[i] /= np.std(res[i])
 
-
-    # Denoise data
-    denoised_data=model.predict((eval_samples, masks)) # denoised_data ist auch gleicher shape wie oben
-    # Reshape denoised data:
-    denoised_data = np.squeeze(denoised_data)
-    denoised_data = denoised_data[1, :, :]
-
+    # plot data:
     plt.figure(figsize=(15, 10))
-    for i in range(denoised_data.shape[0]):
-        plt.plot(denoised_data[i] + 1 * i, color="black", alpha=0.6)
-    plt.plot(data_borehole + 1 * (denoised_data.shape[0] + 1), color="red")
+    for i in range(res.shape[0]):
+        plt.plot(res[i] + 12 * i, color="black", alpha=0.6)
+    plt.plot(data_borehole + 12 * (res.shape[0] + 1), color="red")
     plt.show()
     # Save denoised data
+
+
+
+    """
+    TODO: 
+    filtering denoised data and normalize denoised data!! 
+    """

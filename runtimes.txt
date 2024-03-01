@@ -1,13 +1,13 @@
-
-09_borehole_seismometer_(3,5): 1 Stunden, 51 Minuten und 10.675944 Sekunden
-09_borehole_seismometer_(5,20): 3 Stunden, 33 Minuten und 14.912218 Sekunden
-09_borehole_seismometer_(8,50): 9 Stunden, 16 Minuten und 11.935963 Sekunden
-
 01_ablation_horizontal: 3 Stunden, 15 Minuten und 57.301003 Sekunden
 02_ablation_vertical: 3 Stunden, 16 Minuten und 07.882458 Sekunden
 03_accumulation_horizontal: 3 Stunden, 16 Minuten und 18.286058 Sekunden
 04_accumulation_vertical: 3 Stunden, 16 Minuten und 25.907447 Sekunden
 05_combined200: 3 Stunden, 16 Minuten und 19.898600 Sekunden
-Retraining 07_retrained_combined200 took 0 hours, 02 minutes und 24.196342 seconds
-09_borehole_seismometer: 3 Stunden, 15 Minuten und 38.632027 Sekunden
 06_combined800: 3 Stunden, 56 Minuten und 01.696660 Sekunden
+07_retrained_combined200 took 0 hours, 02 minutes und 24.196342 seconds
+08_retrained_combined800 took 0 hours, 02 minutes und 30.860825 seconds
+09_borehole_seismometer: 3 Stunden, 15 Minuten und 38.632027 Sekunden
+10_borehole_seismometer_(3,5): 1 Stunden, 51 Minuten und 10.675944 Sekunden
+11_borehole_seismometer_(5,20): 3 Stunden, 33 Minuten und 14.912218 Sekunden
+12_borehole_seismometer_(8,50): 9 Stunden, 16 Minuten und 11.935963 Sekunden
+

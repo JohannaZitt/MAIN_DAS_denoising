@@ -49,9 +49,9 @@ def denoise_file (file, timesamples, model, N_sub, fs_trainingdata):
     DAS_data = DAS_data.T
     DAS_data = DAS_data.astype("f")
     # resample data
-    print(DAS_data.shape)
+
     DAS_data = resample(DAS_data, headers["fs"] / 400)
-    print(DAS_data.shape)
+
     # preprocessing
     lowcut: int = 1
     highcut = 120
@@ -103,13 +103,9 @@ def denoise_file (file, timesamples, model, N_sub, fs_trainingdata):
                 eval_samples[i, j, :] = eval_samples[i, j, :] - np.mean(eval_samples[i, j, :])
 
 
-        print(masks.shape)
-        print(eval_samples.shape)
-
         # Create J-invariant reconstructions
         results = model.predict((eval_samples, masks))
 
-        print(results.shape)
         DAS_reconstructions[n] = np.sum(results, axis=1)[:, :, 0]
 
     # reshape data into original shape
@@ -145,10 +141,10 @@ def deal_with_artifacts(data, filler = 0, Nt=1024):
 
 
 models_path = 'experiments'
-#model_names = os.listdir(models_path)
-#model_names = ["01_ablation_horizontal", "02_ablation_vertical", "03_accumulation_horizontal", "04_accumulation_vertical",
-#               "05_combined200", "06_combined800", "07_retrained_combined200", "09_borehole_seismometer"]
-model_names = ["06_combined800", "07_retrained_combined200", "09_borehole_seismometer"]
+model_names = os.listdir(models_path)
+model_names = ["01_ablation_horizontal", "02_ablation_vertical", "03_accumulation_horizontal", "04_accumulation_vertical",
+               "05_combined200", "06_combined800", "07_retrained_combined200", "09_borehole_seismometer"]
+#model_names = ["08_retrained_combined800"]
 
 
 raw_das_folder_path = "data/raw_DAS"

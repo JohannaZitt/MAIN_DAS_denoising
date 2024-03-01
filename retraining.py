@@ -25,8 +25,8 @@ N_sub = 11
 batch_size = 32
 batch_multiplier = 10
 N_epoch = 200
-pretrained_model_name = "05_combined200"
-model_name = "07_retrained_combined200_2"
+pretrained_model_name = "06_combined800"
+model_name = "08_retrained_combined800"
 trainingdata = "data/training_data/preprocessed_DAS/retraining_data.npy"
 
 # Load pretrained Model:
@@ -60,10 +60,10 @@ train_generator = DataGeneratorDAS(X=train_data, N_sub=N_sub, batch_multiplier=b
 test_generator = DataGeneratorDAS(X=test_data, N_sub=N_sub, batch_multiplier=batch_multiplier, batch_size=batch_size)
 print("Done")
 
-#for i in range(630, 640):
-#    for j in range(11):
-#        plt.plot(train_generator.samples[i][j] + 8 * j, color="black", alpha=0.5)
-#    plt.show()
+for i in range(630, 640):
+    for j in range(11):
+        plt.plot(train_generator.samples[i][j] + 8 * j, color="black", alpha=0.5)
+    plt.show()
 
 
 start = time.time()

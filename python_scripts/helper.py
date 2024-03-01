@@ -57,7 +57,7 @@ with open("../surface_event_times.txt", "w") as file:
             
 '''
 
-""" Download DAS test
+""" Download DAS test"""
 
 # Access to Nextcloud Server via generated App Password
 options = {
@@ -67,11 +67,14 @@ options = {
 }
 client = Client(options)
 
-file = "rhone1khz_UTC_20200804_001220.542.h5"
+files = ["rhone1khz_UTC_20200727_162938.575.h5", "rhone1khz_UTC_20200727_093338.575.h5","rhone1khz_UTC_20200727_193008.575.h5","rhone1khz_UTC_20200727_175208.575.h5","rhone1khz_UTC_20200727_141638.575.h5",
+         "rhone1khz_UTC_20200727_030108.575.h5","rhone1khz_UTC_20200727_141908.575.h5","rhone1khz_UTC_20200727_145708.575.h5","rhone1khz_UTC_20200727_095838.575.h5","rhone1khz_UTC_20200727_062038.575.h5"
+         ,"rhone1khz_UTC_20200727_112738.575.h5","rhone1khz_UTC_20200727_232308.575.h5","rhone1khz_UTC_20200727_124008.575.h5","rhone1khz_UTC_20200727_101408.575.h5","rhone1khz_UTC_20200727_001708.575.h5"]
+for file in files:
 
-remote_path = 'environment-earth/Projects/Rhonegletscher/Data/no_backup/DAS_2020/20200804/' + file
-local_path = "helper_folder/" + file
+    remote_path = 'environment-earth/Projects/Rhonegletscher/Data/no_backup/DAS_2020/20200727/' + file
+    local_path = "helper_folder/" + file
+    print("download file ", file)
+    client.download(remote_path=remote_path , local_path=local_path)
 
-client.download(remote_path=remote_path , local_path=local_path)
-"""
 

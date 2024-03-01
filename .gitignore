@@ -11,3 +11,5 @@ experiments/03_accumulation_horizontal/denoisedDAS
 experiments/04_accumulation_vertical/denoisedDAS
 experiments/05_combined200/denoisedDAS
 experiments/06_combined800/denoisedDAS
+experiments/07_retrained_combined200/denoisedDAS
+experiments/09_borehole_seismometer/denoisedDAS
