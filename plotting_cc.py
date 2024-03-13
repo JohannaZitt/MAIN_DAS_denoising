@@ -4,8 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
-experiments = os.listdir("old/experiments")
-experiments.sort()
+#experiments = os.listdir("experiments")
+experiments = ["01_ablation_horizontal", "02_ablation_vertical", "03_accumulation_horizontal", "04_accumulation_vertical",
+               "05_combined200", "06_combined800", "07_retrained_combined200", "08_retrained_combined800",
+               "09_borehole_seismometer"]
 values_ablation_cc_gain = {}
 values_ablation_cc_gain_seis = {}
 values_accumulation_cc_gain = {}
@@ -18,7 +20,7 @@ Extract Data:
 '''
 for experiment in experiments:
 
-    csv_path = os.path.join("old/experiments", experiment, "cc_evaluation_" + experiment[0:2] + ".csv")
+    csv_path = os.path.join("experiments", experiment, "cc_evaluation_" + experiment[0:2] + ".csv")
 
     with open(csv_path, "r") as file:
 
@@ -43,7 +45,60 @@ for experiment in experiments:
     values_accumulation_cc_gain[experiment[3:]] = np.mean(accumulation_cc_gain)
     values_accumulation_cc_gain_seis[experiment[3:]] = np.mean(accumulation_cc_gain_seis)
 
-print(values_ablation_cc_gain)
+'''
+
+Plot - cc_seis and local cc seperated
+
+'''
+
+datatypes = ["local", "seis"]
+for datatype in datatypes:
+
+    # Data:
+    labels = ["Ablation\nHorizontal", "Ablation\nVertical", "Accumulation\nHorizontal", "Accumulation\nVertical"
+              , "Combined 200", "Combined 800", "Retrained\nCombined 200", "Retrained\nCombined 800", "Borehole"]
+
+    if datatype == "local":
+        acc_cc_gain = list(values_accumulation_cc_gain.values())
+        abl_cc_gain = list(values_ablation_cc_gain.values())
+        label = "Local Waveform Coherence Gain []"
+    else:
+        acc_cc_gain = list(values_accumulation_cc_gain_seis.values())
+        abl_cc_gain = list(values_ablation_cc_gain_seis.values())
+        label = "Cross Correlation Seismometer Gain []"
+
+    # Params:
+    col_acc = "#008B93"
+    col_abl = "#DF575F"
+    width = 0.2  # Breite der Balken
+    x = np.arange(len(labels))  # x-Koordinaten für die Balken
+    fontsize = 12
+    gain = 2 #fontsize gain
+
+    plt.figure(figsize=(13, 6))
+    plt.grid(axis="y", zorder = 0)
+    plt.bar(x - 0.5 * width, abl_cc_gain, width=width, label="Ablation", color=col_abl, zorder=3)
+    plt.bar(x + 0.5 * width, acc_cc_gain, width=width, label="Accumulation", color=col_acc, zorder=3)
+
+    plt.axhline(y=1, color="blue", zorder=4)
+    # Achsenbeschriftungen und Titel hinzufügen
+    plt.ylabel(label, fontsize=fontsize+gain)
+    plt.yticks((0.5, 1, 1.5, 2, 2.5), (0.5, 1.0, 1.5, 2.0, 2.5), fontsize=fontsize)
+    plt.legend(fontsize=fontsize+gain, frameon=False, ncol=1, loc="upper left")
+    plt.xticks(x, labels, rotation=20, fontsize=fontsize+1)
+
+
+    # Diagramm anzeigen
+
+    plt.tight_layout()
+    #plt.show()
+    plt.savefig("plots/cc/" + datatype + ".png", dpi=250)
+
+
+
+
+
+
 
 '''
 
@@ -96,54 +151,6 @@ plt.legend(custom_lines, ['Accumulation Local', 'Accumulation Seis', 'Ablation L
 #plt.show()
 plt.savefig('plots/cc/all_in_one.png')
 '''
-
-'''
-
-Plot - cc_seis and local cc seperated
-
-'''
-
-datatypes = ["local", "seis"]
-for datatype in datatypes:
-
-    # Data:
-    labels = ["Ablation\nHorizontal", "Ablation\nVertical", "Accumulation\nHorizontal", "Accumulation\nVertical"
-              , "Combined 120", "Combined 480", "Random 480", "Random\nBorehole 480"]
-
-    if datatype == "local":
-        acc_cc_gain = list(values_accumulation_cc_gain.values())
-        abl_cc_gain = list(values_ablation_cc_gain.values())
-        label = "Local Waveform Coherence Gain []"
-    else:
-        acc_cc_gain = list(values_accumulation_cc_gain_seis.values())
-        abl_cc_gain = list(values_ablation_cc_gain_seis.values())
-        label = "Cross Correlation Seismometer Gain []"
-
-    # Params:
-    col_acc = "#008B93"
-    col_abl = "#DF575F"
-    width = 0.2  # Breite der Balken
-    x = np.arange(len(labels))  # x-Koordinaten für die Balken
-    fontsize = 12
-
-    plt.figure(figsize=(10, 6))
-    plt.grid(axis='y', zorder = 0)
-    plt.bar(x - 0.5 * width, abl_cc_gain, width=width, label='Ablation', color=col_abl, zorder=3)
-    plt.bar(x + 0.5 * width, acc_cc_gain, width=width, label='Accumulation', color = col_acc, zorder = 3)
-
-    plt.axhline(y=1, color = "blue", zorder=4)
-    # Achsenbeschriftungen und Titel hinzufügen
-    plt.ylabel(label, fontsize=fontsize)
-    plt.yticks(fontsize=fontsize)
-    plt.xticks(x, labels, rotation=15, fontsize=fontsize)
-    plt.legend(fontsize=fontsize, frameon = False, ncol = 2)
-
-    # Diagramm anzeigen
-    plt.show()
-    #plt.savefig("plots/cc/" + datatype + ".png")
-
-
-
 
 
 

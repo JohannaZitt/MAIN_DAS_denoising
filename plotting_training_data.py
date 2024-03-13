@@ -24,7 +24,7 @@ def resample(stream, ratio):
         data[i] = stream[i].data[0:n_t]
 
     # resample
-    res = np.zeros((data.shape[0], int(data.shape[1]/ ratio) + 1))
+    res = np.zeros((data.shape[0], int(data.shape[1]/ratio) + 1))
     for i in range(data.shape[0]):
         res[i] = np.interp(np.arange(0, len(data[0]), ratio), np.arange(0, len(data[0])), data[i])
 
@@ -34,63 +34,79 @@ def butter_bandpass(lowcut, highcut, fs, order=4):
     nyq = 0.5 * fs
     low = lowcut / nyq
     high = highcut / nyq
-    b, a = butter(order, [low, high], btype = 'band')
+    b, a = butter(order, [low, high], btype = "band")
     return b, a
-def butter_bandpass_filter(data, lowcut, highcut, fs, order = 4):
-    b, a = butter_bandpass(lowcut, highcut, fs, order = order)
+def butter_bandpass_filter(data, lowcut, highcut, fs, order=4):
+    b, a = butter_bandpass(lowcut, highcut, fs, order=order)
     y = lfilter(b, a, data)
     return y
 
-event_path= "old/raw_seismometer/"
-events=["ablation_horizontal_stick_slip/ID:59_2020-08-04_00:27:46_RA88_EH2.mseed", "ablation_horizontal_surface/ID:46_2020-07-30_11:52:46_RA88_EH3.mseed",
-        "ablation_vertical_stick_slip/ID:12_2020-08-03_23:44:33_RA88_EHZ.mseed", "ablation_vertical_surface/ID:12_2020-07-23_11:39:19_RA82_EHZ.mseed",
-        "accumulation_horizontal_stick_slip/ID:29_2020-07-12_00:09:12_c0AKU_p2.mseed", "accumulation_horizontal_surface/ID:20_2020-07-27_13:27:42_c0ALH_p2.mseed",
-        "accumulation_vertical_stick_slip/ID:18_2020-07-15_16:52:08_c0AJP_p0.mseed", "accumulation_vertical_surface/ID:40_2020-07-15_10:40:55_c0AKU_p0.mseed"]
-titels = ["Ablation - Horizontal - Stick-Slip", "Ablation - Horizontal - Surface", "Ablation - Vertical - Stick-Slip", "Ablation - Vertical - Surface",
-          "Accumulation - Horizontal - Stick-Slip", "Accumulation - Horizontal - Surface", "Accumulation - Vertical - Stick-Slip", "Accumulation - Vertical - Surface"]
-t_start = [950, 950, 1050, 900, 1050, 1200, 900, 1100]
+event_path= "data/training_data/raw_seismometer_trainingdata/"
+events=["01_ablation_horizontal/ID:0_2020-07-25_07:20:54_RA83_EH3.mseed",
+        "01_ablation_horizontal/ID:49_2020-07-24_08:00:44_RA82_EH2.mseed",
+        "02_ablation_vertical/ID:0_2020-07-23_13:10:53_RA81_EHZ.mseed",
+        "02_ablation_vertical/ID:49_2020-07-26_15:59:44_RA84_EHZ.mseed",
+        "03_accumulation_horizontal/ID:0_2020-07-23_11:45:30_c0AJP_p1.mseed",
+        "03_accumulation_horizontal/ID:49_2020-07-23_19:32:29_c0AJP_p1.mseed",
+        "04_accumulation_vertical/ID:0_2020-07-25_08:58:04_c0ALH_p0.mseed",
+        "04_accumulation_vertical/ID:49_2020-07-26_19:41:17_c0ALH_p0.mseed",
+        "09_borehole_seismometer/ID:0_2020-07-23_15:31:32_RA91_EH2.mseed",
+        "09_borehole_seismometer/ID:49_2020-07-24_03:33:29_RA92_EHZ.mseed"]
+
+title1 = "Highest Amplitude"
+title2 = "Lowest Amplitude"
+t_start = [1100, 1000, 850, 800, 950, 1100, 1100, 1100, 900, 1100]
 t = 500
-fontsize = 12
-letters = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p"]
+fontsize = 13
+gain = 2
+rotation = 90
+letters = ["a", "b", "c", "d", "e", "f", "g",
+           "h", "j", "k", "l", "m", "n", "o", "p"]
 letter_params = {
     "fontsize": fontsize,
     "verticalalignment": "top",
     "bbox": {"edgecolor": "k", "linewidth": 1, "facecolor": "w",}
 }
 
-fig, axes = plt.subplots(4, 2, figsize=(12,8))
+fig, axes = plt.subplots(5, 2, figsize=(10,8))
 
 for i, event in enumerate(events):
     # load data:
     stream = read(os.path.join(event_path, event))
 
-    print(stream[0].stats)
-
     # preprocessing data: resample and filter:
-    if stream[0].stats["sampling_rate"] == 500:
-        stream = resample(stream, 500/400)
+    if not stream[0].stats["sampling_rate"] == 400:
+        stream = resample(stream, stream[0].stats["sampling_rate"]/400)
     data = stream[0].data
     data = butter_bandpass_filter(data, lowcut=1, highcut=120, fs=400, order=4)
-    data = data / np.std(data)
+    data = data / np.std(data) # Data is normalized -> the amplitudes in the plot are distorted
 
     # plot data:
     row = i // 2
     col = i % 2
 
-    axes[row, col].plot(data[t_start[i]:t_start[i]+t], color="black", linewidth=1)
-    axes[row, col].set_title(titels[i])
+    axes[row, col].plot(data[t_start[i]:t_start[i]+t], color="black", linewidth=1, alpha=0.8)
     axes[row, col].set_yticks([])
     axes[row, col].text(x=0.0, y=1.0, transform=axes[row, col].transAxes, s=letters[i], **letter_params)
-    #axes[row, col].set_ylim(-30, 30)
+    axes[row, col].set_ylim(-32, 32)
 
-    if col==0:
-        axes[row, col].set_ylabel("ground velocity [norm]", fontsize=fontsize-2)
+    axes[0, 0].set_ylabel("Ablation\nHorizontal",  fontsize=fontsize)
+    axes[1, 0].set_ylabel("Ablation\nVertical",  fontsize=fontsize)
+    axes[2, 0].set_ylabel("Accumulation\nHorizontal",  fontsize=fontsize)
+    axes[3, 0].set_ylabel("Accumulation\nVertical",  fontsize=fontsize)
+    axes[4, 0].set_ylabel("Borehole",  fontsize=fontsize)
 
-    if row==3:
-        axes[row, col].set_xticks([0, 100, 200, 300, 400, 500], [0, 0.25, 0.5, 0.75, 1, 1.25], fontsize = fontsize-2)
-        axes[row, col].set_xlabel("Time [s]", fontsize=fontsize-2)
+
+    if row==0:
+        axes[row, 0].set_title(title1, fontsize=fontsize+gain)
+        axes[row, 1].set_title(title2, fontsize=fontsize+gain)
+
+    if row==4:
+        axes[row, col].set_xticks([0, 100, 200, 300, 400, 500], [0, 0.25, 0.5, 0.75, 1, 1.25], fontsize=fontsize)
+        axes[row, col].set_xlabel("Time [s]", fontsize=fontsize)
     else:
         axes[row, col].set_xticks([])
 
 plt.tight_layout()
 plt.show()
+#plt.savefig("plots/training_data_samples.png", dpi=250)
