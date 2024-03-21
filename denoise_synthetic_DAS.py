@@ -69,7 +69,7 @@ def plot_das_data(data):
     i = 0
     plt.figure(figsize=(20, 12))
     for ch in range(channels):
-        plt.plot(data[ch][:] + 12 * i, '-k', alpha=alpha)
+        plt.plot(data[ch][:] + 12 * i, "-k", alpha=alpha)
         i += 1
     plt.show()
 
@@ -87,15 +87,21 @@ def deal_with_artifacts(data, filler = 0, Nt=1024):
 
 
 #model_names = os.listdir('experiments')
-model_names = ["03_accumulation_horizontal", "04_accumulation_vertical", "10_random_borehole"]
+model_names = ["01_ablation_horizontal", "02_ablation_vertical", "03_accumulation_horizontal", "04_accumulation_vertical", "05_combined200", "06_combined800", "09_borehole_seismometer"]
 
-data_path = 'data/synthetic_DAS/from_DAS/'
+data_path = "data/synthetic_DAS/from_DAS/"
 data_files = os.listdir(data_path)
 
 for model_name in model_names:
 
+    print("##############################################################")
+    print("##############################################################")
+    print("############### " + model_name + " ####################")
+    print("##############################################################")
+    print("##############################################################")
+
     # 1. Load model
-    model = keras.models.load_model("experiments/" + model_name + '/' + model_name + '.h5')
+    model = keras.models.load_model("experiments/" + model_name + "/" + model_name + ".h5")
 
     for data_file in data_files:
 
@@ -108,11 +114,11 @@ for model_name in model_names:
         #plot_das_data(raw_data)
         #plot_das_data(denoised_data)
 
-        saving_path = 'experiments/' + model_name + '/denoised_' + data_path[5:]
+        saving_path = "experiments/" + model_name + "/denoised_" + data_path[5:]
         if not os.path.isdir(saving_path):
             os.makedirs(saving_path)
 
-        np.save(saving_path + '/denoised_' + data_file.split('/')[-1], denoised_data)
+        np.save(saving_path + "/denoised_" + data_file.split("/")[-1], denoised_data)
 
 
 

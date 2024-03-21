@@ -99,7 +99,7 @@ def plot_data(raw_data, denoised_data, seis_data, seis_stats, data_type, saving_
     fs = 400
     alpha = 0.7
     alpha_dashed_line = 0.2
-    plot_title = id + ": " + data_type + ", " + str(seis_stats["starttime"]) + ' - ' + str(seis_stats["endtime"]) + ', ' + str(seis_stats["station"])
+    plot_title = "ID: " + id + ": " + data_type + ", " + str(seis_stats["starttime"]) + ' - ' + str(seis_stats["endtime"]) + ', ' + str(seis_stats["station"])
 
     fig, ax = plt.subplots(2, 2, figsize=(20, 12), gridspec_kw={"height_ratios": [5, 1]})
     fig.suptitle(plot_title, x=0.2, size=font_s)
@@ -170,12 +170,21 @@ def plot_data(raw_data, denoised_data, seis_data, seis_stats, data_type, saving_
 
 
 #experiments = os.listdir('experiments/')
-experiments = ["01_ablation_horizontal"]
-data_types = ["ablation"]
+experiments = ["08_retrained_combined800"]
+data_types = ["ablation", "accumulation"]
 
 for experiment in experiments: # for every experiment
 
+    print("##############################################################")
+    print("############### ", experiment, " ###################")
+    print("##############################################################")
+
+
     for data_type in data_types:  # for every data type
+
+        print("##############################################################")
+        print("############### ", data_type, " ###################")
+        print("##############################################################")
 
         seis_data_path = "data/test_data/" + data_type
         seismometer_events = os.listdir(seis_data_path)
@@ -189,7 +198,7 @@ for experiment in experiments: # for every experiment
                 receiver = seismometer_event[-14:-10]
                 event_time = seismometer_event[-23:-15]
                 event_date = seismometer_event[-34:-24]
-                id = ''
+                #id = ''
             elif data_type[:2] == "ac":
                 receiver = seismometer_event[-12:-9]
                 event_time = seismometer_event[-23:-15]
@@ -217,16 +226,16 @@ for experiment in experiments: # for every experiment
             denoised_folder_path = "experiments/" + experiment + "/denoisedDAS/"
             denoised_data, denoised_headers, denoised_axis = load_das_data(folder_path =denoised_folder_path, t_start = t_start, t_end = t_end, receiver = receiver, raw = False)
 
-            saving_path = os.path.join("old/experiments", experiment, "plots", data_type)
+            saving_path = os.path.join("experiments", experiment, "plots", data_type)
             if not os.path.isdir(saving_path):
                 os.makedirs(saving_path)
 
-            #saving_path += "/" + seismometer_event  # when the plot should be depicted, set saving_path = None
-            saving_path = None
+            saving_path += "/" + seismometer_event[:-6]  # when the plot should be depicted, set saving_path = None
+            #saving_path = None
 
             # Plotting Data
             id = re.search(r"ID:(\d+)_", seismometer_event).group(1)
-            if saving_path is None or not os.path.exists(saving_path + ".png"):
+            if saving_path is None or not os.path.exists(saving_path+".png"):
                 print("Event wird geplottet")
                 plot_data(raw_data.T, denoised_data.T, seis_data, seis_stats, data_type, saving_path, id)
             else:
