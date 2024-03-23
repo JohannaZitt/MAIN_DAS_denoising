@@ -5,12 +5,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def extract_id(filename):
-    id = re.search(r'ID:(\d+)', filename).group(1)
+    id = re.search(r"ID:(\d+)", filename).group(1)
     return id
 
 
 def extract_SNR(filename):
-    snr_pattern = re.compile(r'SNR:(\d+(\.\d+)?)\.npy')
+    snr_pattern = re.compile(r"SNR:(\d+(\.\d+)?)\.npy")
     match = re.search(snr_pattern, filename)
     return float(match.group(1))
 
@@ -21,23 +21,25 @@ def plot_das_data(data):
     i = 0
     plt.figure(figsize=(10, 8))
     for ch in range(channels):
-        plt.plot(data[ch][:] + 15 * i, '-k', alpha=alpha)
+        plt.plot(data[ch][:] + 15 * i, "-k", alpha=alpha)
         i += 1
 
     plt.show()
 
 
-'''
+"""
 Estemate Velocity of waveform
 
-'''
+"""
 
 data_path = "data/synthetic_DAS/from_DAS/cleanDAS_ID:34_SNR:0.npy"
 data = np.load(os.path.join(data_path))
 data = data[47:55,1080:1115]
 
+experiment = "03_accumulation_horizontal"
+
 print(data.shape)
-plot_das_data(data)
+#plot_das_data(data)
 
 
 
@@ -48,10 +50,10 @@ Single Waveform Comparison - Seis
 
 
 event_id = 46 # 37, 46, 48, 96
-SNR_values = [0.0, 0.3, 1.0, 3.2, 10.0] # 0.0, 0.3, 1.0, 3.2, 10.0, 31.6, 100.0
+SNR_values = [0.0, 1.0, 3.2, 10.0] # 0.0, 0.3, 1.0, 3.2, 10.0, 31.6, 100.0
 
 
-data_path = "data/synthetic_DAS/from_seis_data"
+data_path = "data/synthetic_DAS/from_seis"
 event_names_all = os.listdir(data_path)
 event_names = [event_name for event_name in event_names_all if str(event_id) == extract_id(event_name)]
 
@@ -69,8 +71,8 @@ event_names.append(first_event)
 event_names = event_names[::-1]
 
 # Loading Denoised Data
-experiment = "08_combined480"
-denoised_data_path = os.path.join("experiments", experiment, "denoised_synthetic_DAS", "from_seis_data")
+experiment = "03_accumulation_horizontal"
+denoised_data_path = os.path.join("experiments", experiment, "denoised_synthetic_DAS", "from_seis")
 denoised_event_names = []
 for event_name in event_names:
     denoised_event_names.append("denoised_" + event_name)
@@ -78,9 +80,9 @@ for event_name in event_names:
 
 t_start = 1050
 t_end = 1250
-channel = 30
+channel = 28#29
 alpha = 0.8
-fontsize = 12
+fontsize = 14
 
 
 fig, axs = plt.subplots(1, len(event_names), figsize=(18, 4))
@@ -90,8 +92,8 @@ for i, event_name in enumerate(event_names):
     denoised_data = np.load(os.path.join(denoised_data_path, denoised_event_names[i]))[channel, t_start:t_end]
 
     # Plot Data
-    axs[i].plot(data, color="black", linewidth=1, label="Noise Coruppted")
-    axs[i].plot(denoised_data, color="red", linewidth=1, label="Denoised")
+    axs[i].plot(data, color="red", alpha=0.5, linewidth=1, label="Noise Coruppted")
+    axs[i].plot(denoised_data, color="black", linewidth=1, label="Denoised")
 
     # Achses
     axs[i].set_ylim([-22, 22])
@@ -99,7 +101,8 @@ for i, event_name in enumerate(event_names):
     axs[i].set_yticks([])
     if i == 0:
         axs[i].set_ylabel("Strain Rate [norm]", fontsize=fontsize)
-        axs[i].legend(fontsize=fontsize-2, loc="lower left")
+    if i == 3:
+        axs[i].legend(fontsize=fontsize) #, loc="lower left"
 
 
 
@@ -123,8 +126,8 @@ for i, event_name in enumerate(event_names):
 plt.tight_layout()
 #plt.savefig("plots/synthetics/seis_wiggle_comparison.png")
 plt.show()
-
 '''
+
 
 '''
 
@@ -154,7 +157,7 @@ event_names.append(first_event)
 event_names = event_names[::-1]
 
 # Loading Denoised Data
-experiment = "08_combined480"
+experiment = "03_accumulation_horizontal"
 denoised_data_path = os.path.join("experiments", experiment, "denoised_synthetic_DAS", "from_DAS")
 denoised_event_names = []
 for event_name in event_names:
@@ -165,18 +168,18 @@ t_start = 950
 t_end = 1250
 channel = 32#32
 alpha = 0.8
-fontsize = 12
+fontsize = 14
 
 
-fig, axs = plt.subplots(1, len(event_names), figsize=(14, 4))
+fig, axs = plt.subplots(1, len(event_names), figsize=(18, 4))
 for i, event_name in enumerate(event_names):
     # Laden der Daten
     data = np.load(os.path.join(data_path, event_name))[channel, t_start:t_end]
     denoised_data = np.load(os.path.join(denoised_data_path, denoised_event_names[i]))[channel, t_start:t_end]
 
     # Plot Data
-    axs[i].plot(data, color="black", linewidth=1, label="Noise Coruppted")
-    axs[i].plot(denoised_data, color="red", linewidth=1, label="Denoised")
+    axs[i].plot(data, color="red", alpha=0.5, linewidth=1, label="Noise Coruppted")
+    axs[i].plot(denoised_data, color="black", linewidth=1, label="Denoised")
 
     # Achses
     axs[i].set_ylim([-12, 12])
@@ -184,7 +187,8 @@ for i, event_name in enumerate(event_names):
     axs[i].set_yticks([])
     if i == 0:
         axs[i].set_ylabel("Strain Rate [norm]", fontsize=fontsize)
-        axs[i].legend(fontsize=fontsize-2)
+    if i == 3:
+        axs[i].legend(fontsize=fontsize)
 
 
 
@@ -206,14 +210,15 @@ for i, event_name in enumerate(event_names):
     axs[i].text(x=0.5, y=1.03, transform=axs[i].transAxes, s=snr_values[i], fontsize=fontsize + 2, ha="center")
 
 plt.tight_layout()
-plt.savefig("plots/synthetics/das_wiggle_comparison.png")
+#plt.savefig("plots/synthetics/das_wiggle_comparison.png")
 plt.show()
-'''
-
 
 '''
 
-Single Waveform Comparison DAS
+'''
+
+Single Waveforms DAS
+
 
 
 
@@ -239,7 +244,6 @@ event_names.append(first_event)
 event_names = event_names[::-1]
 
 # Loading Denoised Data
-experiment = "08_combined480"
 denoised_data_path = os.path.join("experiments", experiment, "denoised_synthetic_DAS", "from_DAS")
 denoised_event_names = []
 for event_name in event_names:
@@ -292,10 +296,9 @@ for j in range(len(event_names)):
         axs[i, j].text(x=0.0, y=1.0, transform=axs[i, j].transAxes, s=letters[i*len(event_names)+j], **letter_params)
 
 plt.tight_layout()
-plt.savefig("plots/synthetics/das_single_waveform.png")
-#plt.show()
+#plt.savefig("plots/synthetics/das_single_waveform.png")
+plt.show()
 '''
-
 
 '''
 
@@ -304,10 +307,10 @@ Single Waveform Comparison Seis
 
 
 event_id = 46 # 37, 46, 48, 96
-SNR_values = [0.0, 0.3, 1.0, 3.2, 10.0] # 0.0, 0.3, 1.0, 3.2, 10.0, 31.6, 100.0
+SNR_values = [0.0, 1.0, 3.2, 10.0] # 0.0, 0.3, 1.0, 3.2, 10.0, 31.6, 100.0
 
 
-data_path = "data/synthetic_DAS/from_seis_data"
+data_path = "data/synthetic_DAS/from_seis"
 event_names_all = os.listdir(data_path)
 event_names = [event_name for event_name in event_names_all if str(event_id) == extract_id(event_name)]
 
@@ -325,8 +328,7 @@ event_names.append(first_event)
 event_names = event_names[::-1]
 
 # Loading Denoised Data
-experiment = "08_combined480"
-denoised_data_path = os.path.join("experiments", experiment, "denoised_synthetic_DAS", "from_seis_data")
+denoised_data_path = os.path.join("experiments", experiment, "denoised_synthetic_DAS", "from_seis")
 denoised_event_names = []
 for event_name in event_names:
     denoised_event_names.append("denoised_" + event_name)
@@ -334,7 +336,7 @@ for event_name in event_names:
 
 t_start = 1050
 t_end = 1250
-channel = 30
+channel = 28
 alpha = 0.8
 fontsize = 12
 
@@ -397,7 +399,7 @@ for j in range(len(event_names)):
 
 plt.tight_layout()
 plt.savefig("plots/synthetics/seis_single_waveform.png")
-#plt.show()
+plt.show()
 
 '''
 
@@ -412,7 +414,7 @@ event_id = 46 # 37, 46, 48, 96
 SNR_values = [0.0, 0.3, 1.0, 3.2] # 0.0, 0.3, 1.0, 3.2, 10.0, 31.6, 100.0
 
 
-data_path = "data/synthetic_DAS/from_seis_data"
+data_path = "data/synthetic_DAS/from_seis"
 event_names_all = os.listdir(data_path)
 event_names = [event_name for event_name in event_names_all if str(event_id) == extract_id(event_name)]
 
@@ -430,10 +432,10 @@ event_names.append(first_event)
 event_names = event_names[::-1]
 
 # Loading Denoised Data
-experiment1 = "07_combined120"
-experiment2 = "08_combined480"
-denoised_data_path1 = os.path.join("experiments", experiment1, "denoised_synthetic_DAS", "from_seis_data")
-denoised_data_path2 = os.path.join("experiments", experiment2, "denoised_synthetic_DAS", "from_seis_data")
+experiment1 = "03_accumulation_horizontal"
+experiment2 = "06_combined800"
+denoised_data_path1 = os.path.join("experiments", experiment1, "denoised_synthetic_DAS", "from_seis")
+denoised_data_path2 = os.path.join("experiments", experiment2, "denoised_synthetic_DAS", "from_seis")
 denoised_event_names1 = []
 denoised_event_names2 = []
 for event_name in event_names:
@@ -443,13 +445,14 @@ for event_name in event_names:
 
 t_start = 800
 t_end = 1500
-ch_start = 30
-ch_end = 50
-alpha = 0.8
-fontsize = 14
+ch_start = 20
+ch_end = ch_start+15
+ch_black = 28 - ch_start
+alpha = 0.5
+fontsize = 13
 
 # Erstellen von Subplots mit Größe (15, 12)
-fig, axs = plt.subplots(len(event_names), 3, figsize=(13, 16))
+fig, axs = plt.subplots(len(event_names), 3, figsize=(11, 14))
 
 for i, event_name in enumerate(event_names):
     # Laden der Daten
@@ -460,28 +463,48 @@ for i, event_name in enumerate(event_names):
     # Erste Spalte für noisy Daten:
     n = 0
     for ch in range(data.shape[0]):
+        print(ch)
         if i == 0:
-            axs[i, 0].plot(data[ch][:] + 20 * n, '-k', alpha=alpha)
+            if ch == ch_black:
+                axs[i, 0].plot(data[ch][:] + 20 * n, '-k')
+            else:
+                axs[i, 0].plot(data[ch][:] + 20 * n, '-k', alpha=alpha)
         else:
-            axs[i, 0].plot(data[ch][:] + 12 * n, '-k', alpha=alpha)
+            if ch == ch_black:
+                axs[i, 0].plot(data[ch][:] + 12 * n, '-k')
+            else:
+                axs[i, 0].plot(data[ch][:] + 12 * n, '-k', alpha=alpha)
+
         n += 1
 
     # Zweite Spalte für denoised_data1
     n = 0
     for ch in range(denoised_data1.shape[0]):
         if i == 0:
-            axs[i, 1].plot(denoised_data1[ch][:] + 20 * n, '-k', alpha=alpha)
+            if ch == ch_black:
+                axs[i, 1].plot(denoised_data1[ch][:] + 20 * n, '-k')
+            else:
+                axs[i, 1].plot(denoised_data1[ch][:] + 20 * n, '-k', alpha=alpha)
         else:
-            axs[i, 1].plot(denoised_data1[ch][:] + 12 * n, '-k', alpha=alpha)
+            if ch == ch_black:
+                axs[i, 1].plot(denoised_data1[ch][:] + 12 * n, '-k')
+            else:
+                axs[i, 1].plot(denoised_data1[ch][:] + 12 * n, '-k', alpha=alpha)
         n += 1
 
     # Dritte Spalte für denoised_data2
     n = 0
     for ch in range(denoised_data2.shape[0]):
         if i == 0:
-            axs[i, 2].plot(denoised_data2[ch][:] + 20 * n, '-k', alpha=alpha)
+            if ch == ch_black:
+                axs[i, 2].plot(denoised_data2[ch][:] + 20 * n, '-k')
+            else:
+                axs[i, 2].plot(denoised_data2[ch][:] + 20 * n, '-k', alpha=alpha)
         else:
-            axs[i, 2].plot(denoised_data2[ch][:] + 12 * n, '-k', alpha=alpha)
+            if ch == ch_black:
+                axs[i, 2].plot(denoised_data2[ch][:] + 12 * n, '-k')
+            else:
+                axs[i, 2].plot(denoised_data2[ch][:] + 12 * n, '-k', alpha=alpha)
         n += 1
 
     # y-Achsen:
@@ -489,9 +512,9 @@ for i, event_name in enumerate(event_names):
     axs[i, 2].set_yticks([])
     axs[i, 0].set_ylabel("Offset [m]", fontsize=fontsize)
     if i == 0:
-        axs[i, 0].set_yticks([0, 80, 160, 240, 320], [0, 48, 96, 144, 192], fontsize=fontsize)
+        axs[i, 0].set_yticks([0, 80, 160, 240], [0, 48, 96, 144], fontsize=fontsize)
     else:
-        axs[i, 0].set_yticks([0, 50, 100, 150, 200], [0, 48, 96, 144, 192], fontsize=fontsize)
+        axs[i, 0].set_yticks([0, 50, 100, 150], [0, 48, 96, 144], fontsize=fontsize)
 
     # x-Achsen:
     for j in range(3):
@@ -502,14 +525,14 @@ for i, event_name in enumerate(event_names):
         axs[3, j].set_xlabel("Time [s]", fontsize=fontsize)
 
 # Beschriftung Plot
-axs[0, 0].text(30, 350, "No Noise Added", bbox=dict(facecolor='white'), fontsize=fontsize)
-axs[1, 0].text(30, 210, "SNR: 3.2", bbox=dict(facecolor='white'), fontsize=fontsize)
-axs[2, 0].text(30, 210, "SNR: 1.0", bbox=dict(facecolor='white'), fontsize=fontsize)
-axs[3, 0].text(30, 210, "SNR: 0.3", bbox=dict(facecolor='white'), fontsize=fontsize)
+axs[0, 0].text(30, 240, "No Noise Added", bbox=dict(facecolor='white'), fontsize=fontsize)
+axs[1, 0].text(30, 150, "SNR: 3.2", bbox=dict(facecolor='white'), fontsize=fontsize)
+axs[2, 0].text(30, 150, "SNR: 1.0", bbox=dict(facecolor='white'), fontsize=fontsize)
+axs[3, 0].text(30, 150, "SNR: 0.3", bbox=dict(facecolor='white'), fontsize=fontsize)
 
-axs[0, 0].text(40, 430, "Synthetic Corrupted Data", fontsize=fontsize)
-axs[0, 1].text(60, 430, "Denoised with " + experiment1[3:].capitalize(), fontsize=fontsize)
-axs[0, 2].text(60, 430, "Denoised with " + experiment2[3:].capitalize(), fontsize=fontsize)
+axs[0, 0].text(40, 330, "Synthetic Corrupted Data", fontsize=fontsize)
+axs[0, 1].text(60, 320, "Denoised with Acc_Horiz", fontsize=fontsize) #+ experiment1[3:].capitalize()
+axs[0, 2].text(45, 320, "Denoised with Combined 800", fontsize=fontsize) #+ experiment2[3:].capitalize()
 
 plt.tight_layout()
 plt.savefig("plots/synthetics/Seis_synthetic_denoised1_denoised2.png")
@@ -519,7 +542,7 @@ plt.savefig("plots/synthetics/Seis_synthetic_denoised1_denoised2.png")
 
 '''
 Plotting Synthetic Data DAS - Section Plots
-
+'''
 
 
 event_id = 34 # 0, 17, 34, 44
@@ -546,8 +569,8 @@ event_names = event_names[::-1]
 
 # Loading Denoised Data
 #experiment = "08_combined480"
-experiment1 = "07_combined120"
-experiment2 = "08_combined480"
+experiment1 = "01_ablation_horizontal"
+experiment2 = "06_combined800"
 denoised_data_path1 = os.path.join("experiments", experiment1, "denoised_synthetic_DAS", "from_DAS")
 denoised_data_path2 = os.path.join("experiments", experiment2, "denoised_synthetic_DAS", "from_DAS")
 denoised_event_names1 = []
@@ -561,11 +584,13 @@ t_start = 800
 t_end = 1500
 ch_start = 20
 ch_end = 62
-alpha = 0.8
-fontsize = 14
+alpha = 0.5
+fontsize = 13
+linewidth=0.8
+ch_black = 32
 
 # Erstellen von Subplots mit Größe (15, 12)
-fig, axs = plt.subplots(len(event_names), 3, figsize=(13, 16))
+fig, axs = plt.subplots(len(event_names), 3, figsize=(11, 14))
 
 for i, event_name in enumerate(event_names):
     # Laden der Daten
@@ -576,27 +601,36 @@ for i, event_name in enumerate(event_names):
     # Erste Spalte für noisy Daten:
     n = 0
     for ch in range(data.shape[0]):
-        axs[i, 0].plot(data[ch][:] + 12 * n, '-k', alpha=alpha)
+        if ch == ch_black:
+            axs[i, 0].plot(data[ch][:] + 12 * n, '-k', linewidth=linewidth)
+        else:
+            axs[i, 0].plot(data[ch][:] + 12 * n, '-k', linewidth=linewidth, alpha=alpha)
         n += 1
 
     # Zweite Spalte für denoised_data1
     n = 0
     for ch in range(denoised_data1.shape[0]):
-        axs[i, 1].plot(denoised_data1[ch][:] + 12 * n, '-k', alpha=alpha)
+        if ch == ch_black:
+            axs[i, 1].plot(denoised_data1[ch][:] + 12 * n, '-k', linewidth=linewidth)
+        else:
+            axs[i, 1].plot(denoised_data1[ch][:] + 12 * n, '-k', linewidth=linewidth, alpha=alpha)
         n += 1
 
 
     # Dritte Spalte für denoised_data2
     n = 0
     for ch in range(denoised_data2.shape[0]):
-        axs[i, 2].plot(denoised_data2[ch][:] + 12 * n, '-k', alpha=alpha)
+        if ch == ch_black:
+            axs[i, 2].plot(denoised_data2[ch][:] + 12 * n, '-k', linewidth=linewidth)
+        else:
+            axs[i, 2].plot(denoised_data2[ch][:] + 12 * n, '-k', linewidth=linewidth, alpha=alpha)
         n += 1
 
     # y-Achsen:
     axs[i, 1].set_yticks([])
     axs[i, 2].set_yticks([])
     axs[i, 0].set_ylabel("Offset [m]", fontsize=fontsize)
-    axs[i, 0].set_yticks(range(0, 501, 100), range(0, 8*12*5+1, 8*12), fontsize=fontsize)
+    axs[i, 0].set_yticks(range(0, 501, 100), [0, 64, 128, 192, 256, 320], fontsize=fontsize)
 
     # x-Achsen:
     for j in range(3):
@@ -609,15 +643,15 @@ for i, event_name in enumerate(event_names):
 
 # Beschriftung Plot
 x = 30
-y = 498
+y = 495
 axs[0, 0].text(x, y, "No Noise Added", bbox=dict(facecolor='white'), fontsize=fontsize)
 axs[1, 0].text(x, y, "SNR: 10.0", bbox=dict(facecolor='white'), fontsize=fontsize)
 axs[2, 0].text(x, y, "SNR: 3.2", bbox=dict(facecolor='white'), fontsize=fontsize)
 axs[3, 0].text(x, y, "SNR: 1.0", bbox=dict(facecolor='white'), fontsize=fontsize)
 
 axs[0, 0].text(40, 560, "Synthetic Corrupted Data", fontsize=fontsize)
-axs[0, 1].text(60, 560, "Denoised with " + experiment1[3:].capitalize(), fontsize=fontsize)
-axs[0, 2].text(60, 560, "Denoised with " + experiment2[3:].capitalize(), fontsize=fontsize)
+axs[0, 1].text(60, 560, "Denoised with Acc_Horiz", fontsize=fontsize) #+ experiment1[3:].capitalize()
+axs[0, 2].text(60, 560, "Denoised with Combined800", fontsize=fontsize) #+ experiment2[3:].capitalize()
 
 # Beschriftungen
 letters = ["a", "b", "c", "d", "e", "f", "g", "h", "j", "k", "l", "m", "n", "o", "p"]
@@ -634,10 +668,10 @@ for i in range(4):
 
 
 plt.tight_layout()
-#plt.savefig("plots/synthetics/DAS_synthetic_denoised1_denoised2.png")
-plt.show()
+plt.savefig("plots/synthetics/DAS_synthetic_denoised1_denoised2.png")
+#plt.show()
 
-'''
+
 
 
 

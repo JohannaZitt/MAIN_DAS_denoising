@@ -23,7 +23,7 @@ def load_das_data(folder_path, t_start, t_end, raw):
 
     # 1. load data
     data, headers, axis = load_das_h5.load_das_custom(t_start, t_end, input_dir=folder_path, convert=False)
-    data = data.astype('f')
+    data = data.astype("f")
 
     # 2. downsample data in space:
     if raw:
@@ -31,7 +31,7 @@ def load_das_data(folder_path, t_start, t_end, raw):
             data = data[:,::4]
         else:
             data = data[:, ::2]
-        headers['dx'] = 8
+        headers["dx"] = 8
 
     # 3. cut to size
     ch_middel = int(3460/4) # get start and end channel:
@@ -39,12 +39,12 @@ def load_das_data(folder_path, t_start, t_end, raw):
 
     if raw:
         # 4. downsample in time
-        data = resample(data, headers['fs'] / 400)
-        headers['fs'] = 400
+        data = resample(data, headers["fs"] / 400)
+        headers["fs"] = 400
 
     # 5. bandpasfilter and normalize
     for i in range(data.shape[1]):
-        data[:, i] = butter_bandpass_filter(data[:,i], 1, 120, fs=headers['fs'], order=4)
+        data[:, i] = butter_bandpass_filter(data[:,i], 1, 120, fs=headers["fs"], order=4)
         data[:,i] = data[:,i] / np.std(data[:,i])
 
     return data.T, headers, axis
@@ -55,7 +55,7 @@ def plot_das_data(data):
     i = 0
     plt.figure(figsize=(20, 12))
     for ch in range(channels):
-        plt.plot(data[ch][:] + 12 * i, '-k', alpha=alpha)
+        plt.plot(data[ch][:] + 12 * i, "-k", alpha=alpha)
         i += 1
     plt.show()
 
@@ -63,7 +63,7 @@ def butter_bandpass(lowcut, highcut, fs, order=4):
     nyq = 0.5 * fs
     low = lowcut / nyq
     high = highcut / nyq
-    b, a = butter(order, [low, high], btype='band')
+    b, a = butter(order, [low, high], btype="band")
     return b, a
 
 def butter_bandpass_filter(data, lowcut, highcut, fs, order=4):
@@ -71,7 +71,7 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=4):
     y = lfilter(b, a, data)
     return y
 
-def compute_shift(gauge = 8, slowness_max = True, fs = 400): # gauge is here channel spacing!
+def compute_shift(gauge = 12, slowness_max = True, fs = 400): # gauge is here channel spacing!
     if slowness_max:
         slowness = 1 / 1650 # S-wave slowness
     else:
@@ -91,7 +91,7 @@ SNR_values = [-1, 0, 1, 2, 3, 4]
 
 '''
 GENERATE SYNTHETIC DATA FROM DAS DATA:
-
+'''
 
 das_folder_path = 'data/raw_DAS/0706/'
 event_times = ['19:32:35.0', '20:41:46.0', '20:18:58.0', '19:42:24.0']
@@ -102,7 +102,7 @@ for n, event_time in enumerate(event_times):
     id = ids[n]
     for SNR in SNR_values:
         print(SNR)
-        t_start = datetime.strptime('2020-07-06 ' + event_time, '%Y-%m-%d %H:%M:%S.%f')
+        t_start = datetime.strptime("2020-07-06 " + event_time, "%Y-%m-%d %H:%M:%S.%f")
         t_end = t_start + timedelta(seconds=6)
         das_data, headers, axis = load_das_data(das_folder_path, t_start, t_end, raw=True)
         #plot_das_data(das_data)
@@ -122,9 +122,9 @@ for n, event_time in enumerate(event_times):
             synthetic_data[i] = synthetic_data[i] / np.std(synthetic_data[i])
 
         #plot_das_data(synthetic_data)
-        file_name = 'DAS_ID:' + str(id) + '_SNR:' + str(round(SNR, 1))
-        #np.save('/home/johanna/PycharmProjects/MAIN_DAS_denoising/data/synthetic_DAS/' + file_name, synthetic_data)
-    '''
+        file_name = "DAS_ID:" + str(id) + "_SNR:" + str(round(SNR, 1))
+        #np.save("/home/johanna/PycharmProjects/MAIN_DAS_denoising/data/synthetic_DAS/" + file_name, synthetic_data)
+
 
 
 
@@ -136,20 +136,20 @@ GENERATE SYNTHETIC DATA FROM SEISMOMETERS:
 
 
 # 1. einlesen der Daten:
-folder_path = 'data/synthetic_DAS/raw_seismometer/'
+folder_path = "data/synthetic_DAS/raw_seismometer/"
 data_paths = os.listdir(folder_path)
 
 for data_path in data_paths:
     print(data_path)
 
     # 1. read data
-    stream = read(folder_path + '/' + data_path)
+    stream = read(folder_path + "/" + data_path)
     stats = stream[0].stats
     data = stream[0].data
 
     # 2. downsample data:
-    if not stats['sampling_rate'] == fs:
-        print('DATA NEEDS TO BE DOWNSAMPLED')
+    if not stats["sampling_rate"] == fs:
+        print("DATA NEEDS TO BE DOWNSAMPLED")
 
     # 3. filter data:
     data = butter_bandpass_filter(data, lowcut=lowcut, highcut=highcut, fs=fs, order=4)
@@ -184,12 +184,12 @@ for data_path in data_paths:
             # normalize data:
             synthetic_data[i] = synthetic_data[i] / np.std(synthetic_data[i])
 
-        #plot_das_data(synthetic_data)
+        plot_das_data(synthetic_data)
 
-        print('SHAPE: ', synthetic_data.shape)
+        print("SHAPE: ", synthetic_data.shape)
 
         # savedata
-        # file_name = data_path.split('/')[-1][0:5] + '_SNR:' + str(round(SNR, 1)) + '.npy'
-        # np.save('/home/johanna/PycharmProjects/MAIN_DAS_denoising/data/synthetic_DAS/from_seis_data/' + file_name, synthetic_data)
+        file_name = data_path.split("/")[-1][0:5] + "_SNR:" + str(round(SNR, 1)) + ".npy"
+        np.save("/home/johanna/PycharmProjects/MAIN_DAS_denoising/data/synthetic_DAS/from_seis_data/" + file_name, synthetic_data)
 
 

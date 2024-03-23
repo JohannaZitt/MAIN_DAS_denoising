@@ -88,8 +88,9 @@ def deal_with_artifacts(data, filler = 0, Nt=1024):
 
 #model_names = os.listdir('experiments')
 model_names = ["01_ablation_horizontal", "02_ablation_vertical", "03_accumulation_horizontal", "04_accumulation_vertical", "05_combined200", "06_combined800", "09_borehole_seismometer"]
+data_type = "from_seis"
 
-data_path = "data/synthetic_DAS/from_DAS/"
+data_path = "data/synthetic_DAS/"+data_type+"/"
 data_files = os.listdir(data_path)
 
 for model_name in model_names:
