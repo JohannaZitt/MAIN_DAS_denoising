@@ -75,14 +75,8 @@ for event in events:
     data_borehole /= data_borehole.std()
 
 
-    plt.figure(figsize=(15, 10))
-    for i in range(data.shape[0]):
-        plt.plot(data[i]+12 * i, color="black", alpha=0.6, )
-    plt.plot(data_borehole + 12 * (data.shape[0] + 1), color="red")
-    plt.show()
-
     # Load Model:
-    model_name = "12_borehole_seismometer_850"
+    model_name = "11_borehole_seismometer_520"
     model_file = os.path.join("experiments", model_name, model_name + ""'.h5')
     model = keras.models.load_model(model_file)
 
@@ -121,17 +115,40 @@ for event in events:
         res[i] = butter_bandpass_filter(res[i], 1, 120, fs=400, order=4)
         res[i] /= np.std(res[i])
 
-    # plot data:
+    # plot raw data
+
+    fontsize = 16
+    id = event[3:5]
+    data = data[:, 900:1900]
+    data_borehole = data_borehole[900:1900]
+    plt.figure(figsize=(15, 10))
+    for i in range(data.shape[0]):
+        plt.plot(data[i] + 12 * i, color="black", alpha=0.6, )
+    plt.plot(data_borehole + 12 * (data.shape[0] + 1), color="red")
+    plt.yticks([])
+    plt.ylabel("Ground velocity [norm]", fontsize=fontsize)
+    plt.xticks([0, 200, 400, 600, 800, 1000], [0, 0.5, 1.0, 1.5, 2.0, 2.5], fontsize=fontsize-2)
+    plt.xlabel("Time [s]", fontsize=fontsize)
+    plt.title("Raw: " + event, fontsize=fontsize+2)
+    plt.text(1, 112, "Borehole seismometer data: ", fontsize=fontsize)
+    plt.text(1, 92, "Surface seismometer data: ", fontsize=fontsize)
+    plt.savefig("experiments/11_borehole_seismometer_520/pics/" + id + "_raw.png")
+    plt.show()
+
+    # plot denoised data:
+    res = res[:, 900:1900]
     plt.figure(figsize=(15, 10))
     for i in range(res.shape[0]):
         plt.plot(res[i] + 12 * i, color="black", alpha=0.6)
     plt.plot(data_borehole + 12 * (res.shape[0] + 1), color="red")
+    plt.yticks([])
+    plt.ylabel("Ground velocity [norm]", fontsize=fontsize)
+    plt.xlabel("Time [s]", fontsize=fontsize)
+    plt.xticks([0, 200, 400, 600, 800, 1000], [0, 0.5, 1.0, 1.5, 2.0, 2.5], fontsize=fontsize-2)
+    plt.title("Denoised: " + event, fontsize=fontsize+2)
+    plt.text(1, 112, "Borehole seismometer data: ", fontsize=fontsize)
+    plt.text(1, 92, "Surface seismometer data: ", fontsize=fontsize)
+    plt.savefig("experiments/11_borehole_seismometer_520/pics/" + id + "_denoised.png")
     plt.show()
     # Save denoised data
 
-
-
-    """
-    TODO: 
-    filtering denoised data and normalize denoised data!! 
-    """
