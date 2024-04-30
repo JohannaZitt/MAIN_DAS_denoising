@@ -47,7 +47,7 @@ print(data.shape)
 
 Single Waveform Comparison - Seis
 
-
+'''
 
 event_id = 46 # 37, 46, 48, 96
 SNR_values = [0.0, 1.0, 3.2, 10.0] # 0.0, 0.3, 1.0, 3.2, 10.0, 31.6, 100.0
@@ -92,7 +92,7 @@ for i, event_name in enumerate(event_names):
     denoised_data = np.load(os.path.join(denoised_data_path, denoised_event_names[i]))[channel, t_start:t_end]
 
     # Plot Data
-    axs[i].plot(data, color="red", alpha=0.5, linewidth=1, label="Noise Coruppted")
+    axs[i].plot(data, color="red", alpha=0.5, linewidth=1, label="Noise Corrupted")
     axs[i].plot(denoised_data, color="black", linewidth=1, label="Denoised")
 
     # Achses
@@ -124,9 +124,9 @@ for i, event_name in enumerate(event_names):
     axs[i].text(x=0.5, y=1.03, transform=axs[i].transAxes, s=snr_values[i], fontsize=fontsize + 2, ha="center")
 
 plt.tight_layout()
-#plt.savefig("plots/synthetics/seis_wiggle_comparison.png")
-plt.show()
-'''
+plt.savefig("plots/synthetics/seis_wiggle_comparison.png", dpi=400)
+#plt.show()
+
 
 
 '''
@@ -178,7 +178,7 @@ for i, event_name in enumerate(event_names):
     denoised_data = np.load(os.path.join(denoised_data_path, denoised_event_names[i]))[channel, t_start:t_end]
 
     # Plot Data
-    axs[i].plot(data, color="red", alpha=0.5, linewidth=1, label="Noise Coruppted")
+    axs[i].plot(data, color="red", alpha=0.5, linewidth=1, label="Noise Corrupted")
     axs[i].plot(denoised_data, color="black", linewidth=1, label="Denoised")
 
     # Achses
@@ -210,10 +210,10 @@ for i, event_name in enumerate(event_names):
     axs[i].text(x=0.5, y=1.03, transform=axs[i].transAxes, s=snr_values[i], fontsize=fontsize + 2, ha="center")
 
 plt.tight_layout()
-#plt.savefig("plots/synthetics/das_wiggle_comparison.png")
+#plt.savefig("plots/synthetics/das_wiggle_comparison.png", dpi=400)
 plt.show()
-
 '''
+
 
 '''
 
@@ -299,6 +299,7 @@ plt.tight_layout()
 #plt.savefig("plots/synthetics/das_single_waveform.png")
 plt.show()
 '''
+
 
 '''
 
@@ -398,7 +399,7 @@ for j in range(len(event_names)):
         axs[i, j].text(x=0.0, y=1.0, transform=axs[i, j].transAxes, s=letters[i*len(event_names)+j], **letter_params)
 
 plt.tight_layout()
-plt.savefig("plots/synthetics/seis_single_waveform.png")
+#plt.savefig("plots/synthetics/seis_single_waveform.png")
 plt.show()
 
 '''
@@ -406,7 +407,7 @@ plt.show()
 
 '''
 
-Plotting Synthetic Data Seismometer - Section Plots
+Plotting Synthetic Data Seismometer - Section Plots - Two Denoised Versions
 
 
 
@@ -535,14 +536,262 @@ axs[0, 1].text(60, 320, "Denoised with Acc_Horiz", fontsize=fontsize) #+ experim
 axs[0, 2].text(45, 320, "Denoised with Combined 800", fontsize=fontsize) #+ experiment2[3:].capitalize()
 
 plt.tight_layout()
-plt.savefig("plots/synthetics/Seis_synthetic_denoised1_denoised2.png")
+#plt.savefig("plots/synthetics/Seis_synthetic_denoised1_denoised2.png")
+plt.show()
+'''
+
+'''
+
+Plotting Synthetic Data Seismometer - Section Plots - One Denoised Versions
+
+
+
+event_id = 46 # 37, 46, 48, 96
+SNR_values = [0.0, 1.0, 3.2, 10.0] # 0.0, 0.3, 1.0, 3.2, 10.0, 31.6, 100.0
+
+
+data_path = "data/synthetic_DAS/from_seis"
+event_names_all = os.listdir(data_path)
+event_names = [event_name for event_name in event_names_all if str(event_id) == extract_id(event_name)]
+
+remove_events = []
+for event_name in event_names:
+    if not extract_SNR(event_name) in SNR_values:
+        remove_events.append(event_name)
+
+for event in remove_events:
+    event_names.remove(event)
+
+event_names.sort(key=extract_SNR)
+first_event = event_names.pop(0)
+event_names.append(first_event)
+event_names = event_names[::-1]
+
+# Loading Denoised Data
+experiment1 = "03_accumulation_horizontal"
+denoised_data_path1 = os.path.join("experiments", experiment1, "denoised_synthetic_DAS", "from_seis")
+denoised_event_names1 = []
+
+for event_name in event_names:
+    denoised_event_names1.append("denoised_" + event_name)
+
+
+t_start = 1030
+t_end = 1230
+ch_start = 20
+ch_end = ch_start+15
+ch_black = 28 - ch_start
+alpha = 0.5
+fontsize = 13
+
+# Erstellen von Subplots mit Größe (15, 12)
+fig, axs = plt.subplots(len(event_names), 2, figsize=(9, 14))
+
+for i, event_name in enumerate(event_names):
+    # Laden der Daten
+    data = np.load(os.path.join(data_path, event_name))[ch_start:ch_end, t_start:t_end]
+    denoised_data1 = np.load(os.path.join(denoised_data_path1, denoised_event_names1[i]))[ch_start:ch_end, t_start:t_end]
+
+    # Erste Spalte für noisy Daten:
+    n = 0
+    for ch in range(data.shape[0]):
+        print(ch)
+        if i == 0:
+            if ch == ch_black:
+                axs[i, 0].plot(data[ch][:] + 20 * n, '-k')
+            else:
+                axs[i, 0].plot(data[ch][:] + 20 * n, '-k', alpha=alpha)
+        else:
+            if ch == ch_black:
+                axs[i, 0].plot(data[ch][:] + 12 * n, '-k')
+            else:
+                axs[i, 0].plot(data[ch][:] + 12 * n, '-k', alpha=alpha)
+
+        n += 1
+
+    # Zweite Spalte für denoised_data1
+    n = 0
+    for ch in range(denoised_data1.shape[0]):
+        if i == 0:
+            if ch == ch_black:
+                axs[i, 1].plot(denoised_data1[ch][:] + 20 * n, '-k')
+            else:
+                axs[i, 1].plot(denoised_data1[ch][:] + 20 * n, '-k', alpha=alpha)
+        else:
+            if ch == ch_black:
+                axs[i, 1].plot(denoised_data1[ch][:] + 12 * n, '-k')
+            else:
+                axs[i, 1].plot(denoised_data1[ch][:] + 12 * n, '-k', alpha=alpha)
+        n += 1
+
+    # y-Achsen:
+    axs[i, 1].set_yticks([])
+    axs[i, 0].set_ylabel("Offset [m]", fontsize=fontsize)
+    if i == 0:
+        axs[i, 0].set_yticks([0, 80, 160, 240], [0, 48, 96, 144], fontsize=fontsize)
+    else:
+        axs[i, 0].set_yticks([0, 50, 100, 150], [0, 48, 96, 144], fontsize=fontsize)
+
+    # x-Achsen:
+    for j in range(2):
+        axs[0, j].set_xticks([])
+        axs[1, j].set_xticks([])
+        axs[2, j].set_xticks([])
+        axs[3, j].set_xticks(range(0, 201, 100), [0, 0.25, 0.5], fontsize=fontsize)
+        axs[3, j].set_xlabel("Time [s]", fontsize=fontsize)
+
+# Beschriftung Plot
+x_dist = 7
+axs[0, 0].text(x_dist, 300, "No Noise Added", bbox=dict(facecolor='white'), fontsize=fontsize)
+axs[1, 0].text(x_dist, 177, "SNR: 10.0", bbox=dict(facecolor='white'), fontsize=fontsize)
+axs[2, 0].text(x_dist, 171, "SNR: 3.2", bbox=dict(facecolor='white'), fontsize=fontsize)
+axs[3, 0].text(x_dist, 171, "SNR: 1.0", bbox=dict(facecolor='white'), fontsize=fontsize)
+
+axs[0, 0].text(55, 340, "Noise Corrupted", fontsize=fontsize+2)
+axs[0, 1].text(80, 330, "Denoised", fontsize=fontsize+2) #+ experiment1[3:].capitalize()
+
+
+# Beschriftungen
+letters = ["a", "b", "c", "d", "e", "f", "g", "h", "j", "k", "l", "m", "n", "o", "p"]
+letter_params = {
+    "fontsize": fontsize,
+    "verticalalignment": "top",
+    "bbox": {"edgecolor": "k", "linewidth": 1, "facecolor": "w",}
+}
+
+for i in range(4):
+    for j in range(2):
+        axs[i, j].text(x=0.0, y=1.0, transform=axs[i, j].transAxes, s=letters[i*3+j], **letter_params)
+
+
+
+
+plt.tight_layout()
+plt.savefig("plots/synthetics/seis_synthetic_denoised1.png", dpi = 400)
+#plt.show()
+'''
+
+'''
+Plotting Synthetic Data DAS - Section Plots - One Denoised Version
+
+
+
+event_id = 34 # 0, 17, 34, 44
+SNR_values = [0.0, 1.0, 3.2, 10.0] # 0.0, 0.3, 1.0, 3.2, 10.0, 31.6, 100.0
+
+
+data_path = "data/synthetic_DAS/from_DAS"
+event_names_all = os.listdir(data_path)
+event_names = [event_name for event_name in event_names_all if str(event_id) == extract_id(event_name)]
+
+remove_events = []
+for event_name in event_names:
+    if not extract_SNR(event_name) in SNR_values:
+        remove_events.append(event_name)
+
+for event in remove_events:
+    event_names.remove(event)
+
+event_names.sort(key=extract_SNR)
+first_event = event_names.pop(0)
+event_names.append(first_event)
+event_names = event_names[::-1]
+
+
+# Loading Denoised Data
+#experiment = "08_combined480"
+experiment1 = "03_accumulation_horizontal"
+
+denoised_data_path1 = os.path.join("experiments", experiment1, "denoised_synthetic_DAS", "from_DAS")
+denoised_event_names1 = []
+for event_name in event_names:
+    denoised_event_names1.append("denoised_" + event_name)
+
+t_start = 950
+t_end = 1250
+ch_start = 24
+ch_end = 55
+alpha = 0.5
+fontsize = 13
+linewidth=0.8
+ch_black = 26
+
+# Erstellen von Subplots mit Größe (15, 12)
+fig, axs = plt.subplots(len(event_names), 2, figsize=(9, 14))
+
+for i, event_name in enumerate(event_names):
+    # Laden der Daten
+    data = np.load(os.path.join(data_path, event_name))[ch_start:ch_end, t_start:t_end]
+    denoised_data1 = np.load(os.path.join(denoised_data_path1, denoised_event_names1[i]))[ch_start:ch_end, t_start:t_end]
+
+    # Erste Spalte für noisy Daten:
+    n = 0
+    for ch in range(data.shape[0]):
+        if ch == ch_black:
+            axs[i, 0].plot(data[ch][:] + 12 * n, '-k', linewidth=linewidth)
+        else:
+            axs[i, 0].plot(data[ch][:] + 12 * n, '-k', linewidth=linewidth, alpha=alpha)
+        n += 1
+
+    # Zweite Spalte für denoised_data1
+    n = 0
+    for ch in range(denoised_data1.shape[0]):
+        if ch == ch_black:
+            axs[i, 1].plot(denoised_data1[ch][:] + 12 * n, '-k', linewidth=linewidth)
+        else:
+            axs[i, 1].plot(denoised_data1[ch][:] + 12 * n, '-k', linewidth=linewidth, alpha=alpha)
+        n += 1
+
+
+    # y-Achsen:
+    axs[i, 1].set_yticks([])
+    axs[i, 0].set_ylabel("Offset [m]", fontsize=fontsize)
+    axs[i, 0].set_yticks(range(0, 301, 100), [0, 64, 128, 192], fontsize=fontsize)
+
+    # x-Achsen:
+    for j in range(2):
+        axs[0, j].set_xticks([])
+        axs[1, j].set_xticks([])
+        axs[2, j].set_xticks([])
+        axs[3, j].set_xticks(range(0, 301, 100), [0, 0.25, 0.5, 0.75], fontsize=fontsize)
+        axs[3, j].set_xlabel("Time [s]", fontsize=fontsize)
+
+
+# Beschriftung Plot
+x = 14
+y = 364
+axs[0, 0].text(x, y+3, "No Noise Added", bbox=dict(facecolor='white'), fontsize=fontsize)
+axs[1, 0].text(x, y, "SNR: 10.0", bbox=dict(facecolor='white'), fontsize=fontsize)
+axs[2, 0].text(x, y, "SNR: 3.2", bbox=dict(facecolor='white'), fontsize=fontsize)
+axs[3, 0].text(x, y, "SNR: 1.0", bbox=dict(facecolor='white'), fontsize=fontsize)
+
+axs[0, 0].text(70, 410, "Noise Corrupted", fontsize=fontsize+2)
+axs[0, 1].text(90, 410, "Denoised", fontsize=fontsize+2) #+ experiment1[3:].capitalize()
+
+# Beschriftungen
+letters = ["a", "b", "c", "d", "e", "f", "g", "h", "j", "k", "l", "m", "n", "o", "p"]
+letter_params = {
+    "fontsize": fontsize,
+    "verticalalignment": "top",
+    "bbox": {"edgecolor": "k", "linewidth": 1, "facecolor": "w",}
+}
+
+for i in range(4):
+    for j in range(2):
+        axs[i, j].text(x=0.0, y=1.0, transform=axs[i, j].transAxes, s=letters[i*3+j], **letter_params)
+
+
+
+plt.tight_layout()
+plt.savefig("plots/synthetics/DAS_synthetic_denoised1.png", dpi=400)
 #plt.show()
 
 '''
 
+
 '''
-Plotting Synthetic Data DAS - Section Plots
-'''
+Plotting Synthetic Data DAS - Section Plots - Two Denoised Versions
+
 
 
 event_id = 34 # 0, 17, 34, 44
@@ -668,11 +917,10 @@ for i in range(4):
 
 
 plt.tight_layout()
-plt.savefig("plots/synthetics/DAS_synthetic_denoised1_denoised2.png")
-#plt.show()
+#plt.savefig("plots/synthetics/DAS_synthetic_denoised1_denoised2.png")
+plt.show()
 
-
-
+'''
 
 
 
