@@ -45,7 +45,7 @@ def load_das_data(folder_path, t_start, t_end, raw):
 
     # 3. cut to size
     ch_middel = int(3842/6)
-    data = data[:, ch_middel - 100:ch_middel + 80]
+    data = data[:, ch_middel - 40:ch_middel + 40]
 
     if raw:
         # 4. downsample in time
@@ -133,13 +133,17 @@ event_times = {0: "2020-07-27 08:17:34.5", # Category 1, Receiver ALH
                52: "2020-07-27 20:00:30.0", # Category 2, Receiver ALH
                67: "2020-07-27 23:17:54.0", # Category 2, Receiver ALH
                107: "2020-07-27 01:25:20.0", # Category 2, Receiver ALH
+
+               12: "2020-07-27 14:15:29.0", # Category 3, Receiver ALH
+               82: "2020-07-27 05:04:55.0", # Category 3, Receiver ALH
+               113: "2020-07-27 18:22:59.0" # Category 3, Receiver ALH
                }
 experiment = "03_accumulation_horizontal"
 
 raw_path = os.path.join("data", "raw_DAS/")
 denoised_path = os.path.join("experiments", experiment, "denoisedDAS/")
 
-id = 107
+id = 113
 event_time = event_times[id]
 t_start = datetime.strptime(event_time, "%Y-%m-%d %H:%M:%S.%f")
 t_end = t_start + timedelta(seconds=3)
@@ -221,10 +225,10 @@ plt.plot(X_seis[:, 0], X_seis[:, 1], color = "black")
 ax[2].invert_yaxis()
 plt.axvline(x=1, color="black", linestyle="dotted")
 plt.xlabel("CC gain []", fontsize = fs)
-plt.xticks([0, 1, 2, 3, 4], [0, 1, 2, 3, 4])
+plt.xticks([0, 1, 2, 3], [0, 1, 2, 3])
 plt.ylim(0, raw_denoised_cc.shape[0]-1)
 
 
 plt.subplots_adjust(wspace=0.05)
-plt.show()
-#plt.savefig("plots/waterfall/"+str(id)+"_waterfall.png", dpi=400)
+#plt.show()
+plt.savefig("plots/waterfall/"+str(id)+"_waterfall.png", dpi=400)
