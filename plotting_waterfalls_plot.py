@@ -29,7 +29,7 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=4):
     y = lfilter(b, a, data)
     return y
 
-def load_das_data(folder_path, t_start, t_end, raw):
+def load_das_data(folder_path, t_start, t_end, raw, channel_delta_start, channel_delta_end):
 
     # 1. load data
     data, headers, axis = load_das_h5.load_das_custom(t_start, t_end, input_dir=folder_path, convert=False)
@@ -45,7 +45,7 @@ def load_das_data(folder_path, t_start, t_end, raw):
 
     # 3. cut to size
     ch_middel = int(3842/6)
-    data = data[:, ch_middel - 40:ch_middel + 40]
+    data = data[:, ch_middel - channel_delta_start:ch_middel + channel_delta_end]
 
     if raw:
         # 4. downsample in time
@@ -119,37 +119,36 @@ def plot_das_data(data, type="nix"):
 # Mögliche Events, die man plotten kann:
 #  - 2020-07-06 19:10:51.0
 #  - 2020-07-06 19:11:34.0
+# ID : [starttime, start channel delta, end channel delta, category, closts seismometer, ]
+event_times = {0: ["2020-07-27 08:17:34.5", 40, 40, 1, "ALH"], # Category 1, Receiver ALH
+               5: ["2020-07-27 19:43:30.5", 45, 75, 1, "ALH"], # Category 1, Receiver ALH
+               11: ["2020-07-27 19:43:01.0", 1, "ALH"], # Category 1, Receiver ALH
+               35: ["2020-07-27 03:03:20.0", 1, "ALH"], # Category 1, Receiver ALH
+               83: ["2020-07-27 01:03:00.0", 1, "ALH"], # Category 1, Receiver ALH
 
-event_times = {0: "2020-07-27 08:17:34.5", # Category 1, Receiver ALH
-               5: "2020-07-27 19:43:30.0", # Category 1, Receiver ALH
-               11: "2020-07-27 19:43:01.0", # Category 1, Receiver ALH
-               35: "2020-07-27 03:03:20.0", # Category 1, Receiver ALH
-               83: "2020-07-27 01:03:00.0", # Category 1, Receiver ALH
+               9: ["2020-07-27 16:39:55.0", 2, "ALH"], # Category 2, Receiver ALH
+               20: ["2020-07-27 00:21:46.3", 30, 30, 2, "ALH"], # Category 2, Receiver ALH
+               24: ["2020-07-27 05:21:48.0", 2, "ALH"], # Category 2, Receiver ALH
+               36: ["2020-07-27 20:47:35.0", 2, "ALH"], # Category 2, Receiver ALH
+               52: ["2020-07-27 20:00:30.0", 2, "ALH"], # Category 2, Receiver ALH
+               67: ["2020-07-27 23:17:54.0", 2, "ALH"], # Category 2, Receiver ALH
+               107: ["2020-07-27 01:25:20.0", 2, "ALH"], # Category 2, Receiver ALH
 
-               9: "2020-07-27 16:39:55.0", # Category 2, Receiver ALH
-               20: "2020-07-27 00:21:46.0", # Category 2, Receiver ALH
-               24: "2020-07-27 05:21:48.0", # Category 2, Receiver ALH
-               36: "2020-07-27 20:47:35.0", # Category 2, Receiver ALH
-               52: "2020-07-27 20:00:30.0", # Category 2, Receiver ALH
-               67: "2020-07-27 23:17:54.0", # Category 2, Receiver ALH
-               107: "2020-07-27 01:25:20.0", # Category 2, Receiver ALH
-
-               12: "2020-07-27 14:15:29.0", # Category 3, Receiver ALH
-               82: "2020-07-27 05:04:55.0", # Category 3, Receiver ALH
-               113: "2020-07-27 18:22:59.0" # Category 3, Receiver ALH
+               82: ["2020-07-27 05:04:55.0", 80, 150, 3, "ALH"], # Category 3, Receiver ALH
+               113: ["2020-07-27 18:22:59.0", 3, "ALH"] # Category 3, Receiver ALH
                }
 experiment = "03_accumulation_horizontal"
 
 raw_path = os.path.join("data", "raw_DAS/")
 denoised_path = os.path.join("experiments", experiment, "denoisedDAS/")
 
-id = 113
-event_time = event_times[id]
+id = 82
+event_time = event_times[id][0]
 t_start = datetime.strptime(event_time, "%Y-%m-%d %H:%M:%S.%f")
-t_end = t_start + timedelta(seconds=3)
+t_end = t_start + timedelta(seconds=2)
 
-raw_data, raw_headers, raw_axis = load_das_data(raw_path, t_start, t_end, raw=True)
-denoised_data, denoised1_headers, denoised1_axis = load_das_data(denoised_path, t_start, t_end, raw=False)
+raw_data, raw_headers, raw_axis = load_das_data(raw_path, t_start, t_end, raw=True, channel_delta_start=event_times[id][1], channel_delta_end=event_times[id][2])
+denoised_data, denoised1_headers, denoised1_axis = load_das_data(denoised_path, t_start, t_end, raw=False, channel_delta_start=event_times[id][1], channel_delta_end=event_times[id][2])
 
 # Plot Data for Testing
 #plot_das_data(raw_data)
@@ -162,7 +161,7 @@ denoised_cc = compute_moving_coherence(denoised_data, bin_size)
 raw_denoised_cc = denoised_cc / raw_cc
 
 # Parameters for Plotting:
-cmap = "viridis" # verschiednene colormaps: cmocean.cm.curl, seismic, cividis, plasma, inferno, viridis
+cmap = "plasma" # verschiednene colormaps:  cividis, plasma, inferno, viridis, magma, (cmocean.cm.curl, seismic)
 t_start = 0
 t_end = denoised_data.shape[1]
 ch_start = 0
@@ -171,7 +170,7 @@ ch_ch_spacing = 12
 vmin=-7
 vmax=7
 fs = 16 # font size
-label = "main_icequake_cc_small_inferno"
+#label = "main_icequake_cc_small_inferno"
 
 # Basic Figure Settup:
 fig, ax = plt.subplots(1, 3,
@@ -179,14 +178,14 @@ fig, ax = plt.subplots(1, 3,
                            "width_ratios": [3, 3, 1],
                            "height_ratios": [1]},
                       sharey = False)
-fig.set_figheight(8)
-fig.set_figwidth(18)
+fig.set_figheight(6)
+fig.set_figwidth(14)
 ax[0].tick_params(axis="both", labelsize=fs)
 ax[1].tick_params(axis="both", labelsize=fs)
 ax[2].tick_params(axis="both", labelsize=fs)
-ax[0].set_title("Raw DAS Data", y=1.0, fontsize=fs+4)
-ax[1].set_title("Denoised DAS Data", y=1.0, fontsize=fs+4)
-ax[2].set_title("CC", y = 1.0, fontsize=fs+4)
+#ax[0].set_title("Raw DAS Data", y=1.0, fontsize=fs+4)
+#ax[1].set_title("Denoised DAS Data", y=1.0, fontsize=fs+4)
+#ax[2].set_title("CC", y = 1.0, fontsize=fs+4)
 ax[1].axes.yaxis.set_ticklabels([])
 ax[2].axes.yaxis.set_ticklabels([])
 ax[2].axes.xaxis.set_ticklabels([])
@@ -199,14 +198,14 @@ plt.imshow(raw_data, cmap=cmap, aspect="auto", interpolation="antialiased",
           vmin=vmin, vmax=vmax)
 plt.xlabel("Time [s]", fontsize=fs)
 plt.ylabel("Offset [km]", fontsize=fs)
-plt.xticks([0.5, 1, 1.5, 2, 2.5], [0.5, 1, 1.5, 2, 2.5])
+plt.xticks([0.5, 1, 1.5], [0.5, 1, 1.5])
 
 # Plotting Denoised Data
 plt.subplot(132)
 plt.imshow(denoised_data, cmap=cmap, aspect="auto", interpolation="antialiased",
           extent=(0 ,(t_end-t_start)/400,0,ch_end * ch_ch_spacing/1000),
           vmin=vmin, vmax=vmax)
-plt.xticks([0.5, 1, 1.5, 2, 2.5], [0.5, 1, 1.5, 2, 2.5])
+plt.xticks([0.5, 1, 1.5], [0.5, 1, 1.5])
 plt.xlabel("Time [s]", fontsize = fs)
 
 #cbar = plt.colorbar(location = 'right')
@@ -225,8 +224,19 @@ plt.plot(X_seis[:, 0], X_seis[:, 1], color = "black")
 ax[2].invert_yaxis()
 plt.axvline(x=1, color="black", linestyle="dotted")
 plt.xlabel("CC gain []", fontsize = fs)
-plt.xticks([0, 1, 2, 3], [0, 1, 2, 3])
+plt.xticks([0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5])
 plt.ylim(0, raw_denoised_cc.shape[0]-1)
+
+# Add letters in plots:
+letter_params = {
+        "fontsize": fs+2,
+        "verticalalignment": "top",
+        "bbox": {"edgecolor": "k", "linewidth": 1, "facecolor": "w",}
+    }
+letters = ["g", "h", "i"]
+for i in range(3):
+    ax[i].text(x=0.0, y=1.0, transform=ax[i].transAxes, s=letters[i], **letter_params)
+
 
 
 plt.subplots_adjust(wspace=0.05)
