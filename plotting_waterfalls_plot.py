@@ -119,7 +119,7 @@ def plot_das_data(data, type="nix"):
 # Mögliche Events, die man plotten kann:
 #  - 2020-07-06 19:10:51.0
 #  - 2020-07-06 19:11:34.0
-# ID : [starttime, start channel delta, end channel delta, category, closts seismometer, ]
+# ID : [starttime, start channel delta, end channel delta, category, closts seismometer]
 event_times = {0: ["2020-07-27 08:17:34.5", 40, 40, 1, "ALH"], # Category 1, Receiver ALH
                5: ["2020-07-27 19:43:30.5", 45, 75, 1, "ALH"], # Category 1, Receiver ALH
                11: ["2020-07-27 19:43:01.0", 1, "ALH"], # Category 1, Receiver ALH
@@ -240,5 +240,5 @@ for i in range(3):
 
 
 plt.subplots_adjust(wspace=0.05)
-#plt.show()
-plt.savefig("plots/waterfall/"+str(id)+"_waterfall.png", dpi=400)
+plt.show()
+#plt.savefig("plots/waterfall/"+str(id)+"_waterfall.png", dpi=400)
