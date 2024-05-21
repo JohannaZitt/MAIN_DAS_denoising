@@ -83,11 +83,133 @@ print(data.shape)
 plot_das_data(data)
 """
 
+""" imshow - synthetically corrupted DAS data """
+
+# Parameters:
+cmap = "plasma"
+vmin = -2
+vmax = 2
+ch_start = 10
+ch_end = 70
+wiggle_comparison_channel=32
+fs=12
+
+
+
+event_id = 34 # 0, 17, 34, 44
+SNR_values = [0.0, 1.0, 3.2, 10.0] # 0.0, 0.3, 1.0, 3.2, 10.0, 31.6, 100.0
+
+
+data_path = "data/synthetic_DAS/from_DAS"
+event_names_all = os.listdir(data_path)
+event_names = [event_name for event_name in event_names_all if str(event_id) == extract_id(event_name)]
+
+remove_events = []
+for event_name in event_names:
+    if not extract_SNR(event_name) in SNR_values:
+        remove_events.append(event_name)
+
+for event in remove_events:
+    event_names.remove(event)
+
+event_names.sort(key=extract_SNR)
+first_event = event_names.pop(0)
+event_names.append(first_event)
+event_names = event_names[::-1]
+
+experiment = "03_accumulation_horizontal"
+denoised_data_path = os.path.join("experiments", experiment, "denoised_synthetic_DAS", "from_DAS")
+denoised_event_names = []
+
+for event_name in event_names:
+    denoised_event_names.append("denoised_" + event_name)
+
+
+# Erstellen von Subplots mit Größe (15, 12)
+fig, axs = plt.subplots(len(event_names), 3, figsize=(9, 14), gridspec_kw={"width_ratios": [3, 3, 1]})
+
+for i, event_name in enumerate(event_names):
+    # Load Data:
+    data = np.load(os.path.join(data_path, event_name))[ch_start:ch_end]
+    data = data[:, 550:1750]
+    denoised_data = np.load(os.path.join(denoised_data_path, denoised_event_names[i]))[ch_start:ch_end]
+    denoised_data = denoised_data[:, 550:1750]
+
+    # Calculate CC
+    bin_size = 11
+    raw_cc = compute_moving_coherence(data, bin_size)
+    denoised_cc = compute_moving_coherence(denoised_data, bin_size)
+    raw_denoised_cc = denoised_cc / raw_cc
+    raw_denoised_cc = raw_denoised_cc[ch_start:ch_end]
+    x = np.arange(raw_denoised_cc.shape[0])
+    y_seis = raw_denoised_cc
+    X_seis = np.vstack((x, y_seis)).T
+    X_seis = np.vstack((X_seis[:, 1], X_seis[:, 0])).T
+
+    # Plotting Data:
+    axs[i, 0].imshow(data, cmap=cmap, aspect="auto", interpolation="antialiased",
+          vmin=vmin, vmax=vmax)
+    axs[i, 1].imshow(denoised_data, cmap=cmap, aspect="auto", interpolation="antialiased",
+                     vmin=vmin, vmax=vmax)
+    axs[i, 2].plot(X_seis[:, 0], X_seis[:, 1], color = "black")
+    axs[i, 2].axvline(x=1, color="black", linestyle="dotted")
+
+    # Label and Ticks
+    axs[i, 0].set_ylabel("Offset [m]", fontsize=fs)
+    axs[i, 0].set_yticks([59, 49, 39, 29, 19, 9], [0, 120, 240, 360, 480, 600])
+    axs[i, 1].set_yticks([59, 49, 39, 29, 19, 9], [0, 120, 240, 360, 480, 600])
+    axs[i, 1].set_yticklabels([])
+    axs[i, 2].set_yticks([])
+    axs[i, 2].set_xlim(0, 6)
+    axs[i, 2].set_ylim(0, raw_denoised_cc.shape[0]-1)
+
+    axs[i, 0].set_xticks([400, 800], [1.0, 2.0])
+    axs[i, 1].set_xticks([400, 800], [1.0, 2.0])
+    axs[i, 2].set_xticks([1, 3, 5])
+    if i == 3:
+        axs[i, 0].set_xlabel("Time [s]", fontsize=fs)
+        axs[i, 1].set_xlabel("Time [s]", fontsize=fs)
+        axs[i, 2].set_xlabel("LWC Gain [-]", fontsize=fs)
+    else:
+        axs[i, 0].set_xticklabels([])
+        axs[i, 1].set_xticklabels([])
+        axs[i, 2].set_xticklabels([])
+
+axs[0, 0].set_title("Raw Data", fontsize=fs+4, y=1.05)
+axs[0, 1].set_title("Denoised Data", fontsize=fs+4, y=1.05)
+axs[0, 2].set_title("LWC", fontsize=fs+4, y=1.05)
+
+# add patch:
+rect = patches.Rectangle((500, 28), 100, 1, linewidth=1.5, edgecolor="black", facecolor="none")
+axs[0, 0].add_patch(rect)
+
+# Add letters in plots:
+letter_params = {
+        "fontsize": fs+2,
+        "verticalalignment": "top",
+        "bbox": {"edgecolor": "k", "linewidth": 1, "facecolor": "w",}
+    }
+letters = ["a", "b", "c", "d", "e", "f", "g", "h", "j", "k", "l", "m"]
+snr_values = ["No Noise Added", "SNR: 10", "SNR: 3.2", "SNR: 1.0"]
+
+for i in range(4):
+    axs[i, 0].text(x=0.09, y=1, transform=axs[i, 0].transAxes, s=snr_values[i], **letter_params)
+    for j in range(3):
+        axs[i, j].text(x=0.0, y=1.0, transform=axs[i, j].transAxes, s=letters[i*3 + j], **letter_params)
+
+
+
+plt.tight_layout()
+plt.savefig("plots/synthetics/water_fall_DAS_synthetic.png", dpi=400)
+#plt.show()
+
+
+
+
+
+
+
 """ imshow - synthetic DAS data 
-
-
-
-
 
 # Parameters:
 cmap = "plasma"
