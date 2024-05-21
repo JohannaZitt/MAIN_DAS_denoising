@@ -200,11 +200,6 @@ seis_data = butter_bandpass_filter(seis_data, 1, 120, fs=seis_stats.sampling_rat
 seis_data = seis_data/np.std(seis_data)
 seis_data = seis_data[600:1601]
 print(seis_stats)
-# TODO: OBACHT noch nicht in strain rate umgerechnet
-
-print(raw_das_data.shape)
-print(denoised1_das_data.shape)
-print(seis_data.shape)
 
 #plot_das_data(raw_das_data)
 #plot_das_data(denoised1_das_data)

@@ -1,5 +1,5 @@
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import numpy as np
 from obspy import UTCDateTime
 import os
@@ -89,7 +89,7 @@ def load_das_data(folder_path, t_start, t_end, receiver, raw, ch_delta_start, ch
 
     return data, headers, axis
 
-def plot_data(raw_data, denoised_data, seis_data, seis_stats, saving_path, middle_channel):
+def plot_sectionplot(raw_data, denoised_data, seis_data, seis_stats, saving_path, middle_channel):
 
     # different fonts:
     font_s = 12
@@ -122,7 +122,8 @@ def plot_data(raw_data, denoised_data, seis_data, seis_stats, saving_path, middl
     plt.gca().yaxis.set_major_locator(MaxNLocator(nbins=6))
     #print(n*1.5)
     #print(channels*ch_spacing/1000)
-    plt.yticks(np.arange(0, n * 1.5, 60), np.arange(0, channels*ch_spacing/1000, 0.5), size=font_s)
+    #plt.yticks(np.arange(0, n * 1.5, 12), np.arange(0, channels*ch_spacing/1000, 0.1), size=font_s)
+    plt.yticks(np.arange(0, n * 1.5, 45), [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7], size=font_s)
     plt.title("Noisy DAS Data", loc="left")
     plt.annotate("", xy=(0, (channels-middle_channel) * 1.5), xytext=(-1, (channels-middle_channel) * 1.5),
                  arrowprops=dict(color="red", arrowstyle="->", linewidth=2))
@@ -135,7 +136,7 @@ def plot_data(raw_data, denoised_data, seis_data, seis_stats, saving_path, middl
         i += 1
     for i in range(3):
         plt.axvline(x=(i + 1) * (fs / 2), color="black", linestyle="dashed", alpha=alpha_dashed_line)
-    plt.yticks(np.arange(0, n * 1.5, 60), [])
+    plt.yticks(np.arange(0, n * 1.5, 45), []) #25, 12, 45
     plt.xticks([], [])
     plt.title("Denoised DAS Data", loc="left")
     ax = plt.gca()
@@ -176,14 +177,45 @@ def plot_data(raw_data, denoised_data, seis_data, seis_stats, saving_path, middl
 
     plt.tight_layout()
     #plt.show()
-    plt.savefig(saving_path + ".png", bbox_inches='tight', pad_inches=0.5, dpi=400)
+    plt.savefig(saving_path + ".png", bbox_inches="tight", pad_inches=0.5, dpi=400)
+
+def plot_wiggle_comparison(raw_data, denoised_data, seis_data, middle_channel, saving_path):
+
+    custom_red = "#BF4843"
+    custom_pink = "#9A1967"
+
+    fs=14
+
+    fig, axs = plt.subplots(nrows=2, ncols=1, figsize=(10, 6))
+
+    # plotting data
+    axs[0].plot(raw_data[middle_channel], color=custom_red, label="Noisy DAS Channel", linewidth=1.5)
+    axs[0].plot(denoised_data[middle_channel], color="black", label="Denoised DAS Channel", linewidth=1.5)
+    axs[1].plot(seis_data, color=custom_pink, label="Seismometer", linewidth=1.5)
+    axs[1].plot(denoised_data[middle_channel], color="black", label="Denoised DAS Channel", linewidth=1.5)
+
+    # labels
+    axs[0].set_xticks([100, 200, 300], [])
+    axs[1].set_xlabel("Time [s]", fontsize=fs)
+    axs[1].set_xticks([100, 200, 300], [0.25, 0.5, 0.75], fontsize=fs)
+    axs[0].set_ylabel("Strain Rate [norm.]", fontsize=fs)
+    axs[0].set_yticks([], [])
+    axs[1].set_yticks([], [])
+    axs[1].set_ylabel("Ground Velocity [norm.]", fontsize=fs)
+    axs[0].legend(loc="upper right", fontsize=fs)
+    axs[1].legend(loc="upper right", fontsize=fs)
+
+
+    plt.tight_layout()
+    #plt.show()
+    plt.savefig(saving_path, dpi=400)
 
 
 
 # ID : [starttime, start channel delta, end channel delta, category, closts seismometer]
-events = {5: ["2020-07-27 19:43:30.5", 45, 75, 1, "ALH"],
-         20: ["2020-07-27 00:21:46.3", 30, 30, 2, "ALH"],
-         82: ["2020-07-27 05:04:55.0", 80, 150, 3, "ALH"]
+events = {5: ["2020-07-27 19:43:30.5", 45, 75, 1, "ALH", "5_"],
+         20: ["2020-07-27 00:21:46.3", 30, 30, 2, "ALH", "20"],
+         82: ["2020-07-27 05:04:55.0", 80, 150, 3, "ALH", "82"]
          }
 
 id = 82
@@ -194,15 +226,15 @@ experiment = "03_accumulation_horizontal"
 receiver = "ALH"
 
 # load seismometer data:
-seis_data_path = "data/test_data/accumulation/ID:5_2020-07-27_19:43:31_c0ALH_p0.mseed"
-
-seis_stream = read(seis_data_path, starttime=UTCDateTime("2020-07-27T19:43:30.5"), endtime=UTCDateTime("2020-07-27T19:43:32.5"))
+string_list = os.listdir("data/test_data/accumulation/")
+filtered_strings = [s for s in string_list if s.startswith("ID:" + events[id][5])]
+seis_data_path = "data/test_data/accumulation/" + filtered_strings[0]
+seis_stream = read(seis_data_path, starttime=UTCDateTime(t_start-timedelta(seconds=1)), endtime=UTCDateTime(t_end))
 seis_data = seis_stream[0].data
 seis_stats = seis_stream[0].stats
 seis_data = butter_bandpass_filter(seis_data, 1, 120, fs=seis_stats.sampling_rate, order=4)
-
-print(seis_data.shape)
-
+seis_data = seis_data/np.abs(seis_data).max()
+seis_data = seis_data[400:]
 
 # load raw DAS data:
 raw_folder_path = "data/raw_DAS/"
@@ -215,8 +247,8 @@ denoised_data, denoised_headers, denoised_axis = load_das_data(folder_path=denoi
 saving_path = "plots/section_plots/" + str(id) + "_sectionplot"
 
 
-plot_data(raw_data=raw_data.T, denoised_data=denoised_data.T, seis_data=seis_data, seis_stats=seis_stats, saving_path=saving_path, middle_channel=events[id][1])
-
+#plot_sectionplot(raw_data=raw_data.T, denoised_data=denoised_data.T, seis_data=seis_data, seis_stats=seis_stats, saving_path=saving_path, middle_channel=events[id][1])
+plot_wiggle_comparison(raw_data=raw_data[200:600].T, denoised_data=denoised_data[200:600].T, seis_data=seis_data[200:600], middle_channel=events[id][1], saving_path="plots/wiggle_comparison/" + str(id) + "_wiggle_comparison.png")
 
 
 

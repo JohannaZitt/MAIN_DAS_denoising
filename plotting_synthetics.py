@@ -124,8 +124,8 @@ for i, event_name in enumerate(event_names):
     axs[i].text(x=0.5, y=1.03, transform=axs[i].transAxes, s=snr_values[i], fontsize=fontsize + 2, ha="center")
 
 plt.tight_layout()
-plt.savefig("plots/synthetics/seis_wiggle_comparison.png", dpi=400)
-#plt.show()
+#plt.savefig("plots/synthetics/seis_wiggle_comparison.png", dpi=400)
+plt.show()
 
 
 
