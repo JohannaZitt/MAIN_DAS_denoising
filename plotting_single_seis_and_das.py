@@ -176,8 +176,8 @@ def plot_sectionplot(raw_data, denoised_data, seis_data, seis_stats, saving_path
     ax.axes.yaxis.set_ticklabels([])
 
     plt.tight_layout()
-    #plt.show()
-    plt.savefig(saving_path + ".png", bbox_inches="tight", pad_inches=0.5, dpi=400)
+    plt.show()
+    #plt.savefig(saving_path + ".png", bbox_inches="tight", pad_inches=0.5, dpi=400)
 
 def plot_wiggle_comparison(raw_data, denoised_data, seis_data, middle_channel, saving_path):
 
@@ -207,8 +207,8 @@ def plot_wiggle_comparison(raw_data, denoised_data, seis_data, middle_channel, s
 
 
     plt.tight_layout()
-    #plt.show()
-    plt.savefig(saving_path, dpi=400)
+    plt.show()
+    #plt.savefig(saving_path, dpi=400)
 
 
 
@@ -247,7 +247,7 @@ denoised_data, denoised_headers, denoised_axis = load_das_data(folder_path=denoi
 saving_path = "plots/section_plots/" + str(id) + "_sectionplot"
 
 
-#plot_sectionplot(raw_data=raw_data.T, denoised_data=denoised_data.T, seis_data=seis_data, seis_stats=seis_stats, saving_path=saving_path, middle_channel=events[id][1])
+plot_sectionplot(raw_data=raw_data.T, denoised_data=denoised_data.T, seis_data=seis_data, seis_stats=seis_stats, saving_path=saving_path, middle_channel=events[id][1])
 plot_wiggle_comparison(raw_data=raw_data[200:600].T, denoised_data=denoised_data[200:600].T, seis_data=seis_data[200:600], middle_channel=events[id][1], saving_path="plots/wiggle_comparison/" + str(id) + "_wiggle_comparison.png")
 
 

@@ -142,103 +142,110 @@ experiment = "03_accumulation_horizontal"
 raw_path = os.path.join("data", "raw_DAS/")
 denoised_path = os.path.join("experiments", experiment, "denoisedDAS/")
 
-id = 82
-event_time = event_times[id][0]
-t_start = datetime.strptime(event_time, "%Y-%m-%d %H:%M:%S.%f")
-t_end = t_start + timedelta(seconds=2)
-
-raw_data, raw_headers, raw_axis = load_das_data(raw_path, t_start, t_end, raw=True, channel_delta_start=event_times[id][1], channel_delta_end=event_times[id][2])
-denoised_data, denoised1_headers, denoised1_axis = load_das_data(denoised_path, t_start, t_end, raw=False, channel_delta_start=event_times[id][1], channel_delta_end=event_times[id][2])
-
-# Plot Data for Testing
-#plot_das_data(raw_data)
-#plot_das_data(denoised_data)
-
-# Calculate CC
-bin_size = 11
-raw_cc = compute_moving_coherence(raw_data, bin_size)
-denoised_cc = compute_moving_coherence(denoised_data, bin_size)
-raw_denoised_cc = denoised_cc / raw_cc
-
-# Parameters for Plotting:
-cmap = "plasma" # verschiednene colormaps:  cividis, plasma, inferno, viridis, magma, (cmocean.cm.curl, seismic)
-t_start = 0
-t_end = denoised_data.shape[1]
-ch_start = 0
-ch_end = denoised_data.shape[0]
-ch_ch_spacing = 12
-vmin=-7
-vmax=7
-fs = 16 # font size
-#label = "main_icequake_cc_small_inferno"
+ids = [5, 20, 82]
 
 # Basic Figure Settup:
-fig, ax = plt.subplots(1, 3,
+fig, axs = plt.subplots(len(ids), 3,
                        gridspec_kw={
-                           "width_ratios": [3, 3, 1],
-                           "height_ratios": [1]},
+                           "width_ratios": [4, 4, 1],
+                           "height_ratios": [1, 1, 1]},
                       sharey = False)
-fig.set_figheight(6)
-fig.set_figwidth(14)
-ax[0].tick_params(axis="both", labelsize=fs)
-ax[1].tick_params(axis="both", labelsize=fs)
-ax[2].tick_params(axis="both", labelsize=fs)
-#ax[0].set_title("Raw DAS Data", y=1.0, fontsize=fs+4)
-#ax[1].set_title("Denoised DAS Data", y=1.0, fontsize=fs+4)
-#ax[2].set_title("CC", y = 1.0, fontsize=fs+4)
-ax[1].axes.yaxis.set_ticklabels([])
-ax[2].axes.yaxis.set_ticklabels([])
-ax[2].axes.xaxis.set_ticklabels([])
-#ax[2].set_xticks([0, 1, 2], [0, 1,2])
+fig.set_figheight(13)
+fig.set_figwidth(10)
 
-# Plotting Raw Data
-plt.subplot(131)
-plt.imshow(raw_data, cmap=cmap, aspect="auto", interpolation="antialiased",
-          extent=(0 ,(t_end-t_start)/400,0,ch_end * ch_ch_spacing/1000),
-          vmin=vmin, vmax=vmax)
-plt.xlabel("Time [s]", fontsize=fs)
-plt.ylabel("Offset [km]", fontsize=fs)
-plt.xticks([0.5, 1, 1.5], [0.5, 1, 1.5])
+for i, id in enumerate(ids):
+    event_time = event_times[id][0]
+    t_start = datetime.strptime(event_time, "%Y-%m-%d %H:%M:%S.%f")
+    t_end = t_start + timedelta(seconds=2)
 
-# Plotting Denoised Data
-plt.subplot(132)
-plt.imshow(denoised_data, cmap=cmap, aspect="auto", interpolation="antialiased",
-          extent=(0 ,(t_end-t_start)/400,0,ch_end * ch_ch_spacing/1000),
-          vmin=vmin, vmax=vmax)
-plt.xticks([0.5, 1, 1.5], [0.5, 1, 1.5])
-plt.xlabel("Time [s]", fontsize = fs)
+    raw_data, raw_headers, raw_axis = load_das_data(raw_path, t_start, t_end, raw=True, channel_delta_start=event_times[id][1], channel_delta_end=event_times[id][2])
+    denoised_data, denoised1_headers, denoised1_axis = load_das_data(denoised_path, t_start, t_end, raw=False, channel_delta_start=event_times[id][1], channel_delta_end=event_times[id][2])
 
-#cbar = plt.colorbar(location = 'right')
-#cbar.set_label('strain rate [norm]', size=fs)
-#cbar.ax.tick_params(labelsize=fs)
+    # Calculate CC
+    bin_size = 11
+    raw_cc = compute_moving_coherence(raw_data, bin_size)
+    denoised_cc = compute_moving_coherence(denoised_data, bin_size)
+    raw_denoised_cc = denoised_cc / raw_cc
 
-# Damit Graph gekippt angezeigt werden kann:
-x = np.arange(ch_end-ch_start)
-y_seis = raw_denoised_cc[ch_start:ch_end]
-X_seis = np.vstack((x, y_seis)).T
-X_seis = np.vstack((X_seis[:, 1], X_seis[:, 0])).T
+    # Parameters for Plotting:
+    cmap = "plasma" # verschiednene colormaps:  cividis, plasma, inferno, viridis, magma, (cmocean.cm.curl, seismic)
+    t_start = 0
+    t_end = denoised_data.shape[1]
+    ch_start = 0
+    ch_end = denoised_data.shape[0]
+    ch_ch_spacing = 12
+    vmin=-7
+    vmax=7
+    fs = 16
 
-# Plotting CC Gain
-plt.subplot(133)
-plt.plot(X_seis[:, 0], X_seis[:, 1], color = "black")
-ax[2].invert_yaxis()
-plt.axvline(x=1, color="black", linestyle="dotted")
-plt.xlabel("CC gain []", fontsize = fs)
-plt.xticks([0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5])
-plt.ylim(0, raw_denoised_cc.shape[0]-1)
+    # Plotting Raw Data
+    axs[i, 0].imshow(raw_data, cmap=cmap, aspect="auto", interpolation="antialiased",
+              extent=(0 ,(t_end-t_start)/400,0,ch_end * ch_ch_spacing/1000),
+              vmin=vmin, vmax=vmax)
+    axs[i, 0].set_ylabel("Offset [km]", fontsize=fs)
 
-# Add letters in plots:
-letter_params = {
-        "fontsize": fs+2,
+    # Plotting Denoised Data
+    im = axs[i, 1].imshow(denoised_data, cmap=cmap, aspect="auto", interpolation="antialiased",
+              extent=(0 ,(t_end-t_start)/400,0,ch_end * ch_ch_spacing/1000),
+              vmin=vmin, vmax=vmax)
+    axs[i, 1].set_yticklabels([])
+
+    #cbar=fig.colorbar(im, ax=axs[i, 1])
+    #cbar.set_label("Strain Rate [norm.]", fontsize=fs)
+
+    # Damit Graph gekippt angezeigt werden kann:
+    x = np.arange(ch_end-ch_start)
+    y_seis = raw_denoised_cc[ch_start:ch_end]
+    X_seis = np.vstack((x, y_seis)).T
+    X_seis = np.vstack((X_seis[:, 1], X_seis[:, 0])).T
+
+    # Plotting CC Gain
+    axs[i, 2].plot(X_seis[:, 0], X_seis[:, 1], color="black")
+    axs[i, 2].invert_yaxis()
+    axs[i, 2].axvline(x=1, color="black", linestyle="dotted")
+    axs[i, 2].set_ylim(0, raw_denoised_cc.shape[0]-1)
+    axs[i, 2].set_xlim(0, 6)
+    axs[i, 2].set_yticks([])
+    axs[i, 2].set_yticklabels([])
+
+    # Add letters in plots:
+    letter_params = {
+        "fontsize": fs + 2,
         "verticalalignment": "top",
-        "bbox": {"edgecolor": "k", "linewidth": 1, "facecolor": "w",}
+        "bbox": {"edgecolor": "k", "linewidth": 1, "facecolor": "w", }
     }
-letters = ["g", "h", "i"]
-for i in range(3):
-    ax[i].text(x=0.0, y=1.0, transform=ax[i].transAxes, s=letters[i], **letter_params)
+    letters = ["a", "b", "c", "d", "e", "f", "g", "h", "j", "k", "l", "m"]
+
+    for j in range(3):
+        axs[i, j].text(x=0.0, y=1.0, transform=axs[i, j].transAxes, s=letters[i * 3 + j], **letter_params)
+
+# titles:
+axs[0, 0].set_title("Noisy DAS Data", y=1.0, fontsize=fs+2)
+axs[0, 1].set_title("Denoised DAS Data", y=1.0, fontsize=fs+2)
+axs[0, 2].set_title("LWC", y=1.0, fontsize=fs+2)
+# axs labels:
+axs[2, 0].set_xlabel("Time [s]", fontsize=fs)
+axs[2, 0].set_xticks([0.5, 1, 1.5])
+axs[2, 1].set_xlabel("Time [s]", fontsize=fs)
+axs[2, 1].set_xticks([0.5, 1, 1.5])
+axs[2, 2].set_xlabel("Gain [-]", fontsize=fs)
+
+axs[0, 2].set_xticks([1, 3, 5])
+axs[0, 2].set_xticklabels([])
+axs[1, 2].set_xticks([1, 3, 5])
+axs[1, 2].set_xticklabels([])
+axs[2, 2].set_xticks([1, 3, 5])
 
 
+axs[0, 0].set_xticks([0.5, 1.0, 1.5])
+axs[0, 0].set_xticklabels([])
+axs[0, 1].set_xticks([0.5, 1.0, 1.5])
+axs[0, 1].set_xticklabels([])
+axs[1, 0].set_xticks([0.5, 1.0, 1.5])
+axs[1, 0].set_xticklabels([])
+axs[1, 1].set_xticks([0.5, 1.0, 1.5])
+axs[1, 1].set_xticklabels([])
 
-plt.subplots_adjust(wspace=0.05)
-plt.show()
-#plt.savefig("plots/waterfall/"+str(id)+"_waterfall.png", dpi=400)
+plt.tight_layout()
+#plt.show()
+plt.savefig("plots/waterfall/waterfall_all_in_one.png", dpi=400)
