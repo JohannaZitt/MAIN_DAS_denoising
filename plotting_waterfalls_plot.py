@@ -4,6 +4,8 @@ import os
 from scipy.signal import butter, lfilter
 from pydas_readers.readers import load_das_h5_CLASSIC as load_das_h5
 from datetime import datetime, timedelta
+from obspy import UTCDateTime
+from obspy import read
 
 def resample(data, ratio):
     try:
@@ -56,6 +58,7 @@ def load_das_data(folder_path, t_start, t_end, raw, channel_delta_start, channel
     for i in range(data.shape[1]):
         data[:, i] = butter_bandpass_filter(data[:,i], 1, 120, fs=headers['fs'], order=4)
         data[:,i] = data[:,i] / np.std(data[:,i])
+        #data[:, i] = data[:, i] / np.abs(data[:, i]).max()
 
     return data.T, headers, axis
 
@@ -145,24 +148,38 @@ denoised_path = os.path.join("experiments", experiment, "denoisedDAS/")
 ids = [5, 20, 82]
 
 # Basic Figure Settup:
-fig, axs = plt.subplots(len(ids), 3,
+fig, axs = plt.subplots(len(ids), 4,
                        gridspec_kw={
-                           "width_ratios": [4, 4, 1],
+                           "width_ratios": [5, 5, 1, 5],
                            "height_ratios": [1, 1, 1]},
                       sharey = False)
-fig.set_figheight(13)
-fig.set_figwidth(10)
+fig.set_figheight(10)
+fig.set_figwidth(12)
 
 for i, id in enumerate(ids):
     event_time = event_times[id][0]
     t_start = datetime.strptime(event_time, "%Y-%m-%d %H:%M:%S.%f")
     t_end = t_start + timedelta(seconds=2)
 
+    # load seismometer data:
+    string_list = os.listdir("data/test_data/accumulation/")
+    if id == 5:
+        filtered_strings = [s for s in string_list if s.startswith("ID:5_")]
+    else:
+        filtered_strings = [s for s in string_list if s.startswith("ID:"+str(id))]
+
+    seis_data_path = "data/test_data/accumulation/" + filtered_strings[0]
+    seis_stream = read(seis_data_path, starttime=UTCDateTime(t_start),
+                       endtime=UTCDateTime(t_end))
+    seis_data = seis_stream[0].data
+    seis_stats = seis_stream[0].stats
+    seis_data = butter_bandpass_filter(seis_data, 1, 120, fs=seis_stats.sampling_rate, order=4)
+    seis_data = seis_data / np.std(seis_data)
+
+
+    # load DAS data:
     raw_data, raw_headers, raw_axis = load_das_data(raw_path, t_start, t_end, raw=True, channel_delta_start=event_times[id][1], channel_delta_end=event_times[id][2])
     denoised_data, denoised1_headers, denoised1_axis = load_das_data(denoised_path, t_start, t_end, raw=False, channel_delta_start=event_times[id][1], channel_delta_end=event_times[id][2])
-
-    channels = raw_data.shape[0]
-    middle_channel = event_times[id][1]
 
     # Calculate CC
     bin_size = 11
@@ -172,10 +189,12 @@ for i, id in enumerate(ids):
 
     # Parameters for Plotting:
     cmap = "plasma" # verschiednene colormaps:  cividis, plasma, inferno, viridis, magma, (cmocean.cm.curl, seismic)
-    t_start = 0
-    t_end = denoised_data.shape[1]
+    t_start_das = 0
+    t_end_das = denoised_data.shape[1]
     ch_start = 0
     ch_end = denoised_data.shape[0]
+    channels = raw_data.shape[0]
+    middle_channel = event_times[id][1]
     ch_ch_spacing = 12
     vmin=-7
     vmax=7
@@ -183,14 +202,14 @@ for i, id in enumerate(ids):
 
     # Plotting Raw Data
     axs[i, 0].imshow(raw_data, cmap=cmap, aspect="auto", interpolation="antialiased",
-              extent=(0 ,(t_end-t_start)/400,0,ch_end * ch_ch_spacing/1000),
+              extent=(0 ,(t_end_das-t_start_das)/400,0,ch_end * ch_ch_spacing/1000),
               vmin=vmin, vmax=vmax)
-    axs[i, 0].set_ylabel("Offset [km]", fontsize=fs)
+    axs[i, 0].set_ylabel("Distance [km]", fontsize=fs)
     axs[i, 0].tick_params(axis='y', labelsize=fs-2)
 
     # Plotting Denoised Data
     im = axs[i, 1].imshow(denoised_data, cmap=cmap, aspect="auto", interpolation="antialiased",
-              extent=(0 ,(t_end-t_start)/400,0,ch_end * ch_ch_spacing/1000),
+              extent=(0 ,(t_end_das-t_start_das)/400,0,ch_end * ch_ch_spacing/1000),
               vmin=vmin, vmax=vmax)
     axs[i, 1].set_yticklabels([])
 
@@ -214,29 +233,36 @@ for i, id in enumerate(ids):
     axs[i, 2].set_yticklabels([])
 
     # plot arrow where wiggle for wiggle comparison takes place:
+    arrow_style = "Simple,head_width=0.5,head_length=0.5"
     axs[i, 0].annotate("", xy=(0, (channels - middle_channel) * 0.0125), xytext=(-0.05, (channels - middle_channel) * 0.0125),
-                       arrowprops=dict(color="red", arrowstyle="->", linewidth=2))
+                       arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=3))
     axs[i, 1].annotate("", xy=(0, (channels - middle_channel) * 0.0125),
                        xytext=(-0.05, (channels - middle_channel) * 0.0125),
-                       arrowprops=dict(color="red", arrowstyle="->", linewidth=2))
+                       arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=3))
 
-    print((channels - middle_channel) * 0.015)
+    # plotting wiggle for wiggle comparison
+    if id == 82:
+        t_start_wiggle = 320
+        t_end_wiggle = 480
+    else:
+        t_start_wiggle = 270
+        t_end_wiggle = 430
+    axs[i, 3].plot(raw_data[middle_channel][t_start_wiggle:t_end_wiggle], color="grey", label="Raw DAS Channel", linewidth=3, alpha=0.25, zorder=1)
+    axs[i, 3].plot(denoised_data[middle_channel][t_start_wiggle:t_end_wiggle], color="black", label="Denoised DAS Channel", linewidth=2, alpha=1, zorder=1)
+    axs[i, 3].plot(seis_data[t_start_wiggle:t_end_wiggle], color="red", label="Seismometer", linewidth=2, alpha=0.75, zorder=1)
+    axs[i, 3].set_yticks([])
+    ax2 = axs[i, 3].twinx()
+    #ax2.set_ylabel("Ground Velocity [norm.]", fontsize=fs-4, color="red")
+    ax2.set_ylabel("Strain Rate [norm.]", fontsize=fs - 4, color="black")
+    ax2.set_yticks([])
+    ax2.tick_params(axis="y", labelcolor="red")
 
-    # Add letters in plots:
-    letter_params = {
-        "fontsize": fs + 2,
-        "verticalalignment": "top",
-        "bbox": {"edgecolor": "k", "linewidth": 1, "facecolor": "w", }
-    }
-    letters = ["a", "b", "c", "d", "e", "f", "g", "h", "j", "k", "l", "m"]
-
-    for j in range(3):
-        axs[i, j].text(x=0.0, y=1.0, transform=axs[i, j].transAxes, s=letters[i * 3 + j], **letter_params)
 
 # titles:
-axs[0, 0].set_title("Noisy DAS Data", y=1.0, fontsize=fs+2)
-axs[0, 1].set_title("Denoised DAS Data", y=1.0, fontsize=fs+2)
+axs[0, 0].set_title("Raw", y=1.0, fontsize=fs+2)
+axs[0, 1].set_title("Denoised", y=1.0, fontsize=fs+2)
 axs[0, 2].set_title("LWC", y=1.0, fontsize=fs+2)
+axs[0, 3].set_title("Wiggle Comparison", y=1.0, fontsize=fs+2)
 # axs labels:
 axs[2, 0].set_xlabel("Time [s]", fontsize=fs)
 axs[2, 0].set_xticks([0.5, 1, 1.5], [0.5, 1, 1.5], fontsize=fs-2)
@@ -250,7 +276,6 @@ axs[1, 2].set_xticks([1, 3, 5])
 axs[1, 2].set_xticklabels([])
 axs[2, 2].set_xticks([1, 3, 5], [1, 3, 5], fontsize=fs-2)
 
-
 axs[0, 0].set_xticks([0.5, 1.0, 1.5])
 axs[0, 0].set_xticklabels([])
 axs[0, 1].set_xticks([0.5, 1.0, 1.5])
@@ -260,6 +285,27 @@ axs[1, 0].set_xticklabels([])
 axs[1, 1].set_xticks([0.5, 1.0, 1.5])
 axs[1, 1].set_xticklabels([])
 
+axs[0, 3].set_xticks([40, 80, 120])
+axs[0, 3].set_xticklabels([])
+axs[1, 3].set_xticks([40, 80, 120])
+axs[1, 3].set_xticklabels([])
+axs[2, 3].set_xticks([40, 80, 120])
+axs[2, 3].set_xticklabels([0.1, 0.2, 0.3], fontsize=fs-2)
+axs[2, 3].set_xlabel("Time [s]", fontsize=fs)
+
+
+# Add letters in plots:
+letter_params = {
+    "fontsize": fs + 2,
+    "verticalalignment": "top",
+    "bbox": {"edgecolor": "k", "linewidth": 1, "facecolor": "w"}
+}
+letters = ["a", "b", "c", "d", "e", "f", "g", "h", "j", "k", "l", "m", "n", "o", "p"]
+
+for i in range(3):
+    for j in range(4):
+        axs[i, j].text(x=0.0, y=1.0, transform=axs[i, j].transAxes, s=letters[i * 4 + j], **letter_params)
+
 plt.tight_layout()
 #plt.show()
-plt.savefig("plots/waterfall/waterfall_all_in_one.pdf", dpi=400)
+plt.savefig("plots/waterfall/waterfall+wiggle.pdf", dpi=400)

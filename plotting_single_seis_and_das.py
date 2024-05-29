@@ -222,7 +222,7 @@ def plot_wiggle_comparison(raw_data, denoised_data, seis_data, middle_channel, s
     ax2 = ax.twinx()
     ax2.set_ylabel("Ground Velocity [norm.]", fontsize=fs, color='red')
     ax2.set_yticks([])
-    ax2.tick_params(axis='y', labelcolor='red')
+    ax2.tick_params(axis="y", labelcolor="red")
 
     # Layout anpassen
     plt.tight_layout()
