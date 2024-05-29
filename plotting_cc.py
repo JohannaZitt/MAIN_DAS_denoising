@@ -87,12 +87,18 @@ for datatype in datatypes:
     plt.legend(fontsize=fontsize+gain, frameon=False, ncol=1, loc="upper left")
     plt.xticks(x, labels, rotation=20, fontsize=fontsize+1)
 
+    print(label)
+    print("Labels", labels)
+    print("Accumulation: ", acc_cc_gain)
+    print("Ablation: ", abl_cc_gain)
+
+
 
     # Diagramm anzeigen
 
     plt.tight_layout()
-    #plt.show()
-    plt.savefig("plots/cc/" + datatype + ".png", dpi=250)
+    plt.show()
+    #plt.savefig("plots/cc/" + datatype + ".png", dpi=250)
 
 
 

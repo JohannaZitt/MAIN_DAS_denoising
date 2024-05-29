@@ -42,20 +42,20 @@ def plot_data(data, moveout=8):
 
 
 # event_data, event_time, start_channel, end_channel
-event01 = ["2020/07/07", "13:24:41.5", 1320, 1450]
-event02 = ["2020/07/11", "12:34:15.0", 1260, 1310]
-event03 = ["2020/07/12", "06:00:37.5", 1255, 1410]
-event04 = ["2020/07/12", "06:53:13.5", 1160, 1215]
-event05 = ["2020/07/12", "06:53:13.5", 1215, 1350]
-event06 = ["2020/07/12", "06:53:28.0", 1200, 1350]
-event07 = ["2020/07/13", "00:48:36.7", 395, 440]
-event08 = ["2020/07/06", "19:32:37.5", 3425, 3550]
-event09 = ["2020/07/06", "20:42:37.5", 3410, 3510]
-event10 = ["2020/07/06", "20:41:49.0", 3400, 3520]
-event11 = ["2020/07/06", "19:27:10.5", 3410, 3510]
-event12 = ["2020/07/06", "20:19:00.5", 3420, 3550]
-event13 = ["2020/07/06", "19:42:27.0", 3400, 3510]
-event14 = ["2020/07/06", "19:51:23.0", 3400, 3510]
+event01 = ["2020/07/07", "13:24:41.5", 1320, 1450] #Ablation Zone
+event02 = ["2020/07/11", "12:34:15.0", 1260, 1310] #Ablation Zone
+event03 = ["2020/07/12", "06:00:37.5", 1255, 1410] #Ablation Zone
+event04 = ["2020/07/12", "06:53:13.5", 1160, 1215] #Ablation Zone
+event05 = ["2020/07/12", "06:53:13.5", 1215, 1350] #Ablation Zone
+event06 = ["2020/07/12", "06:53:28.0", 1200, 1350] #Ablation Zone
+event07 = ["2020/07/13", "00:48:36.7", 395, 440] #Ablation Zone
+event08 = ["2020/07/06", "19:32:37.5", 3425, 3550] #Accumulation Zone
+event09 = ["2020/07/06", "20:42:37.5", 3410, 3510] #Accumulation Zone
+event10 = ["2020/07/06", "20:41:49.0", 3400, 3520] #Accumulation Zone
+event11 = ["2020/07/06", "19:27:10.5", 3410, 3510] #Accumulation Zone
+event12 = ["2020/07/06", "20:19:00.5", 3420, 3550] #Accumulation Zone
+event13 = ["2020/07/06", "19:42:27.0", 3400, 3510] #Accumulation Zone
+event14 = ["2020/07/06", "19:51:23.0", 3400, 3510] #Accumulation Zone
 events = [event01, event02, event03, event04, event05, event06, event07, event08, event09, event10, event11, event12, event13, event14]
 n_sub = 15
 n_t = 2400
@@ -118,7 +118,8 @@ for event in events: # for evey event
 
 # 8. Save data:
 training_data = np.transpose(training_data, (0, 2, 1))
-np.save("data/training_data/preprocessed_DAS/retraining_data.npy", training_data)
+print(training_data.shape)
+#np.save("data/training_data/preprocessed_DAS/retraining_data.npy", training_data)
 
 
 

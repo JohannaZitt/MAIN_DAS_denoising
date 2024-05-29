@@ -83,7 +83,7 @@ print(data.shape)
 plot_das_data(data)
 """
 
-""" imshow - synthetically corrupted DAS data """
+""" imshow - synthetically corrupted DAS data
 
 # Parameters:
 cmap = "plasma"
@@ -126,7 +126,7 @@ for event_name in event_names:
 
 
 # Erstellen von Subplots mit Größe (15, 12)
-fig, axs = plt.subplots(len(event_names), 3, figsize=(9, 14), gridspec_kw={"width_ratios": [3, 3, 1]})
+fig, axs = plt.subplots(len(event_names), 3, figsize=(9, 14), gridspec_kw={"width_ratios": [4, 4, 1]})
 
 for i, event_name in enumerate(event_names):
     # Load Data:
@@ -169,13 +169,13 @@ for i, event_name in enumerate(event_names):
     if i == 3:
         axs[i, 0].set_xlabel("Time [s]", fontsize=fs)
         axs[i, 1].set_xlabel("Time [s]", fontsize=fs)
-        axs[i, 2].set_xlabel("LWC Gain [-]", fontsize=fs)
+        axs[i, 2].set_xlabel("Gain [-]", fontsize=fs)
     else:
         axs[i, 0].set_xticklabels([])
         axs[i, 1].set_xticklabels([])
         axs[i, 2].set_xticklabels([])
 
-axs[0, 0].set_title("Raw Data", fontsize=fs+4, y=1.05)
+axs[0, 0].set_title("Noise Corrupted", fontsize=fs+4, y=1.05)
 axs[0, 1].set_title("Denoised Data", fontsize=fs+4, y=1.05)
 axs[0, 2].set_title("LWC", fontsize=fs+4, y=1.05)
 
@@ -200,16 +200,16 @@ for i in range(4):
 
 
 plt.tight_layout()
-plt.savefig("plots/synthetics/water_fall_DAS_synthetic.png", dpi=400)
+plt.savefig("plots/synthetics/water_fall_DAS_synthetic.pdf", dpi=400)
 #plt.show()
 
 
 
+ """
 
 
 
-
-""" imshow - synthetic DAS data 
+""" imshow - synthetic DAS data """
 
 # Parameters:
 cmap = "plasma"
@@ -251,7 +251,7 @@ for event_name in event_names:
 
 
 # Erstellen von Subplots mit Größe (15, 12)
-fig, axs = plt.subplots(len(event_names), 3, figsize=(9, 14), gridspec_kw={"width_ratios": [3, 3, 1]})
+fig, axs = plt.subplots(len(event_names), 3, figsize=(9, 14), gridspec_kw={"width_ratios": [4, 4, 1]})
 
 for i, event_name in enumerate(event_names):
     # Load Data:
@@ -292,13 +292,13 @@ for i, event_name in enumerate(event_names):
     if i == 3:
         axs[i, 0].set_xlabel("Time [s]", fontsize=fs)
         axs[i, 1].set_xlabel("Time [s]", fontsize=fs)
-        axs[i, 2].set_xlabel("LWC Gain [-]", fontsize=fs)
+        axs[i, 2].set_xlabel("Gain [-]", fontsize=fs)
     else:
         axs[i, 0].set_xticklabels([])
         axs[i, 1].set_xticklabels([])
         axs[i, 2].set_xticklabels([])
 
-axs[0, 0].set_title("Raw Data", fontsize=fs+4, y=1.05)
+axs[0, 0].set_title("Noise Corrupted", fontsize=fs+4, y=1.05)
 axs[0, 1].set_title("Denoised Data", fontsize=fs+4, y=1.05)
 axs[0, 2].set_title("LWC", fontsize=fs+4, y=1.05)
 
@@ -323,11 +323,11 @@ for i in range(4):
 
 
 plt.tight_layout()
-plt.savefig("plots/synthetics/water_fall_seis_synthetic.png", dpi=400)
+plt.savefig("plots/synthetics/water_fall_seis_synthetic.pdf", dpi=400)
 #plt.show()
 
 
-"""
+
 
 
 

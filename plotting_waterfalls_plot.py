@@ -161,6 +161,9 @@ for i, id in enumerate(ids):
     raw_data, raw_headers, raw_axis = load_das_data(raw_path, t_start, t_end, raw=True, channel_delta_start=event_times[id][1], channel_delta_end=event_times[id][2])
     denoised_data, denoised1_headers, denoised1_axis = load_das_data(denoised_path, t_start, t_end, raw=False, channel_delta_start=event_times[id][1], channel_delta_end=event_times[id][2])
 
+    channels = raw_data.shape[0]
+    middle_channel = event_times[id][1]
+
     # Calculate CC
     bin_size = 11
     raw_cc = compute_moving_coherence(raw_data, bin_size)
@@ -183,6 +186,7 @@ for i, id in enumerate(ids):
               extent=(0 ,(t_end-t_start)/400,0,ch_end * ch_ch_spacing/1000),
               vmin=vmin, vmax=vmax)
     axs[i, 0].set_ylabel("Offset [km]", fontsize=fs)
+    axs[i, 0].tick_params(axis='y', labelsize=fs-2)
 
     # Plotting Denoised Data
     im = axs[i, 1].imshow(denoised_data, cmap=cmap, aspect="auto", interpolation="antialiased",
@@ -192,6 +196,7 @@ for i, id in enumerate(ids):
 
     #cbar=fig.colorbar(im, ax=axs[i, 1])
     #cbar.set_label("Strain Rate [norm.]", fontsize=fs)
+    #cbar.ax.tick_params(labelsize=fs-2, rotation=90)
 
     # Damit Graph gekippt angezeigt werden kann:
     x = np.arange(ch_end-ch_start)
@@ -207,6 +212,15 @@ for i, id in enumerate(ids):
     axs[i, 2].set_xlim(0, 6)
     axs[i, 2].set_yticks([])
     axs[i, 2].set_yticklabels([])
+
+    # plot arrow where wiggle for wiggle comparison takes place:
+    axs[i, 0].annotate("", xy=(0, (channels - middle_channel) * 0.0125), xytext=(-0.05, (channels - middle_channel) * 0.0125),
+                       arrowprops=dict(color="red", arrowstyle="->", linewidth=2))
+    axs[i, 1].annotate("", xy=(0, (channels - middle_channel) * 0.0125),
+                       xytext=(-0.05, (channels - middle_channel) * 0.0125),
+                       arrowprops=dict(color="red", arrowstyle="->", linewidth=2))
+
+    print((channels - middle_channel) * 0.015)
 
     # Add letters in plots:
     letter_params = {
@@ -225,16 +239,16 @@ axs[0, 1].set_title("Denoised DAS Data", y=1.0, fontsize=fs+2)
 axs[0, 2].set_title("LWC", y=1.0, fontsize=fs+2)
 # axs labels:
 axs[2, 0].set_xlabel("Time [s]", fontsize=fs)
-axs[2, 0].set_xticks([0.5, 1, 1.5])
+axs[2, 0].set_xticks([0.5, 1, 1.5], [0.5, 1, 1.5], fontsize=fs-2)
 axs[2, 1].set_xlabel("Time [s]", fontsize=fs)
-axs[2, 1].set_xticks([0.5, 1, 1.5])
+axs[2, 1].set_xticks([0.5, 1, 1.5], [0.5, 1, 1.5], fontsize=fs-2)
 axs[2, 2].set_xlabel("Gain [-]", fontsize=fs)
 
 axs[0, 2].set_xticks([1, 3, 5])
 axs[0, 2].set_xticklabels([])
 axs[1, 2].set_xticks([1, 3, 5])
 axs[1, 2].set_xticklabels([])
-axs[2, 2].set_xticks([1, 3, 5])
+axs[2, 2].set_xticks([1, 3, 5], [1, 3, 5], fontsize=fs-2)
 
 
 axs[0, 0].set_xticks([0.5, 1.0, 1.5])
@@ -248,4 +262,4 @@ axs[1, 1].set_xticklabels([])
 
 plt.tight_layout()
 #plt.show()
-plt.savefig("plots/waterfall/waterfall_all_in_one.png", dpi=400)
+plt.savefig("plots/waterfall/waterfall_all_in_one.pdf", dpi=400)

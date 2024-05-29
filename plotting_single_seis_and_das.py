@@ -89,7 +89,7 @@ def load_das_data(folder_path, t_start, t_end, receiver, raw, ch_delta_start, ch
 
     return data, headers, axis
 
-def plot_sectionplot(raw_data, denoised_data, seis_data, seis_stats, saving_path, middle_channel):
+def plot_sectionplot(raw_data, denoised_data, seis_data, seis_stats, saving_path, middle_channel, id):
 
     # different fonts:
     font_s = 12
@@ -120,10 +120,15 @@ def plot_sectionplot(raw_data, denoised_data, seis_data, seis_stats, saving_path
     # plt.xlabel("Time[s]", size=font_m)
     plt.ylabel("Offset [km]", size=font_m)
     plt.gca().yaxis.set_major_locator(MaxNLocator(nbins=6))
-    #print(n*1.5)
-    #print(channels*ch_spacing/1000)
-    #plt.yticks(np.arange(0, n * 1.5, 12), np.arange(0, channels*ch_spacing/1000, 0.1), size=font_s)
-    plt.yticks(np.arange(0, n * 1.5, 45), [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7], size=font_s)
+
+    if id == 5:
+        plt.yticks(np.arange(0, 190, 25), [0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4], size=font_s)
+    if id == 20:
+        plt.yticks(np.arange(0, n * 1.5, 12), [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7], size=font_s)
+    if id == 82:
+        plt.yticks(np.arange(0, 350, 61), [0.0, 0.5, 1.0, 1.5, 2.0, 2.5], size=font_s)
+
+
     plt.title("Noisy DAS Data", loc="left")
     plt.annotate("", xy=(0, (channels-middle_channel) * 1.5), xytext=(-1, (channels-middle_channel) * 1.5),
                  arrowprops=dict(color="red", arrowstyle="->", linewidth=2))
@@ -136,7 +141,14 @@ def plot_sectionplot(raw_data, denoised_data, seis_data, seis_stats, saving_path
         i += 1
     for i in range(3):
         plt.axvline(x=(i + 1) * (fs / 2), color="black", linestyle="dashed", alpha=alpha_dashed_line)
-    plt.yticks(np.arange(0, n * 1.5, 45), []) #25, 12, 45
+
+    if id == 5:
+        plt.yticks(np.arange(0, 190, 25), [], size=font_s)
+    if id == 20:
+        plt.yticks(np.arange(0, n * 1.5, 12), [], size=font_s)
+    if id == 82:
+        plt.yticks(np.arange(0, 350, 61), [], size=font_s)
+
     plt.xticks([], [])
     plt.title("Denoised DAS Data", loc="left")
     ax = plt.gca()
@@ -176,37 +188,50 @@ def plot_sectionplot(raw_data, denoised_data, seis_data, seis_stats, saving_path
     ax.axes.yaxis.set_ticklabels([])
 
     plt.tight_layout()
-    plt.show()
-    #plt.savefig(saving_path + ".png", bbox_inches="tight", pad_inches=0.5, dpi=400)
+    #plt.show()
+    plt.savefig(saving_path + ".png", bbox_inches="tight", pad_inches=0.5, dpi=400)
 
 def plot_wiggle_comparison(raw_data, denoised_data, seis_data, middle_channel, saving_path):
 
     custom_red = "#BF4843"
     custom_pink = "#9A1967"
 
-    fs=14
+    # Parameter
+    fs = 20
+    t_start = 50 # 70
+    t_end = 250 # 320
 
-    fig, axs = plt.subplots(nrows=2, ncols=1, figsize=(10, 6))
+    # Figure und Achsen erstellen
+    fig, ax = plt.subplots(figsize=(15, 5))
 
-    # plotting data
-    axs[0].plot(raw_data[middle_channel], color=custom_red, label="Noisy DAS Channel", linewidth=1.5)
-    axs[0].plot(denoised_data[middle_channel], color="black", label="Denoised DAS Channel", linewidth=1.5)
-    axs[1].plot(seis_data, color=custom_pink, label="Seismometer", linewidth=1.5)
-    axs[1].plot(denoised_data[middle_channel], color="black", label="Denoised DAS Channel", linewidth=1.5)
-
-    # labels
-    axs[0].set_xticks([100, 200, 300], [])
-    axs[1].set_xlabel("Time [s]", fontsize=fs)
-    axs[1].set_xticks([100, 200, 300], [0.25, 0.5, 0.75], fontsize=fs)
-    axs[0].set_ylabel("Strain Rate [norm.]", fontsize=fs)
-    axs[0].set_yticks([], [])
-    axs[1].set_yticks([], [])
-    axs[1].set_ylabel("Ground Velocity [norm.]", fontsize=fs)
-    axs[0].legend(loc="upper right", fontsize=fs)
-    axs[1].legend(loc="upper right", fontsize=fs)
+    # Daten plotten
+    ax.plot(raw_data[middle_channel][t_start:t_end], color="grey", label="Noisy DAS Channel", linewidth=3, alpha=0.25)
+    ax.plot(denoised_data[middle_channel][t_start:t_end], color="black", label="Denoised DAS Channel", linewidth=2,
+            alpha=1)
+    ax.plot(seis_data[t_start:t_end], color="red", label="Seismometer", linewidth=2, alpha=0.75)
 
 
+    # Labels und Achsenanpassungen
+    ax.set_xticks([40, 80, 120, 160]) #, 200, 240
+    ax.set_xticklabels([0.1, 0.2, 0.3, 0.4], size=fs-2) #, 0.6, 0.8
+    #ax.set_xlabel("Time [s]", fontsize=fs)
+    ax.set_ylabel("Strain Rate [norm.]", fontsize=fs)
+    ax.set_yticks([])
+
+    # Zweite y-Achse erstellen
+    ax2 = ax.twinx()
+    ax2.set_ylabel("Ground Velocity [norm.]", fontsize=fs, color='red')
+    ax2.set_yticks([])
+    ax2.tick_params(axis='y', labelcolor='red')
+
+    # Layout anpassen
     plt.tight_layout()
+
+    # leged
+    #handles, labels = ax.get_legend_handles_labels()
+    #fig.legend(handles, labels, bbox_to_anchor=(0.95, 0.9), ncol=3, fontsize=fs+4) #
+
+    # Plot anzeigen
     plt.show()
     #plt.savefig(saving_path, dpi=400)
 
@@ -218,7 +243,7 @@ events = {5: ["2020-07-27 19:43:30.5", 45, 75, 1, "ALH", "5_"],
          82: ["2020-07-27 05:04:55.0", 80, 150, 3, "ALH", "82"]
          }
 
-id = 82
+id = 20
 event_time = events[id][0]
 t_start = datetime.strptime(event_time, "%Y-%m-%d %H:%M:%S.%f")
 t_end = t_start + timedelta(seconds=2)
@@ -247,8 +272,8 @@ denoised_data, denoised_headers, denoised_axis = load_das_data(folder_path=denoi
 saving_path = "plots/section_plots/" + str(id) + "_sectionplot"
 
 
-plot_sectionplot(raw_data=raw_data.T, denoised_data=denoised_data.T, seis_data=seis_data, seis_stats=seis_stats, saving_path=saving_path, middle_channel=events[id][1])
-plot_wiggle_comparison(raw_data=raw_data[200:600].T, denoised_data=denoised_data[200:600].T, seis_data=seis_data[200:600], middle_channel=events[id][1], saving_path="plots/wiggle_comparison/" + str(id) + "_wiggle_comparison.png")
+#plot_sectionplot(raw_data=raw_data.T, denoised_data=denoised_data.T, seis_data=seis_data, seis_stats=seis_stats, saving_path=saving_path, middle_channel=events[id][1], id=id)
+plot_wiggle_comparison(raw_data=raw_data[200:600].T, denoised_data=denoised_data[200:600].T, seis_data=seis_data[200:600], middle_channel=events[id][1], saving_path="plots/wiggle_comparison/" + str(id) + "_wiggle_comparison.pdf")
 
 
 
