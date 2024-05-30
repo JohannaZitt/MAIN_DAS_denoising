@@ -216,6 +216,8 @@ for i, id in enumerate(ids):
     #cbar=fig.colorbar(im, ax=axs[i, 1])
     #cbar.set_label("Strain Rate [norm.]", fontsize=fs)
     #cbar.ax.tick_params(labelsize=fs-2, rotation=90)
+    #cbar.set_ticks([-6, 0, 6])
+    #cbar.set_ticklabels(['-1', '0', '1'])
 
     # Damit Graph gekippt angezeigt werden kann:
     x = np.arange(ch_end-ch_start)
@@ -253,9 +255,10 @@ for i, id in enumerate(ids):
     axs[i, 3].set_yticks([])
     ax2 = axs[i, 3].twinx()
     #ax2.set_ylabel("Ground Velocity [norm.]", fontsize=fs-4, color="red")
-    ax2.set_ylabel("Strain Rate [norm.]", fontsize=fs - 4, color="black")
+    #ax2.set_ylabel("Strain Rate [norm.]", fontsize=fs - 4, color="black")
     ax2.set_yticks([])
     ax2.tick_params(axis="y", labelcolor="red")
+    #axs[i, 3].legend(ncol=3, fontsize=8)
 
 
 # titles:
@@ -307,5 +310,5 @@ for i in range(3):
         axs[i, j].text(x=0.0, y=1.0, transform=axs[i, j].transAxes, s=letters[i * 4 + j], **letter_params)
 
 plt.tight_layout()
-#plt.show()
-plt.savefig("plots/waterfall/waterfall+wiggle.pdf", dpi=400)
+plt.show()
+#plt.savefig("plots/waterfall/waterfall+wiggle.pdf", dpi=400)
