@@ -32,6 +32,7 @@ import random as python_random
 python_random.seed(seed)
 
 # NumPy (random number generator used for sampling operations)
+# generates numbers in range (0, 1]
 rng = np.random.default_rng(seed)
 
 def butter_bandpass(lowcut, highcut, fs, order=2):

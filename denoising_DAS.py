@@ -49,7 +49,6 @@ def denoise_file (file, timesamples, model, N_sub, fs_trainingdata):
     DAS_data = DAS_data.T
     DAS_data = DAS_data.astype("f")
     # resample data
-
     DAS_data = resample(DAS_data, headers["fs"] / 400)
 
     # preprocessing
