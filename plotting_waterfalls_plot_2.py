@@ -148,15 +148,18 @@ denoised_path = os.path.join("experiments", experiment, "denoisedDAS/")
 ids = [5, 20, 82]
 
 # Basic Figure Settup:
-fig, axs = plt.subplots(len(ids), 4,
+fig, axs = plt.subplots(6, 4,
                        gridspec_kw={
                            "width_ratios": [5, 5, 1, 5],
-                           "height_ratios": [1, 1, 1]},
+                           "height_ratios": [5, 1, 5, 1, 5, 1]},
                       sharey = False)
 fig.set_figheight(10)
 fig.set_figwidth(12)
 
 for i, id in enumerate(ids):
+
+    waterfall_id = i*2
+    seismometer_id = i*2+1
 
     event_time = event_times[id][0]
     t_start = datetime.strptime(event_time, "%Y-%m-%d %H:%M:%S.%f")
@@ -202,17 +205,17 @@ for i, id in enumerate(ids):
     fs = 16
 
     # Plotting Raw Data
-    axs[i, 0].imshow(raw_data, cmap=cmap, aspect="auto", interpolation="antialiased",
+    axs[waterfall_id, 0].imshow(raw_data, cmap=cmap, aspect="auto", interpolation="antialiased",
               extent=(0 ,(t_end_das-t_start_das)/400,0,ch_end * ch_ch_spacing/1000),
               vmin=vmin, vmax=vmax)
-    axs[i, 0].set_ylabel("Distance [km]", fontsize=fs)
-    axs[i, 0].tick_params(axis='y', labelsize=fs-2)
+    axs[waterfall_id, 0].set_ylabel("Distance [km]", fontsize=fs)
+    axs[waterfall_id, 0].tick_params(axis='y', labelsize=fs-2)
 
     # Plotting Denoised Data
-    im = axs[i, 1].imshow(denoised_data, cmap=cmap, aspect="auto", interpolation="antialiased",
+    im = axs[waterfall_id, 1].imshow(denoised_data, cmap=cmap, aspect="auto", interpolation="antialiased",
               extent=(0 ,(t_end_das-t_start_das)/400,0,ch_end * ch_ch_spacing/1000),
               vmin=vmin, vmax=vmax)
-    axs[i, 1].set_yticklabels([])
+    axs[waterfall_id, 1].set_yticklabels([])
 
     #cbar=fig.colorbar(im, ax=axs[i, 1])
     #cbar.set_label("Strain Rate [norm.]", fontsize=fs)
@@ -227,19 +230,19 @@ for i, id in enumerate(ids):
     X_seis = np.vstack((X_seis[:, 1], X_seis[:, 0])).T
 
     # Plotting CC Gain
-    axs[i, 2].plot(X_seis[:, 0], X_seis[:, 1], color="black")
-    axs[i, 2].invert_yaxis()
-    axs[i, 2].axvline(x=1, color="black", linestyle="dotted")
-    axs[i, 2].set_ylim(0, raw_denoised_cc.shape[0]-1)
-    axs[i, 2].set_xlim(0, 6)
-    axs[i, 2].set_yticks([])
-    axs[i, 2].set_yticklabels([])
+    axs[waterfall_id, 2].plot(X_seis[:, 0], X_seis[:, 1], color="black")
+    axs[waterfall_id, 2].invert_yaxis()
+    axs[waterfall_id, 2].axvline(x=1, color="black", linestyle="dotted")
+    axs[waterfall_id, 2].set_ylim(0, raw_denoised_cc.shape[0]-1)
+    axs[waterfall_id, 2].set_xlim(0, 6)
+    axs[waterfall_id, 2].set_yticks([])
+    axs[waterfall_id, 2].set_yticklabels([])
 
     # plot arrow where wiggle for wiggle comparison takes place:
     arrow_style = "Simple,head_width=0.5,head_length=0.5"
-    axs[i, 0].annotate("", xy=(0, (channels - middle_channel) * 0.0125), xytext=(-0.05, (channels - middle_channel) * 0.0125),
+    axs[waterfall_id, 0].annotate("", xy=(0, (channels - middle_channel) * 0.0125), xytext=(-0.05, (channels - middle_channel) * 0.0125),
                        arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=3))
-    axs[i, 1].annotate("", xy=(0, (channels - middle_channel) * 0.0125),
+    axs[waterfall_id, 1].annotate("", xy=(0, (channels - middle_channel) * 0.0125),
                        xytext=(-0.05, (channels - middle_channel) * 0.0125),
                        arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=3))
 
@@ -250,11 +253,11 @@ for i, id in enumerate(ids):
     else:
         t_start_wiggle = 270
         t_end_wiggle = 430
-    axs[i, 3].plot(raw_data[middle_channel][t_start_wiggle:t_end_wiggle], color="grey", label="Raw DAS Channel", linewidth=3, alpha=0.25, zorder=1)
-    axs[i, 3].plot(denoised_data[middle_channel][t_start_wiggle:t_end_wiggle], color="black", label="Denoised DAS Channel", linewidth=2, alpha=1, zorder=1)
-    axs[i, 3].plot(seis_data[t_start_wiggle:t_end_wiggle], color="red", label="Seismometer", linewidth=2, alpha=0.75, zorder=1)
-    axs[i, 3].set_yticks([])
-    ax2 = axs[i, 3].twinx()
+    axs[waterfall_id, 3].plot(raw_data[middle_channel][t_start_wiggle:t_end_wiggle], color="grey", label="Raw DAS Channel", linewidth=3, alpha=0.25, zorder=1)
+    axs[waterfall_id, 3].plot(denoised_data[middle_channel][t_start_wiggle:t_end_wiggle], color="black", label="Denoised DAS Channel", linewidth=2, alpha=1, zorder=1)
+    axs[waterfall_id, 3].plot(seis_data[t_start_wiggle:t_end_wiggle], color="red", label="Seismometer", linewidth=2, alpha=0.75, zorder=1)
+    axs[waterfall_id, 3].set_yticks([])
+    ax2 = axs[waterfall_id, 3].twinx()
     #ax2.set_ylabel("Ground Velocity [norm.]", fontsize=fs-4, color="red")
     #ax2.set_ylabel("Strain Rate [norm.]", fontsize=fs - 4, color="black")
     ax2.set_yticks([])
@@ -268,34 +271,34 @@ axs[0, 1].set_title("Denoised", y=1.0, fontsize=fs+2)
 axs[0, 2].set_title("LWC", y=1.0, fontsize=fs+2)
 axs[0, 3].set_title("Wiggle Comparison", y=1.0, fontsize=fs+2)
 # axs labels:
-axs[2, 0].set_xlabel("Time [s]", fontsize=fs)
-axs[2, 0].set_xticks([0.5, 1, 1.5], [0.5, 1, 1.5], fontsize=fs-2)
-axs[2, 1].set_xlabel("Time [s]", fontsize=fs)
-axs[2, 1].set_xticks([0.5, 1, 1.5], [0.5, 1, 1.5], fontsize=fs-2)
-axs[2, 2].set_xlabel("Gain [-]", fontsize=fs)
+axs[4, 0].set_xlabel("Time [s]", fontsize=fs)
+axs[4, 0].set_xticks([0.5, 1, 1.5], [0.5, 1, 1.5], fontsize=fs-2)
+axs[4, 1].set_xlabel("Time [s]", fontsize=fs)
+axs[4, 1].set_xticks([0.5, 1, 1.5], [0.5, 1, 1.5], fontsize=fs-2)
+axs[4, 2].set_xlabel("Gain [-]", fontsize=fs)
 
 axs[0, 2].set_xticks([1, 3, 5])
 axs[0, 2].set_xticklabels([])
-axs[1, 2].set_xticks([1, 3, 5])
-axs[1, 2].set_xticklabels([])
-axs[2, 2].set_xticks([1, 3, 5], [1, 3, 5], fontsize=fs-2)
+axs[2, 2].set_xticks([1, 3, 5])
+axs[2, 2].set_xticklabels([])
+axs[4, 2].set_xticks([1, 3, 5], [1, 3, 5], fontsize=fs-2)
 
 axs[0, 0].set_xticks([0.5, 1.0, 1.5])
 axs[0, 0].set_xticklabels([])
 axs[0, 1].set_xticks([0.5, 1.0, 1.5])
 axs[0, 1].set_xticklabels([])
-axs[1, 0].set_xticks([0.5, 1.0, 1.5])
-axs[1, 0].set_xticklabels([])
-axs[1, 1].set_xticks([0.5, 1.0, 1.5])
-axs[1, 1].set_xticklabels([])
+axs[2, 0].set_xticks([0.5, 1.0, 1.5])
+axs[2, 0].set_xticklabels([])
+axs[2, 1].set_xticks([0.5, 1.0, 1.5])
+axs[2, 1].set_xticklabels([])
 
 axs[0, 3].set_xticks([40, 80, 120])
 axs[0, 3].set_xticklabels([])
-axs[1, 3].set_xticks([40, 80, 120])
-axs[1, 3].set_xticklabels([])
 axs[2, 3].set_xticks([40, 80, 120])
-axs[2, 3].set_xticklabels([0.1, 0.2, 0.3], fontsize=fs-2)
-axs[2, 3].set_xlabel("Time [s]", fontsize=fs)
+axs[2, 3].set_xticklabels([])
+axs[4, 3].set_xticks([40, 80, 120])
+axs[4, 3].set_xticklabels([0.1, 0.2, 0.3], fontsize=fs-2)
+axs[4, 3].set_xlabel("Time [s]", fontsize=fs)
 
 
 # Add letters in plots:
@@ -304,9 +307,9 @@ letter_params = {
     "verticalalignment": "top",
     "bbox": {"edgecolor": "k", "linewidth": 1, "facecolor": "w"}
 }
-letters = ["a", "b", "c", "d", "e", "f", "g", "h", "j", "k", "l", "m", "n", "o", "p"]
+letters = ["a", "b", "c", "d", "e", "f", "g", "h", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
 
-for i in range(3):
+for i in range(6):
     for j in range(4):
         axs[i, j].text(x=0.0, y=1.0, transform=axs[i, j].transAxes, s=letters[i * 4 + j], **letter_params)
 
