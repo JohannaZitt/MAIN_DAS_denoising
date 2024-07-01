@@ -151,7 +151,7 @@ ids = [5, 20, 82]
 fig, axs = plt.subplots(6, 4,
                        gridspec_kw={
                            "width_ratios": [5, 5, 1, 5],
-                           "height_ratios": [5, 1, 5, 1, 5, 1]},
+                           "height_ratios": [8, 1, 8, 1, 8, 1]},
                       sharey = False)
 fig.set_figheight(10)
 fig.set_figwidth(12)
@@ -179,7 +179,6 @@ for i, id in enumerate(ids):
     seis_stats = seis_stream[0].stats
     seis_data = butter_bandpass_filter(seis_data, 1, 120, fs=seis_stats.sampling_rate, order=4)
     seis_data = seis_data / np.std(seis_data)
-
 
     # load DAS data:
     raw_data, raw_headers, raw_axis = load_das_data(raw_path, t_start, t_end, raw=True, channel_delta_start=event_times[id][1], channel_delta_end=event_times[id][2])
@@ -264,6 +263,29 @@ for i, id in enumerate(ids):
     ax2.tick_params(axis="y", labelcolor="red")
     #axs[i, 3].legend(ncol=3, fontsize=8)
 
+    # plot single seismometer trace
+    axs[seismometer_id, 0].plot(seis_data, color="black", linewidth=0.8)
+    axs[seismometer_id, 0].set_yticks([])
+    axs[seismometer_id, 0].set_xlim([0, 800])
+    axs[seismometer_id, 0].set_xticks([])
+    axs[seismometer_id, 0].spines["top"].set_visible(False)
+    axs[seismometer_id, 0].spines["right"].set_visible(False)
+    axs[seismometer_id, 0].spines["bottom"].set_visible(False)
+    axs[seismometer_id, 0].spines["left"].set_visible(False)
+    axs[seismometer_id, 1].plot(seis_data, color="black", linewidth=0.8)
+    axs[seismometer_id, 1].set_yticks([])
+    axs[seismometer_id, 1].set_xlim([0, 800])
+    axs[seismometer_id, 1].set_xticks([])
+    axs[seismometer_id, 1].spines["top"].set_visible(False)
+    axs[seismometer_id, 1].spines["right"].set_visible(False)
+    axs[seismometer_id, 1].spines["bottom"].set_visible(False)
+    axs[seismometer_id, 1].spines["left"].set_visible(False)
+
+
+    #not show inbetween plots
+    fig.delaxes(axs[seismometer_id, 2])
+    fig.delaxes(axs[seismometer_id, 3])
+
 
 # titles:
 axs[0, 0].set_title("Raw", y=1.0, fontsize=fs+2)
@@ -271,11 +293,14 @@ axs[0, 1].set_title("Denoised", y=1.0, fontsize=fs+2)
 axs[0, 2].set_title("LWC", y=1.0, fontsize=fs+2)
 axs[0, 3].set_title("Wiggle Comparison", y=1.0, fontsize=fs+2)
 # axs labels:
-axs[4, 0].set_xlabel("Time [s]", fontsize=fs)
-axs[4, 0].set_xticks([0.5, 1, 1.5], [0.5, 1, 1.5], fontsize=fs-2)
-axs[4, 1].set_xlabel("Time [s]", fontsize=fs)
-axs[4, 1].set_xticks([0.5, 1, 1.5], [0.5, 1, 1.5], fontsize=fs-2)
+axs[5, 0].set_xlabel("Time [s]", fontsize=fs)
+axs[5, 0].set_xticks([200, 400, 600], [0.5, 1, 1.5], fontsize=fs-2)
+axs[5, 1].set_xlabel("Time [s]", fontsize=fs)
+axs[5, 1].set_xticks([200, 400, 600], [0.5, 1, 1.5], fontsize=fs-2)
 axs[4, 2].set_xlabel("Gain [-]", fontsize=fs)
+
+axs[4, 0].set_xticks([])
+axs[4, 1].set_xticks([])
 
 axs[0, 2].set_xticks([1, 3, 5])
 axs[0, 2].set_xticklabels([])
@@ -300,6 +325,10 @@ axs[4, 3].set_xticks([40, 80, 120])
 axs[4, 3].set_xticklabels([0.1, 0.2, 0.3], fontsize=fs-2)
 axs[4, 3].set_xlabel("Time [s]", fontsize=fs)
 
+# set visisbility of boxes:
+axs[5, 0].spines["bottom"].set_visible(True)
+axs[5, 1].spines["bottom"].set_visible(True)
+
 
 # Add letters in plots:
 letter_params = {
@@ -309,10 +338,12 @@ letter_params = {
 }
 letters = ["a", "b", "c", "d", "e", "f", "g", "h", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
 
-for i in range(6):
+for i in range(3):
     for j in range(4):
-        axs[i, j].text(x=0.0, y=1.0, transform=axs[i, j].transAxes, s=letters[i * 4 + j], **letter_params)
+        axs[i*2, j].text(x=0.0, y=1.0, transform=axs[i*2, j].transAxes, s=letters[i * 4 + j], **letter_params)
 
-plt.tight_layout()
-plt.show()
-#plt.savefig("plots/waterfall/waterfall+wiggle.pdf", dpi=400)
+plt.subplots_adjust(left=0.07, right=0.97, top=0.95, bottom=0.07, wspace=0.05, hspace=0.05)
+
+#plt.tight_layout()
+#plt.show()
+plt.savefig("plots/waterfall/waterfall+wiggle_2.pdf", dpi=400)
