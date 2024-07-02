@@ -351,5 +351,5 @@ for i in range(3):
 plt.subplots_adjust(left=0.07, right=0.97, top=0.95, bottom=0.07, wspace=0.05, hspace=0.05)
 
 #plt.tight_layout()
-#plt.show()
-plt.savefig("plots/waterfall/waterfall+wiggle_2.pdf", dpi=400)
+plt.show()
+#plt.savefig("plots/waterfall/waterfall+wiggle_2.pdf", dpi=400)
