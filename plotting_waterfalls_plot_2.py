@@ -189,6 +189,7 @@ for i, id in enumerate(ids):
     raw_cc = compute_moving_coherence(raw_data, bin_size)
     denoised_cc = compute_moving_coherence(denoised_data, bin_size)
     raw_denoised_cc = denoised_cc / raw_cc
+    raw_denoised_cc = raw_denoised_cc[::-1]
 
     # Parameters for Plotting:
     cmap = "plasma" # verschiednene colormaps:  cividis, plasma, inferno, viridis, magma, (cmocean.cm.curl, seismic)
@@ -238,12 +239,12 @@ for i, id in enumerate(ids):
     axs[waterfall_id, 2].set_yticklabels([])
 
     # plot arrow where wiggle for wiggle comparison takes place:
-    arrow_style = "Simple,head_width=0.5,head_length=0.5"
+    arrow_style = "fancy,head_width=0.5,head_length=0.5"
     axs[waterfall_id, 0].annotate("", xy=(0, (channels - middle_channel) * 0.0125), xytext=(-0.05, (channels - middle_channel) * 0.0125),
-                       arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=3))
+                       arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=2))
     axs[waterfall_id, 1].annotate("", xy=(0, (channels - middle_channel) * 0.0125),
                        xytext=(-0.05, (channels - middle_channel) * 0.0125),
-                       arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=3))
+                       arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=2))
 
     # plotting wiggle for wiggle comparison
     if id == 82:
@@ -266,6 +267,7 @@ for i, id in enumerate(ids):
     # plot single seismometer trace
     axs[seismometer_id, 0].plot(seis_data, color="black", linewidth=0.8)
     axs[seismometer_id, 0].set_yticks([])
+    axs[seismometer_id, 0].set_ylim([-15, 15])
     axs[seismometer_id, 0].set_xlim([0, 800])
     axs[seismometer_id, 0].set_xticks([])
     axs[seismometer_id, 0].spines["top"].set_visible(False)
@@ -276,6 +278,7 @@ for i, id in enumerate(ids):
     axs[seismometer_id, 1].set_yticks([])
     axs[seismometer_id, 1].set_xlim([0, 800])
     axs[seismometer_id, 1].set_xticks([])
+    axs[seismometer_id, 1].set_ylim([-15, 15])
     axs[seismometer_id, 1].spines["top"].set_visible(False)
     axs[seismometer_id, 1].spines["right"].set_visible(False)
     axs[seismometer_id, 1].spines["bottom"].set_visible(False)
@@ -328,6 +331,9 @@ axs[4, 3].set_xlabel("Time [s]", fontsize=fs)
 # set visisbility of boxes:
 axs[5, 0].spines["bottom"].set_visible(True)
 axs[5, 1].spines["bottom"].set_visible(True)
+axs[5, 2].spines["bottom"].set_visible(True)
+axs[5, 3].spines["bottom"].set_visible(True)
+
 
 
 # Add letters in plots:

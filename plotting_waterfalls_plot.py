@@ -187,6 +187,7 @@ for i, id in enumerate(ids):
     raw_cc = compute_moving_coherence(raw_data, bin_size)
     denoised_cc = compute_moving_coherence(denoised_data, bin_size)
     raw_denoised_cc = denoised_cc / raw_cc
+    raw_denoised_cc = raw_denoised_cc[::-1]
 
     # Parameters for Plotting:
     cmap = "plasma" # verschiednene colormaps:  cividis, plasma, inferno, viridis, magma, (cmocean.cm.curl, seismic)
@@ -235,14 +236,6 @@ for i, id in enumerate(ids):
     axs[i, 2].set_yticks([])
     axs[i, 2].set_yticklabels([])
 
-    # plot arrow where wiggle for wiggle comparison takes place:
-    arrow_style = "Simple,head_width=0.5,head_length=0.5"
-    axs[i, 0].annotate("", xy=(0, (channels - middle_channel) * 0.0125), xytext=(-0.05, (channels - middle_channel) * 0.0125),
-                       arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=3))
-    axs[i, 1].annotate("", xy=(0, (channels - middle_channel) * 0.0125),
-                       xytext=(-0.05, (channels - middle_channel) * 0.0125),
-                       arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=3))
-
     # plotting wiggle for wiggle comparison
     if id == 82:
         t_start_wiggle = 320
@@ -260,6 +253,31 @@ for i, id in enumerate(ids):
     ax2.set_yticks([])
     ax2.tick_params(axis="y", labelcolor="red")
     #axs[i, 3].legend(ncol=3, fontsize=8)
+
+    # plot arrow where wiggle for wiggle comparison takes place:
+    arrow_style = "fancy,head_width=0.5,head_length=0.5"
+    axs[i, 0].annotate("", xy=(0, (channels - middle_channel) * 0.0125),
+                       xytext=(-0.05, (channels - middle_channel) * 0.0125),
+                       arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=2))
+    axs[i, 1].annotate("", xy=(0, (channels - middle_channel) * 0.0125),
+                       xytext=(-0.05, (channels - middle_channel) * 0.0125),
+                       arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=2))
+
+    # plot arrow in time domain:
+    #marker_position_1 = t_start_wiggle / 400
+    #marker_position_2 = t_end_wiggle / 400
+    #axs[i, 0].annotate("", xy=(marker_position_1, 0),
+    #                   xytext=(marker_position_1, -0.03),
+    #                   arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=0.5))
+    #axs[i, 1].annotate("", xy=(marker_position_1, 0),
+    #                   xytext=(marker_position_1, -0.03),
+    #                   arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=0.5))
+    #axs[i, 0].annotate("", xy=(marker_position_2, 0),
+    #                   xytext=(marker_position_2, -0.03),
+    #                   arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=0.5))
+    #axs[i, 1].annotate("", xy=(marker_position_2, 0),
+    #                   xytext=(marker_position_2, -0.03),
+    #                   arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=0.5))
 
 
 # titles:
@@ -311,5 +329,5 @@ for i in range(3):
         axs[i, j].text(x=0.0, y=1.0, transform=axs[i, j].transAxes, s=letters[i * 4 + j], **letter_params)
 
 plt.tight_layout()
-plt.show()
-#plt.savefig("plots/waterfall/waterfall+wiggle.pdf", dpi=400)
+#plt.show()
+plt.savefig("plots/waterfall/waterfall+wiggle.pdf", dpi=400)
