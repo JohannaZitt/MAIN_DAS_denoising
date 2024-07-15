@@ -20,7 +20,7 @@ Extract Data:
 '''
 for experiment in experiments:
 
-    csv_path = os.path.join("experiments", experiment, "cc_evaluation_" + experiment[0:2] + ".csv")
+    csv_path = os.path.join("experiments", experiment, "cc_evaluation_max_" + experiment[0:2] + ".csv")
 
     with open(csv_path, "r") as file:
 
@@ -56,7 +56,7 @@ for datatype in datatypes:
 
     # Data:
     labels = ["Ablation\nHorizontal", "Ablation\nVertical", "Accumulation\nHorizontal", "Accumulation\nVertical"
-              , "Combined 200", "Combined 800", "Retrained\nCombined 200", "Retrained\nCombined 800", "Borehole"]
+              , "Combined 200", "Combined 800", "Fine-Tuned\nCombined 200", "Fine-Tuned\nCombined 800", "Borehole"]
 
     if datatype == "local":
         acc_cc_gain = list(values_accumulation_cc_gain.values())
@@ -83,8 +83,8 @@ for datatype in datatypes:
     plt.axhline(y=1, color="blue", zorder=4)
     # Achsenbeschriftungen und Titel hinzufügen
     plt.ylabel(label, fontsize=fontsize+gain)
-    plt.yticks((0.5, 1, 1.5, 2, 2.5), (0.5, 1.0, 1.5, 2.0, 2.5), fontsize=fontsize)
-    plt.legend(fontsize=fontsize+gain, frameon=False, ncol=1, loc="upper left")
+    plt.yticks((1, 2, 3, 4), (1, 2, 3, 4), fontsize=fontsize)
+    #plt.legend(fontsize=fontsize+gain, frameon=False, ncol=1, loc="upper left")
     plt.xticks(x, labels, rotation=20, fontsize=fontsize+1)
 
     print(label)
@@ -98,7 +98,7 @@ for datatype in datatypes:
 
     plt.tight_layout()
     plt.show()
-    #plt.savefig("plots/cc/" + datatype + ".png", dpi=250)
+    #plt.savefig("plots/cc/" + datatype + "_max.pdf", dpi=400)
 
 
 

@@ -91,10 +91,11 @@ vmin = -1.5
 vmax = 1.5
 ch_start = 10
 ch_end = 70
+ch_total=60
 fs=16
-t_start_wiggle = 950
-t_end_wiggle =  1250
-channel_wiggle_comparison=32
+t_start_wiggle = 450
+t_end_wiggle=650
+channel_wiggle_comparison=32#32
 
 event_id = 34 # 0, 17, 34, 44
 SNR_values = [0.0, 1.0, 3.2, 10.0] # 0.0, 0.3, 1.0, 3.2, 10.0, 31.6, 100.0
@@ -112,7 +113,7 @@ for event in remove_events:
     event_names.remove(event)
 
 event_names.sort(key=extract_SNR)
-print(event_names)
+
 first_event = event_names.pop(0)
 event_names.append(first_event)
 event_names = event_names[::-1]
@@ -129,7 +130,7 @@ for event_name in event_names:
 fig, axs = plt.subplots(len(event_names), 4, figsize=(12, 14), gridspec_kw={"width_ratios": [5, 5, 1, 5]})
 
 ground_truth_data = np.load(os.path.join(data_path, "cleanDAS_ID:34_SNR:0.npy"))[ch_start:ch_end]
-
+ground_truth_data = ground_truth_data[:, 550:1750]
 for i, event_name in enumerate(event_names):
     # Load Data:
     data = np.load(os.path.join(data_path, event_name))[ch_start:ch_end]
@@ -159,40 +160,75 @@ for i, event_name in enumerate(event_names):
 
     # Plotting Wiggle Comparison
     axs[i, 3].plot(ground_truth_data[channel_wiggle_comparison][t_start_wiggle:t_end_wiggle], color="red",
-                  label="Ground Truth Data", linewidth=1.5, alpha=0.5, zorder=1)
+                   label="Ground Truth Data", linewidth=1.5, alpha=0.5, zorder=1)
     if not i == 0:
         axs[i, 3].plot(data[channel_wiggle_comparison][t_start_wiggle:t_end_wiggle], color="grey",
-                       label="Noise Corupted Data",
+                       label="Noise Corrupted Data",
                        linewidth=2, alpha=0.25, zorder=1)
     axs[i, 3].plot(denoised_data[channel_wiggle_comparison][t_start_wiggle:t_end_wiggle], color="black",
                    label="Denoised Data", linewidth=1.5, alpha=1, zorder=1)
 
-
+    # Legend
+    axs[i, 3].legend(fontsize=12)
 
     # Label and Ticks
     axs[i, 0].set_ylabel("Offset [m]", fontsize=fs)
-    axs[i, 0].set_yticks([59, 49, 39, 29, 19, 9], [0, 120, 240, 360, 480, 600])
-    axs[i, 1].set_yticks([59, 49, 39, 29, 19, 9], [0, 120, 240, 360, 480, 600])
+    axs[i, 0].set_yticks([59, 49, 39, 29, 19, 9], [0.0, 0.2, 0.3, 0.4, 0.5, 0.6], fontsize=fs-2)
+    axs[i, 1].set_yticks([59, 49, 39, 29, 19, 9], [0.0, 0.2, 0.3, 0.4, 0.5, 0.6], fontsize=fs-2)
     axs[i, 1].set_yticklabels([])
     axs[i, 2].set_yticks([])
     axs[i, 2].set_xlim(0, 6)
     axs[i, 2].set_ylim(0, raw_denoised_cc.shape[0]-1)
+    axs[i, 3].set_yticks([])
+    axs[i, 3].set_xticks([50, 100, 150], [0.2, 0.3, 0.4], fontsize=fs-2)
 
-    axs[i, 0].set_xticks([400, 800], [1.0, 2.0])
-    axs[i, 1].set_xticks([400, 800], [1.0, 2.0])
+    axs[i, 0].set_xticks([200, 400, 600, 800, 1000], [0.5, 1.0, 1.5, 2.0, 2.5], fontsize=fs-2)
+    axs[i, 1].set_xticks([200, 400, 600, 800, 1000], [0.5, 1.0, 1.5, 2.0, 2.5], fontsize=fs-2)
     axs[i, 2].set_xticks([1, 3, 5])
     if i == 3:
         axs[i, 0].set_xlabel("Time [s]", fontsize=fs)
         axs[i, 1].set_xlabel("Time [s]", fontsize=fs)
         axs[i, 2].set_xlabel("Gain [-]", fontsize=fs)
+        axs[i, 3].set_xlabel("Time [s]", fontsize=fs)
     else:
         axs[i, 0].set_xticklabels([])
         axs[i, 1].set_xticklabels([])
         axs[i, 2].set_xticklabels([])
+        axs[i, 3].set_xticklabels([])
+
+    ax2 = axs[i, 3].twinx()
+    ax2.set_yticks([])
+    ax2.set_ylabel("Strain Rate [norm.]", fontsize=fs - 2)
+
+    # plot arrows
+    arrow_style = "fancy,head_width=0.5,head_length=0.5"
+    axs[i, 0].annotate("", xy=(0, ch_total - channel_wiggle_comparison),
+                       xytext=(-0.05, ch_total - channel_wiggle_comparison),
+                       arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=2))
+
+
+axs[3, 0].annotate("", xy=(t_start_wiggle, 59.5),
+                        xytext=(t_start_wiggle, 59.9),
+                        arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=1))
+axs[3, 1].annotate("", xy=(t_start_wiggle, 59.5),
+                        xytext=(t_start_wiggle, 59.9),
+                        arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=1))
+axs[3, 0].annotate("", xy=(t_end_wiggle, 59.5),
+                        xytext=(t_end_wiggle, 59.9),
+                        arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=1))
+axs[3, 1].annotate("", xy=(t_end_wiggle, 59.5),
+                        xytext=(t_end_wiggle, 59.9),
+                        arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=1))
+
+
 
 axs[0, 0].set_title("Noise Corrupted", fontsize=fs+4, y=1.05)
 axs[0, 1].set_title("Denoised Data", fontsize=fs+4, y=1.05)
 axs[0, 2].set_title("LWC", fontsize=fs+4, y=1.05)
+axs[0, 3].set_title("Wiggle Comparison", fontsize=fs+4, y=1.05)
+axs[3, 2].set_xticks([1, 3, 5], [1, 3, 5], fontsize=fs-2)
+#axs[3, 0].set_xticks([0.5, 1.0, 1.5, 2.0], [0.5, 1.0, 1.5, 2.0], fontsize=fs-2)
+
 
 # add patch:
 #rect = patches.Rectangle((500, 28), 100, 1, linewidth=1.5, edgecolor="black", facecolor="none")
@@ -215,8 +251,8 @@ for i in range(4):
 
 
 plt.tight_layout()
-#plt.savefig("plots/synthetics/water_fall_DAS_synthetic.pdf", dpi=400)
-plt.show()
+plt.savefig("plots/synthetics/waterfall+wiggle_comparison_DAS_legend.pdf", dpi=400)
+#plt.show()
 
 
 
@@ -300,7 +336,7 @@ for i, event_name in enumerate(event_names):
     axs[i, 3].plot(ground_truth_data[channel_wiggle_comparison][t_start_wiggle:t_end_wiggle], color="red",
                        label="Ground Truth Data", linewidth=1.5, alpha=0.5, zorder=1)
     if not i == 0:
-        axs[i, 3].plot(data[channel_wiggle_comparison][t_start_wiggle:t_end_wiggle], color="grey", label="Noise Corupted Data",
+        axs[i, 3].plot(data[channel_wiggle_comparison][t_start_wiggle:t_end_wiggle], color="grey", label="Noise Corrupted Data",
                        linewidth=2, alpha=0.25, zorder=1)
     axs[i, 3].plot(denoised_data[channel_wiggle_comparison][t_start_wiggle:t_end_wiggle], color="black",
                    label="Denoised Data", linewidth=1.5, alpha=1, zorder=1)

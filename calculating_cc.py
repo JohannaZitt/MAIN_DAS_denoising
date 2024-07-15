@@ -129,10 +129,9 @@ def compute_moving_coherence(data, bin_size):
 
 
 #experiments = os.listdir('experiments/')
-#experiments = ["01_ablation_horizontal", "02_ablation_vertical", "03_accumulation_horizontal", "04_accumulation_horizontal",
-#               "05_combined200", "06_combined800", "07_retrained_combined200", "08_retrained_combined800", "09_borehole_seismometer"]
-experiments = ["04_accumulation_vertical",
+experiments = ["01_ablation_horizontal", "02_ablation_vertical", "03_accumulation_horizontal",
                "05_combined200", "06_combined800", "07_retrained_combined200", "08_retrained_combined800", "09_borehole_seismometer"]
+# experiments = ["04_accumulation_vertical"] # "05_combined200", "06_combined800", "07_retrained_combined200", "08_retrained_combined800", "09_borehole_seismometer"]
 
 data_types = ["ablation", "accumulation"]
 
@@ -146,7 +145,7 @@ for experiment in experiments: # for every experiment
     print("#################################################################################")
     print("#################################################################################")
 
-    with open("experiments/" + experiment + "/cc_evaluation_" + experiment[:2] + ".csv", mode="w", newline="") as file:
+    with open("experiments/" + experiment + "/cc_evaluation_max_" + experiment[:2] + ".csv", mode="w", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(
             ["id", "mean_cc_gain", "mean_cross_gain", "zone", "model"])
@@ -233,7 +232,9 @@ for experiment in experiments: # for every experiment
                 """
                 raw_cc_seis_total = []
                 denoised_cc_seis_total = []
-
+                raw_data = raw_data[:, 17:23]
+                denoised_data = denoised_data[:, 17:23]
+                print("Shape:", raw_data.shape)
                 for i in range(raw_data.shape[1]):
                     raw_cc_seis = xcorr(raw_data.T[i], seis_data)
                     denoised_cc_seis = xcorr(denoised_data.T[i], seis_data)
@@ -244,7 +245,7 @@ for experiment in experiments: # for every experiment
 
                 # Save values:
                 writer.writerow(
-                    [id, cc_gain.mean(), cc_gain_seis.mean(), zone, experiment])
+                    [id, cc_gain.mean(), cc_gain_seis.max(), zone, experiment])
 
 
 

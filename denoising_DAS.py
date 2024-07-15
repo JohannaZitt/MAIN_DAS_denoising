@@ -132,7 +132,7 @@ def deal_with_artifacts(data, filler = 0, Nt=1024):
 
     for i in range(n_edges): # for every edge
         for j in range(data.shape[1]): # for every channel
-            for n in range(5):
+            for n in range(3):
                 data[Nt * i + n, j] = filler
                 data[Nt * i - (n + 1), j] = filler
 
