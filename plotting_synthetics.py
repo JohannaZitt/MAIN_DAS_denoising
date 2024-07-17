@@ -97,6 +97,8 @@ t_start_wiggle = 450
 t_end_wiggle=650
 channel_wiggle_comparison=32#32
 
+col_pink = "#CE4A75"
+
 event_id = 34 # 0, 17, 34, 44
 SNR_values = [0.0, 1.0, 3.2, 10.0] # 0.0, 0.3, 1.0, 3.2, 10.0, 31.6, 100.0
 
@@ -159,20 +161,21 @@ for i, event_name in enumerate(event_names):
     axs[i, 2].axvline(x=1, color="black", linestyle="dotted")
 
     # Plotting Wiggle Comparison
-    axs[i, 3].plot(ground_truth_data[channel_wiggle_comparison][t_start_wiggle:t_end_wiggle], color="red",
-                   label="Ground Truth Data", linewidth=1.5, alpha=0.5, zorder=1)
+    axs[i, 3].plot(ground_truth_data[channel_wiggle_comparison][t_start_wiggle:t_end_wiggle], color=col_pink,
+                   label="Raw", linewidth=1.5, alpha=0.8, zorder=1)
     if not i == 0:
         axs[i, 3].plot(data[channel_wiggle_comparison][t_start_wiggle:t_end_wiggle], color="grey",
-                       label="Noise Corrupted Data",
-                       linewidth=2, alpha=0.25, zorder=1)
+                       label="Synthetics",
+                       linewidth=1.5, alpha=0.6, zorder=1)
     axs[i, 3].plot(denoised_data[channel_wiggle_comparison][t_start_wiggle:t_end_wiggle], color="black",
-                   label="Denoised Data", linewidth=1.5, alpha=1, zorder=1)
+                   label="Denoised", linewidth=1.5, alpha=0.8, zorder=1)
+
 
     # Legend
-    axs[i, 3].legend(fontsize=12)
+    #axs[i, 3].legend(fontsize=15)
 
     # Label and Ticks
-    axs[i, 0].set_ylabel("Offset [m]", fontsize=fs)
+    axs[i, 0].set_ylabel("Offset [km]", fontsize=fs)
     axs[i, 0].set_yticks([59, 49, 39, 29, 19, 9], [0.0, 0.2, 0.3, 0.4, 0.5, 0.6], fontsize=fs-2)
     axs[i, 1].set_yticks([59, 49, 39, 29, 19, 9], [0.0, 0.2, 0.3, 0.4, 0.5, 0.6], fontsize=fs-2)
     axs[i, 1].set_yticklabels([])
@@ -188,7 +191,7 @@ for i, event_name in enumerate(event_names):
     if i == 3:
         axs[i, 0].set_xlabel("Time [s]", fontsize=fs)
         axs[i, 1].set_xlabel("Time [s]", fontsize=fs)
-        axs[i, 2].set_xlabel("Gain [-]", fontsize=fs)
+        axs[i, 2].set_xlabel("Gain []", fontsize=fs)
         axs[i, 3].set_xlabel("Time [s]", fontsize=fs)
     else:
         axs[i, 0].set_xticklabels([])
@@ -198,10 +201,10 @@ for i, event_name in enumerate(event_names):
 
     ax2 = axs[i, 3].twinx()
     ax2.set_yticks([])
-    ax2.set_ylabel("Strain Rate [norm.]", fontsize=fs - 2)
+    ax2.set_ylabel("Amplitude [norm.]", fontsize=fs)
 
     # plot arrows
-    arrow_style = "fancy,head_width=0.5,head_length=0.5"
+    arrow_style = "fancy,head_width=0.5,head_length=1.8"
     axs[i, 0].annotate("", xy=(0, ch_total - channel_wiggle_comparison),
                        xytext=(-0.05, ch_total - channel_wiggle_comparison),
                        arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=2))
@@ -222,8 +225,8 @@ axs[3, 1].annotate("", xy=(t_end_wiggle, 59.5),
 
 
 
-axs[0, 0].set_title("Noise Corrupted", fontsize=fs+4, y=1.05)
-axs[0, 1].set_title("Denoised Data", fontsize=fs+4, y=1.05)
+axs[0, 0].set_title("Synthetics", fontsize=fs+4, y=1.05)
+axs[0, 1].set_title("Denoised", fontsize=fs+4, y=1.05)
 axs[0, 2].set_title("LWC", fontsize=fs+4, y=1.05)
 axs[0, 3].set_title("Wiggle Comparison", fontsize=fs+4, y=1.05)
 axs[3, 2].set_xticks([1, 3, 5], [1, 3, 5], fontsize=fs-2)
@@ -240,19 +243,19 @@ letter_params = {
         "verticalalignment": "top",
         "bbox": {"edgecolor": "k", "linewidth": 1, "facecolor": "w",}
     }
-letters = ["a", "b", "c", "d", "e", "f", "g", "h", "j", "k", "l", "m", "n", "o", "p", "q"]
+letters = ["a", "b", "c", "d", "e", "f ", "g", "h", "i ", "j ", "k", "l ", "m", "n", "o", "p", "q"]
 snr_values = ["No Noise Added", "SNR: 10", "SNR: 3.2", "SNR: 1.0"]
 
 for i in range(4):
-    axs[i, 0].text(x=0.09, y=1, transform=axs[i, 0].transAxes, s=snr_values[i], **letter_params)
+    axs[i, 0].text(x=0.12, y=1, transform=axs[i, 0].transAxes, s=snr_values[i], **letter_params)
     for j in range(4):
         axs[i, j].text(x=0.0, y=1.0, transform=axs[i, j].transAxes, s=letters[i*4 + j], **letter_params)
 
 
 
 plt.tight_layout()
-plt.savefig("plots/synthetics/waterfall+wiggle_comparison_DAS_legend.pdf", dpi=400)
-#plt.show()
+#plt.savefig("plots/synthetics/waterfall+wiggle_comparison_DAS_synthetics.pdf", dpi=400)
+plt.show()
 
 
 
@@ -299,6 +302,8 @@ experiment = "03_accumulation_horizontal"
 denoised_data_path = os.path.join("experiments", experiment, "denoised_synthetic_DAS", "from_seis")
 denoised_event_names = []
 
+col_pink = "#CE4A75"
+
 for event_name in event_names:
     denoised_event_names.append("denoised_" + event_name)
 
@@ -333,37 +338,37 @@ for i, event_name in enumerate(event_names):
     axs[i, 2].axvline(x=1, color="black", linestyle="dotted")
 
     # Plotting wiggle for wiggle comparison
-    axs[i, 3].plot(ground_truth_data[channel_wiggle_comparison][t_start_wiggle:t_end_wiggle], color="red",
-                       label="Ground Truth Data", linewidth=1.5, alpha=0.5, zorder=1)
+    axs[i, 3].plot(ground_truth_data[channel_wiggle_comparison][t_start_wiggle:t_end_wiggle], color=col_pink,
+                       label="Co-Located Seismometer", linewidth=1.5, alpha=0.8, zorder=1)
     if not i == 0:
-        axs[i, 3].plot(data[channel_wiggle_comparison][t_start_wiggle:t_end_wiggle], color="grey", label="Noise Corrupted Data",
-                       linewidth=2, alpha=0.25, zorder=1)
+        axs[i, 3].plot(data[channel_wiggle_comparison][t_start_wiggle:t_end_wiggle], color="grey", label="Synthetics",
+                       linewidth=1.5, alpha=0.6, zorder=1)
     axs[i, 3].plot(denoised_data[channel_wiggle_comparison][t_start_wiggle:t_end_wiggle], color="black",
-                   label="Denoised Data", linewidth=1.5, alpha=1, zorder=1)
+                   label="Denoised", linewidth=1.5, alpha=0.8, zorder=1)
 
     # legend
-    # axs[i, 3].legend(fontsize = 20)
+    #axs[i, 3].legend(fontsize = 15)
 
-
+    delta = 2
 
     # Label and Ticks
-    axs[i, 0].set_ylabel("Offset [m]", fontsize=fs)
-    axs[i, 0].set_yticks([59, 49 ,39, 29, 19, 9, 0], [0.0, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7], fontsize = fs-4)
-    axs[i, 1].set_yticks([59, 49 ,39, 29, 19, 9, 0], [0.0, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7], fontsize=fs - 4)
+    axs[i, 0].set_ylabel("Offset [km]", fontsize=fs)
+    axs[i, 0].set_yticks([59, 49 ,39, 29, 19, 9, 0], [0.0, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7], fontsize =fs-delta)
+    axs[i, 1].set_yticks([59, 49 ,39, 29, 19, 9, 0], [0.0, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7], fontsize=fs-delta)
     axs[i, 1].set_yticklabels([])
     axs[i, 2].set_yticks([])
     axs[i, 2].set_xlim(0, 9)
     axs[i, 2].set_ylim(0, raw_denoised_cc.shape[0]-1)
     axs[i, 3].set_yticks([])
 
-    axs[i, 0].set_xticks([400, 800, 1200, 1600, 2000], [1.0, 2.0, 3.0, 4.0, 5.0], fontsize = fs-4)
-    axs[i, 1].set_xticks([400, 800, 1200, 1600, 2000], [1.0, 2.0, 3.0, 4.0, 5.0], fontsize = fs-4)
-    axs[i, 2].set_xticks([1, 7], [1, 7], fontsize = fs-4)
-    axs[i, 3].set_xticks([50, 100, 150], [0.2, 0.3, 0.4], fontsize = fs-4)
+    axs[i, 0].set_xticks([400, 800, 1200, 1600, 2000], [1, 2, 3, 4, 5], fontsize = fs-delta)
+    axs[i, 1].set_xticks([400, 800, 1200, 1600, 2000], [1, 2, 3, 4, 5], fontsize = fs-delta)
+    axs[i, 2].set_xticks([1, 7], [1, 7], fontsize = fs-delta)
+    axs[i, 3].set_xticks([50, 100, 150], [0.2, 0.3, 0.4], fontsize = fs-delta)
     if i == 3:
         axs[i, 0].set_xlabel("Time [s]", fontsize=fs)
         axs[i, 1].set_xlabel("Time [s]", fontsize=fs)
-        axs[i, 2].set_xlabel("Gain [-]", fontsize=fs)
+        axs[i, 2].set_xlabel("Gain []", fontsize=fs)
         axs[i, 3].set_xlabel("Time [s]", fontsize=fs)
     else:
         axs[i, 0].set_xticklabels([])
@@ -373,10 +378,10 @@ for i, event_name in enumerate(event_names):
 
     ax2 = axs[i, 3].twinx()
     ax2.set_yticks([])
-    ax2.set_ylabel("Ground Velocity [norm.]", fontsize=fs-2)
+    ax2.set_ylabel("Amplitude [norm.]", fontsize=fs)
 
     # plot arrows
-    arrow_style = "fancy,head_width=0.5,head_length=0.5"
+    arrow_style = "fancy,head_width=0.5,head_length=1.8"
     axs[i, 0].annotate("", xy=(0, ch_total - channel_wiggle_comparison),
                        xytext=(-0.05, ch_total - channel_wiggle_comparison),
                        arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=2))
@@ -396,8 +401,8 @@ axs[3, 1].annotate("", xy=(t_end_wiggle, 59.5),
                         arrowprops=dict(color="black", arrowstyle=arrow_style, linewidth=1))
 
 
-axs[0, 0].set_title("Noise Corrupted", fontsize=fs+4, y=1.05)
-axs[0, 1].set_title("Denoised Data", fontsize=fs+4, y=1.05)
+axs[0, 0].set_title("Synthetics", fontsize=fs+4, y=1.05)
+axs[0, 1].set_title("Denoised", fontsize=fs+4, y=1.05)
 axs[0, 2].set_title("LWC", fontsize=fs+4, y=1.05)
 axs[0, 3].set_title("Wiggle Comparison", fontsize=fs+4, y=1.05)
 
@@ -412,11 +417,11 @@ letter_params = {
         "verticalalignment": "top",
         "bbox": {"edgecolor": "k", "linewidth": 1, "facecolor": "w",}
     }
-letters = ["a", "b", "c", "d", "e", "f", "g", "h", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
+letters = ["a", "b", "c", "d", "e", "f ", "g", "h", "i ", "j ", "k", "l ", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
 snr_values = ["No Noise Added", "SNR: 10", "SNR: 3.2", "SNR: 1.0"]
 
 for i in range(4):
-    axs[i, 0].text(x=0.09, y=1, transform=axs[i, 0].transAxes, s=snr_values[i], **letter_params)
+    axs[i, 0].text(x=0.12, y=1, transform=axs[i, 0].transAxes, s=snr_values[i], **letter_params)
     for j in range(4):
         axs[i, j].text(x=0.0, y=1.0, transform=axs[i, j].transAxes, s=letters[i*4 + j], **letter_params)
 
@@ -426,9 +431,9 @@ plt.tight_layout()
 #plt.savefig("plots/synthetics/water_fall_wiggle_seis_synthetic.pdf", dpi=400)
 plt.show()
 
-
-
 """
+
+
 
 
 
