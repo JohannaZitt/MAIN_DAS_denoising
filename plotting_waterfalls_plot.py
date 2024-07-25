@@ -341,5 +341,5 @@ for i in range(3):
         axs[i, j].text(x=0.0, y=1.0, transform=axs[i, j].transAxes, s=letters[i * 4 + j], **letter_params)
 
 plt.tight_layout()
-#plt.show()
-plt.savefig("plots/waterfall/waterfall+wiggle_pink.pdf", dpi=400)
+plt.show()
+#plt.savefig("plots/waterfall/waterfall+wiggle_pink.pdf", dpi=400)

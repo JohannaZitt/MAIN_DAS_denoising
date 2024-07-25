@@ -83,7 +83,7 @@ for datatype in datatypes:
     plt.axhline(y=1, color="blue", zorder=4)
     # Achsenbeschriftungen und Titel hinzufügen
     plt.ylabel(label, fontsize=fontsize+gain)
-    plt.yticks((1, 2, 3, 4), (1, 2, 3, 4), fontsize=fontsize)
+    #plt.yticks((1, 2, 3, 4), (1, 2, 3, 4), fontsize=fontsize)
     #plt.legend(fontsize=fontsize+gain, frameon=False, ncol=1, loc="upper left")
     plt.xticks(x, labels, rotation=20, fontsize=fontsize+1)
 
