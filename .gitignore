@@ -1,6 +1,7 @@
 .idea
 __pycache__
 old
+plots/spectograms
 data/raw_DAS
 data/training_data/raw_seismometer_trainingdata
 data/training_data/raw_DAS
