@@ -164,19 +164,19 @@ def plot_seismogram_single_channel(raw_data, denoised_data, middle_channel, id, 
 # Category 3: worsening of an icequake through denoising
 # Category 4: no event
 event_times = {0: ["2020-07-27 08:17:34.6", 60, 70, 1, "ALH"], # Category 1, Receiver ALH
-               5: ["2020-07-27 19:43:30.5", 45, 75, 1, "ALH"], # Category 1, Receiver ALH
+               5: ["2020-07-27 19:43:30.5", 45, 75, 1, "ALH"], # Category 1, Receiver ALH (plotted in paper)
                11: ["2020-07-27 19:43:01.4", 65, 85, 1, "ALH"], # Category 1, Receiver ALH
                35: ["2020-07-27 03:03:20.2", 65, 55, 1, "ALH"], # Category 1, Receiver ALH (dominant frequency at 100 Hz)
                83: ["2020-07-27 01:03:00.2", 70, 25, 1, "ALH"], # Category 1, Receiver ALH
 
-               20: ["2020-07-27 00:21:46.3", 30, 30, 2, "ALH"], # Category 2, Receiver ALH
+               20: ["2020-07-27 00:21:46.3", 30, 30, 2, "ALH"], # Category 2, Receiver ALH (plotted in paper)
                24: ["2020-07-27 05:21:48.4", 70, 90, 2, "ALH"], # Category 2, Receiver ALH (dominant frequency at 100 Hz)
                36: ["2020-07-27 20:47:34.8", 40, 45, 2, "ALH"], # Category 2, Receiver ALH
                52: ["2020-07-27 20:00:30.4", 100, 85, 2, "ALH"], # Category 2, Receiver ALH
                67: ["2020-07-27 23:17:54.0", 70, 35, 2, "ALH"], # Category 2, Receiver ALH
                107: ["2020-07-27 01:25:19.6", 30, 15, 2, "ALH"], # Category 2, Receiver ALH
 
-               82: ["2020-07-27 05:04:55.8", 80, 150, 3, "ALH"], # Category 3, Receiver ALH (dominant frequency at 100 Hz)
+               82: ["2020-07-27 05:04:55.8", 80, 150, 3, "ALH"], # Category 3, Receiver ALH (plotted in paper) (dominant frequency at 100 Hz)
 
                }
 experiment = "03_accumulation_horizontal"
