@@ -14,29 +14,29 @@ from pydvs.plot_utils import *
 # Load Seismic Data:
 # ID: [event_time, file_name, start_time, end_time, start_channel, end_channel]
 event_times = {
-    0: ["2020-07-27 08:17:34.6", "rhone1khz_UTC_20200727_081708.575.h5"], # Category 1, Receiver ALH
+    0: ["2020-07-27 08:17:34.6", "rhone1khz_UTC_20200727_081708.575.h5", 25, 30, 580, 770], # Category 1, Receiver ALH
     5: ["2020-07-27 19:43:30.5", "rhone1khz_UTC_20200727_194308.575.h5", 20, 25, 550, 720], # Category 1, Receiver ALH (plotted in paper)
-    11: ["2020-07-27 19:43:01.4", "rhone1khz_UTC_20200727_194238.575.h5"], # Category 1, Receiver ALH
-    35: ["2020-07-27 03:03:20.2", "rhone1khz_UTC_20200727_030308.575.h5"], # Category 1, Receiver ALH (dominant frequency at 100 Hz)
-    83: ["2020-07-27 01:03:00.2", "rhone1khz_UTC_20200727_010238.575.h5"], # Category 1, Receiver ALH
+    11: ["2020-07-27 19:43:01.4", "rhone1khz_UTC_20200727_194238.575.h5", 22, 26, 580, 720], # Category 1, Receiver ALH
+    35: ["2020-07-27 03:03:20.2", "rhone1khz_UTC_20200727_030308.575.h5", 10, 15, 580, 720], # Category 1, Receiver ALH (dominant frequency at 100 Hz)
+    83: ["2020-07-27 01:03:00.2", "rhone1khz_UTC_20200727_010238.575.h5", 20, 25, 570, 700], # Category 1, Receiver ALH
 
     20: ["2020-07-27 00:21:46.3", "rhone1khz_UTC_20200727_002138.575.h5", 5, 10, 580, 700], # Category 2, Receiver ALH (plotted in paper)
-    24: ["2020-07-27 05:21:48.4", "rhone1khz_UTC_20200727_052138.575.h5"], # Category 2, Receiver ALH (dominant frequency at 100 Hz)
-    36: ["2020-07-27 20:47:34.8", "rhone1khz_UTC_20200727_204708.575.h5"], # Category 2, Receiver ALH
-    52: ["2020-07-27 20:00:30.4", "rhone1khz_UTC_20200727_200008.575.h5"], # Category 2, Receiver ALH
-    67: ["2020-07-27 23:17:54.0", "rhone1khz_UTC_20200727_231738.575.h5"], # Category 2, Receiver ALH
-    107: ["2020-07-27 01:25:19.6", "rhone1khz_UTC_20200727_012508.575.h5"], # Category 2, Receiver ALH
+    24: ["2020-07-27 05:21:48.4", "rhone1khz_UTC_20200727_052138.575.h5", 9, 13, 550, 770], # Category 2, Receiver ALH (dominant frequency at 100 Hz)
+    36: ["2020-07-27 20:47:34.8", "rhone1khz_UTC_20200727_204708.575.h5", 25, 30, 580, 700], # Category 2, Receiver ALH
+    52: ["2020-07-27 20:00:30.4", "rhone1khz_UTC_20200727_200008.575.h5", 21, 25, 550, 770], # Category 2, Receiver ALH
+    67: ["2020-07-27 23:17:54.0", "rhone1khz_UTC_20200727_231738.575.h5", 15, 20, 570, 700], # Category 2, Receiver ALH
+    107: ["2020-07-27 01:25:19.6", "rhone1khz_UTC_20200727_012508.575.h5", 10, 15, 600, 700], # Category 2, Receiver ALH
 
     82: ["2020-07-27 05:04:55.8", "rhone1khz_UTC_20200727_050438.575.h5", 15, 20, 560, 770], # Category 3, Receiver ALH (plotted in paper) (dominant frequency at 100 Hz)
                 }
 
-ids = [82]
+ids = [0, 5, 11, 35, 83, 20, 24, 36, 52, 67, 107, 82]
 fs_origin = 1000
 dec_factor = 3
 fs=fs_origin // dec_factor
 
 for id in ids:
-
+    print(id)
     ################################
     # load raw data and filter it: #
     ################################
@@ -115,10 +115,10 @@ for id in ids:
     # Zoomed in Visualization #
     ###########################
     # Zoom into event
-    start_time = 15
-    end_time = 20
-    start_channel = 560
-    end_channel = 770
+    start_time = event_times[id][2]
+    end_time = event_times[id][3]
+    start_channel = event_times[id][4]
+    end_channel = event_times[id][5]
 
     # Generate some sample data
     data1 = data_demean[start_time * fs_origin:end_time * fs_origin, start_channel:end_channel]
