@@ -137,7 +137,7 @@ def plot_channel_range(data, start_channel=0, end_channel=None, fs=1000,
 
 def plot_channel_range_ax(ax, data, start_channel=0, end_channel=None,
                           fs=1000, clip_percentage=None,
-                          time_axis='vertical', cmap='seismic',
+                          time_axis='vertical', cmap='seismic', cbar=False,
                           title=None):
     """
     Plot DAS profile for a given channel range on specified axes.
@@ -194,8 +194,9 @@ def plot_channel_range_ax(ax, data, start_channel=0, end_channel=None,
     ax.set_ylabel('Time (s)')
     ax.set_title(title if title else '')
 
-    cbar = plt.colorbar(im, ax=ax)
-    cbar.set_label('Strain rate ($10^{-9}$ $s^{-1}$)')
+    if cbar:
+        colorbar = plt.colorbar(im, ax=ax)
+        colorbar.set_label('Strain rate ($10^{-9}$ $s^{-1}$)')
 
 
 def plot_fk_spectra(data_fk, f_axis, k_axis, log_scale=False, vmax=None,

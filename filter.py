@@ -30,10 +30,11 @@ event_times = {
     82: ["2020-07-27 05:04:55.8", "rhone1khz_UTC_20200727_050438.575.h5", 15, 20, 560, 770], # Category 3, Receiver ALH (plotted in paper) (dominant frequency at 100 Hz)
                 }
 
-ids = [0, 5, 11, 35, 83, 20, 24, 36, 52, 67, 107, 82]
+ids = [20, 24, 36, 52, 67, 107, 82]
 fs_origin = 1000
 dec_factor = 3
 fs=fs_origin // dec_factor
+save_plot = True
 
 for id in ids:
     print(id)
@@ -55,26 +56,38 @@ for id in ids:
         # 1. Remove mean along time axis for each channel (demean each channel)
         time_mean = data_raw.mean(axis=0).reshape(1, -1)
         data_demean = data_raw - time_mean
-        print(data_demean.shape)
+        #print(data_demean.shape)
 
         # 2. Taper the data before filtering
         data_tapered = taper(data_demean, max_percentage=0.05)
-        print(data_tapered.shape)
+        #print(data_tapered.shape)
         # Band-Pass Filter between 10-90 Hz
-        data_filtered = bandpass_filter(data_tapered, freqmin=10, freqmax=90, fs=fs_origin, dec_factor=dec_factor)
-        print(data_filtered.shape)
+        data_filtered = bandpass_filter(data_tapered, freqmin=1, freqmax=120, fs=fs_origin, dec_factor=dec_factor) #best values: 10-90
+        #print(data_filtered.shape)
 
         # 3. Automatic Gain Control with a window length of 2 seconds
         data_filtered_agc, tosum = AGC(data_filtered, fs * 2)
-        print(data_filtered_agc.shape)
+        #print(data_filtered_agc.shape)
 
         # 4. Remove mean along spatial axis for each time sample (to remove common mode noise), optional
         data_filtered_time_mean = data_filtered_agc.mean(axis=1).reshape(-1, 1)
         data_filtered_demean = data_filtered_agc - data_filtered_time_mean
-        print(data_filtered_demean.shape)
+        #print(data_filtered_demean.shape)
 
         # 5. Normalize each channel by its energy
         data_enorm = energy_norm(data_filtered_demean)
+
+    ##################################
+    # load denoised data vandenende: #
+    ##################################
+    with h5py.File("experiments/13_vandenende/denoisedDAS/denoised_" + event_times[id][1], "r") as f:
+        group_key = list(f.keys())[0]
+        group_key2 = list(f[group_key].keys())[1]
+        group_key3 = list(f[group_key][group_key2].keys())[0]
+        denoised_data_vandenende = f[group_key][group_key2][group_key3][()]
+        denoised_data_vandenende = denoised_data_vandenende[:, 0:770]
+        #print(denoised_data_vandenende.shape)
+
 
     #######################
     # load denoised data: #
@@ -85,9 +98,8 @@ for id in ids:
         group_key3 = list(f[group_key][group_key2].keys())[0]
         denoised_data = f[group_key][group_key2][group_key3][()]
         denoised_data = denoised_data[:, 0:770]
-        print(denoised_data.shape)
+        #print(denoised_data.shape)
 
-        # cut denoised data to size
 
 
     ############################
@@ -97,19 +109,28 @@ for id in ids:
     data2 = data_filtered[:, :]
     data3 = data_filtered_agc
     data4 = data_enorm
+    data5 = denoised_data_vandenende
+    data6 = denoised_data
 
     # Create 2x2 subplot
-    fig, axs = plt.subplots(2, 2, figsize=(15, 10))
+    fig, axs = plt.subplots(3, 2, figsize=(12, 15))
+    clip_percentage = 99.99
 
     # Plot different data in each subplot
-    plot_channel_range_ax(axs[0, 0], data1, fs=fs_origin, cmap="seismic", title="Raw", clip_percentage=99.99)
-    plot_channel_range_ax(axs[0, 1], data3, fs=fs, cmap="seismic", title="BP + AGC", clip_percentage=99.99)
-    plot_channel_range_ax(axs[1, 0], data4, fs=fs, cmap="seismic", title="BP + AGC + EN", clip_percentage=99.99)
-    plot_channel_range_ax(axs[1, 1], denoised_data, fs=400, cmap="seismic", title="J-invariant", clip_percentage=99.99)
+    plot_channel_range_ax(axs[0, 0], data1, fs=fs_origin, cmap="seismic", title="Raw", clip_percentage=clip_percentage)
+    plot_channel_range_ax(axs[0, 1], data2, fs=fs, cmap="seismic", title="BP", clip_percentage=clip_percentage)
+    plot_channel_range_ax(axs[1, 0], data3, fs=fs, cmap="seismic", title="BP + AGC", clip_percentage=clip_percentage)
+    plot_channel_range_ax(axs[1, 1], data4, fs=fs, cmap="seismic", title="BP + AGC + EN", clip_percentage=clip_percentage)
+    plot_channel_range_ax(axs[2, 0], data5, fs=400, cmap="seismic", title="J-invariant van den Ende", clip_percentage=clip_percentage)
+    plot_channel_range_ax(axs[2, 1], data6, fs=400, cmap="seismic", title="J-invariant", clip_percentage=clip_percentage)
 
     # Adjust layout
     plt.tight_layout()
-    plt.show()
+
+    if save_plot:
+        plt.savefig("plots/comparison_with_filter/" + str(id) + "_comparison_filter.pdf", dpi=300)
+    else:
+        plt.show()
 
     ###########################
     # Zoomed in Visualization #
@@ -125,17 +146,24 @@ for id in ids:
     data2 = data_filtered[start_time * fs:end_time * fs, start_channel:end_channel]
     data3 = data_filtered_agc[start_time * fs:end_time * fs, start_channel:end_channel]
     data4 = data_enorm[start_time * fs:end_time * fs, start_channel:end_channel]
-    data5 = denoised_data[start_time * 400: end_time*400, start_channel:end_channel]
+    data5 = denoised_data_vandenende[start_time * 400: end_time*400, start_channel:end_channel]
+    data6 = denoised_data[start_time * 400: end_time * 400, start_channel:end_channel]
 
     # Create 2x2 subplot
-    fig, axs = plt.subplots(2, 2, figsize=(15, 10))
+    fig, axs = plt.subplots(3, 2, figsize=(12, 15))
 
     # Plot different data in each subplot
-    plot_channel_range_ax(axs[0, 0], data1, fs=fs_origin, cmap="seismic", title="Raw", clip_percentage=99.9)
-    plot_channel_range_ax(axs[0, 1], data3, fs=fs, cmap="seismic", title="BP + AGC", clip_percentage=99.9)
-    plot_channel_range_ax(axs[1, 0], data4, fs=fs, cmap="seismic", title="BP + AGC + EN", clip_percentage=99.9)
-    plot_channel_range_ax(axs[1, 1], data5, fs=400, cmap="seismic", title="J-invariant", clip_percentage=99.9)
+    plot_channel_range_ax(axs[0, 0], data1, fs=fs_origin, cmap="seismic", title="Raw", clip_percentage=clip_percentage)
+    plot_channel_range_ax(axs[0, 1], data2, fs=fs, cmap="seismic", title="BP", clip_percentage=clip_percentage)
+    plot_channel_range_ax(axs[1, 0], data3, fs=fs, cmap="seismic", title="BP + AGC", clip_percentage=clip_percentage)
+    plot_channel_range_ax(axs[1, 1], data4, fs=fs, cmap="seismic", title="BP + AGC + EN", clip_percentage=clip_percentage)
+    plot_channel_range_ax(axs[2, 0], data5, fs=400, cmap="seismic", title="J-invariant van den Ende", clip_percentage=clip_percentage)
+    plot_channel_range_ax(axs[2, 1], data6, fs=400, cmap="seismic", title="J-invariant", clip_percentage=clip_percentage)
 
     # Adjust layout
     plt.tight_layout()
-    plt.show()
+
+    if save_plot:
+        plt.savefig("plots/comparison_with_filter/" + str(id) + "_zoomed_comparison_filter.pdf", dpi=300)
+    else:
+        plt.show()
