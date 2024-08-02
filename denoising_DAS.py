@@ -139,18 +139,19 @@ def deal_with_artifacts(data, filler = 0, Nt=1024):
     return data
 
 
-models_path = 'experiments'
+models_path = "experiments"
 
-model_names = ["01_ablation_horizontal", "02_ablation_vertical", "03_accumulation_horizontal", "04_accumulation_vertical",
-               "05_combined200", "06_combined800", "07_retrained_combined200", "08_retrained_combined800", "09_borehole_seismometer"]
-model_names = ["03_accumulation_horizontal", "04_accumulation_vertical", "05_combined200", "06_combined800", "07_retrained_combined200", "08_retrained_combined800", "09_borehole_seismometer"]
+#model_names = ["01_ablation_horizontal", "02_ablation_vertical", "03_accumulation_horizontal", "04_accumulation_vertical",
+#               "05_combined200", "06_combined800", "07_retrained_combined200", "08_retrained_combined800", "09_borehole_seismometer"]
+#model_names = ["03_accumulation_horizontal", "04_accumulation_vertical", "05_combined200", "06_combined800", "07_retrained_combined200", "08_retrained_combined800", "09_borehole_seismometer"]
+model_names = ["13_vandenende"]
 
 
 
 raw_das_folder_path = "data/raw_DAS"
 
 n_sub = 11
-timesamples = 1024
+timesamples = 2048
 fs_trainingdata = 400
 DEAL_WITH_ARTIFACTS = True
 
@@ -166,7 +167,7 @@ for model_name in model_names:
     print("#################################################################################")
 
     saving_path = os.path.join("experiments", model_name, "denoisedDAS")
-    model_file = os.path.join("experiments", model_name, model_name + ""'.h5')
+    model_file = os.path.join("experiments", model_name, model_name + ".h5")
 
     if not os.path.isdir(saving_path):
         os.makedirs(saving_path)
