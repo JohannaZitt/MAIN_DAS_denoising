@@ -3,7 +3,7 @@ import re
 import os
 
 from obspy import UTCDateTime
-from webdav3.client import Client
+#from webdav3.client import Client
 import numpy as np
 
 '''
