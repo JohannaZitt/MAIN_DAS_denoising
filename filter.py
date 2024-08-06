@@ -30,11 +30,11 @@ event_times = {
     82: ["2020-07-27 05:04:55.8", "rhone1khz_UTC_20200727_050438.575.h5", 15, 20, 560, 770], # Category 3, Receiver ALH (plotted in paper) (dominant frequency at 100 Hz)
                 }
 
-ids = [20, 24, 36, 52, 67, 107, 82]
+ids = [0, 5, 11, 35, 83, 20, 24, 36, 52, 67, 107, 82]
 fs_origin = 1000
 dec_factor = 3
 fs=fs_origin // dec_factor
-save_plot = True
+save_plot = False
 
 for id in ids:
     print(id)
@@ -70,8 +70,8 @@ for id in ids:
         #print(data_filtered_agc.shape)
 
         # 4. Remove mean along spatial axis for each time sample (to remove common mode noise), optional
-        data_filtered_time_mean = data_filtered_agc.mean(axis=1).reshape(-1, 1)
-        data_filtered_demean = data_filtered_agc - data_filtered_time_mean
+        data_filtered_spatio_mean = data_filtered_agc.mean(axis=1).reshape(-1, 1)
+        data_filtered_demean = data_filtered_agc - data_filtered_spatio_mean
         #print(data_filtered_demean.shape)
 
         # 5. Normalize each channel by its energy

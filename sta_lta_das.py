@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from pydas_readers.readers import load_das_h5_CLASSIC as load_das_h5
 from scipy.signal import butter, lfilter
 from datetime import datetime, timedelta
-from obspy.signal.trigger import classic_sta_lta
+from obspy.signal.trigger import classic_sta_lta, recursive_sta_lta, trigger_onset
 from obspy.signal.trigger import plot_trigger
 from obspy import Trace
 
@@ -115,29 +115,27 @@ def load_das_data(folder_path, t_start, t_end, raw):
 
     return data, headers, axis
 
-def compute_lta_sta_stack_objective_function(data, sta, lta, n_ch):
 
-    csl_sum = np.zeros(data.shape[0])
-
-    for i in range(data.shape[1]):
-        csl = classic_sta_lta(data[:, i], sta, lta)
-        csl_sum += csl
-    csl_sum /= n_ch
-
-    return csl_sum
-
-def compute_lta_sta_stack_das_dara(data, sta, lta, n_ch):
-    stacked_data = np.sum(data, axis=1)
-
-    cft = classic_sta_lta(stacked_data, sta, lta)
-
-    return cft
 
 
 ids_cat1 = [0, 1, 2, 3, 4, 5, 6, 8, 10, 11, 13, 14, 15, 22, 28, 32, 34, 35, 39, 41, 48, 62, 66, 74, 83, 101, 104, 108, 119]
 ids_cat2 = [7, 9, 16, 17, 18, 20, 21, 24, 25, 36, 40, 42, 45, 46, 50, 52, 56, 59, 64, 65, 67, 75, 78, 80, 85, 87, 90, 94, 95, 96, 98, 102, 105, 107, 116, 118]
 
-ids = [0]
+ids = [0, 1, 2, 3, 11, 34, 35, 83, 104]
+
+start_ch = 600 # must be smaller than 640
+end_ch = 700
+middle_ch = 640 - start_ch
+
+fs = 400
+short_window_length = 0.3 # 0.1
+long_window_length = 3 #5
+# short_window_length values: 0.1
+# long_window_length values: 5
+short_wl = int(short_window_length * fs)
+long_wl = int(long_window_length * fs)
+chanel_range = 20
+chanel_gap = 10
 
 for id in ids:
     event_date = "2020-07-27"
@@ -150,13 +148,103 @@ for id in ids:
     # load raw DAS data:
     raw_folder_path = "data/raw_DAS/"
     raw_data, raw_headers, raw_axis = load_das_data(folder_path=raw_folder_path, t_start=t_start, t_end=t_end, raw=True)
-    print(raw_data.shape)
+    raw_data = raw_data[:, start_ch:end_ch]
+    #print(raw_data.shape)
 
     # load denoised DAS data:
     denoised_folder_path = "experiments/03_accumulation_horizontal/denoisedDAS/"
     denoised_data, denoised_headers, denoised_axis = load_das_data(folder_path=denoised_folder_path, t_start=t_start, t_end=t_end, raw=False)
-    print(denoised_data.shape)
+    denoised_data = denoised_data[:, start_ch:end_ch]
+    #print(denoised_data.shape)
 
+
+
+    # 1.1 Compute LTA/STA for every chanel
+    csl_raw = np.zeros(raw_data.shape)
+    csl_denoised = np.zeros(denoised_data.shape)
+    for ch in range(raw_data.shape[1]):
+        csl_raw[:, ch] = recursive_sta_lta(raw_data[:, ch], short_wl, long_wl)
+        csl_denoised[:, ch] = recursive_sta_lta(denoised_data[:, ch], short_wl, long_wl)
+
+    # 1.2 Plot data as imshow:
+    fig, (ax1, ax2) = plt.subplots(nrows=2, dpi=300, figsize=(6, 6), sharex=True)
+
+    im1 = ax1.imshow(csl_raw.T, aspect="auto", cmap="magma")
+    cbar1 = plt.colorbar(im1, ax=ax1, label="STA/LTA ratio")
+    ax1.set_ylabel("Chanel ID")
+    ax1.set_title("ID: " + str(id) + "  STA/LTA ratios of raw data")
+
+    im2 = ax2.imshow(csl_denoised.T, aspect="auto", cmap="magma")
+    cbar2 = plt.colorbar(im2, ax=ax2, label="STA/LTA ratio")
+    ax2.set_xlabel("Time")
+    ax2.set_ylabel("Chanel ID")
+    ax2.set_title("ID: " + str(id) + "  STA/LTA ratios of denoised data")
+
+    plt.tight_layout()
+    plt.show()
+
+    # 1.3 Plot LTA/STA for singe chanel:
+    objective_chanel = 50
+
+    fig, (ax1, ax2) = plt.subplots(nrows=2, dpi=300, figsize=(6, 6), sharex=True)
+
+    ax1.plot(csl_raw[:, objective_chanel])
+    ax1.set_ylabel("STA/LTA ratio")
+    ax1.set_title("ID: " + str(id) + ", Channel: " + str(objective_chanel) + ", Type: Raw")
+    ax2.plot(csl_denoised[:, objective_chanel])
+    ax2.set_xlabel("Time")
+    ax2.set_ylabel("STA/LTA ratio")
+    ax1.set_title("ID: " + str(id) + ", Channel: " + str(objective_chanel) + ", Type: Denosied")
+
+    plt.tight_layout()
+    plt.show()
+
+
+
+
+    x = np.arange((end_ch-start_ch)/chanel_gap)
+    for i in x:
+        #print(i)
+        if i == 1:
+            break
+        stacked_raw = np.sum(csl_raw[:, int(i*chanel_gap) : int((i*chanel_gap)+chanel_range)], axis=1)
+        stacked_raw /= chanel_range
+
+        stacked_denoised = np.sum(csl_denoised[:, int(i * chanel_gap): int((i * chanel_gap) + chanel_range)], axis=1)
+        stacked_denoised /= chanel_range
+
+        fig, ax = plt.subplots(ncols=2, nrows=2, dpi=300, figsize=(6,6), sharex=True, sharey=True)
+
+        ax[0, 0].plot(stacked_raw[long_wl:])
+        ax[0, 0].set_title("Stacked LTA/STA value for raw data")
+        ax[0, 0].set_ylabel("LTA/STA Ratio")
+
+        ax[0, 1].plot(stacked_denoised[long_wl:])
+        ax[0, 1].set_title("Stacked LTA/STA value for denoised data")
+
+        ax[1, 0].plot(raw_data[long_wl:, int(i*chanel_gap) + int(chanel_range/2)])
+        ax[1, 0].set_title("DAS channel raw")
+        ax[1, 0].set_ylabel("Strain Rate")
+
+
+        ax[1, 1].plot(denoised_data[long_wl:, int(i * chanel_gap) + int(chanel_range / 2)])
+        ax[1, 1].set_title("DAS channel denoised")
+
+        plt.tight_layout()
+        plt.show()
+
+        #plt.plot(stacked_raw)
+        #plt.title("Raw, ID:" + str(id))
+        #plt.show()
+        #plt.plot(stacked_denoised)
+        #plt.title("Denoised, ID:" + str(id))
+        #plt.show()
+
+
+
+    # 3. Stack DAS data and than compute LTA/STA:
+    # stacked_data = np.sum(data, axis=1)
+    # cft = classic_sta_lta(stacked_data, sta, lta)
 
 
 
