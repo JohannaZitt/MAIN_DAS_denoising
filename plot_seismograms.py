@@ -187,6 +187,10 @@ denoised_path = os.path.join("experiments", experiment, "denoisedDAS/")
 # real-world samples in paper: [5, 20, 82]
 ids = [0, 5, 11, 35, 83, 20, 24, 36, 52, 67, 107, 82]
 
+# for plotting all frequency contents in one plot:
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+font_size = 12
+
 for id in ids:
 
 
@@ -251,33 +255,46 @@ for id in ids:
     ##############################
     # Plotting frequency content #
     ##############################
-    plot_frequency_content_single_channel(raw_f_frq, raw_f_amp, denoised_f_frq, denoised_f_amp,
-                                          font_size=15,
-                                          show_plot=False,
-                                          id=id)
-    plot_frequency_content_multiple_channel(raw_data_freq, denoised_data_freq, raw_data,
-                                            font_size=15,
-                                            show_plot=False,
-                                            cc_spacing=12,
-                                            cmap="plasma",
-                                            aspect="auto",
-                                            vmin=0, vmax=150,
-                                            id=id)
-    plot_seismogram_single_channel(raw_data, denoised_data, middle_channel,
-                                   font_size=15,
-                                   show_plot=False,
-                                   NFFT=32,
-                                   Fs=400,
-                                   noverlap=16,
-                                   cmap="plasma",
-                                   scale_by_freq=True,
-                                   id=id)
+    #plot_frequency_content_single_channel(raw_f_frq, raw_f_amp, denoised_f_frq, denoised_f_amp,
+    #                                      font_size=15,
+    #                                      show_plot=True,
+    #                                      id=id)
+    #plot_frequency_content_multiple_channel(raw_data_freq, denoised_data_freq, raw_data,
+    #                                        font_size=15,
+    #                                        show_plot=True,
+    #                                        cc_spacing=12,
+    #                                        cmap="plasma",
+    #                                        aspect="auto",
+    #                                        vmin=0, vmax=150,
+    #                                        id=id)
+    #plot_seismogram_single_channel(raw_data, denoised_data, middle_channel,
+    #                               font_size=15,
+    #                               show_plot=True,
+    #                               NFFT=32,
+    #                               Fs=400,
+    #                               noverlap=16,
+    #                               cmap="plasma",
+    #                               scale_by_freq=True,
+    #                               id=id)
 
+    # for plotting all frequency contents in one plot:
+    ax1.plot(raw_f_frq, raw_f_amp, "k-", linewidth=1, alpha=0.5)
+    ax2.plot(denoised_f_frq, denoised_f_amp, "k-", linewidth=1, alpha=0.5)
 
+# for plotting all frequency contents in one plot:
+ax1.set_xlabel("Frequency [Hz]", fontsize=font_size)
+ax1.set_ylabel("Amplitude", fontsize=font_size)
+ax1.set_title("Noisy", fontsize=font_size + 4)
+ax1.set_ylim(0, 120)
 
+ax2.set_yticks([])
+ax2.set_xlabel("Frequency [Hz]", fontsize=font_size)
+ax2.set_title("Denoised", fontsize=font_size + 4)
+ax2.set_ylim(0, 120)
 
-
-
+plt.tight_layout()
+#plt.show()
+plt.savefig("plots/spectograms/fcontent_single_channel/All_in_one.pdf", dpi = 400)
 
 
 
