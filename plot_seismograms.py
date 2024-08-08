@@ -193,6 +193,11 @@ fs_s=14
 fs_m=16
 fs_l=18
 
+sum_raw_f_frq = np.zeros((401,))
+sum_raw_f_amp = np.zeros((401,))
+sum_denoised_f_frq = np.zeros((401,))
+sum_denoised_f_amp = np.zeros((401,))
+
 for id in ids:
     event_time = event_times[id][0]
     t_start = datetime.strptime(event_time, "%Y-%m-%d %H:%M:%S.%f")
@@ -280,14 +285,26 @@ for id in ids:
     ax1.plot(raw_f_frq, raw_f_amp, "k-", linewidth=1, alpha=0.5)
     ax2.plot(denoised_f_frq, denoised_f_amp, "k-", linewidth=1, alpha=0.5)
 
+    sum_raw_f_frq += raw_f_frq
+    sum_raw_f_amp += raw_f_amp
+    sum_denoised_f_frq += denoised_f_frq
+    sum_denoised_f_amp += denoised_f_amp
+
+
+mean_raw_f_frq = sum_raw_f_frq / len(ids)
+mean_raw_f_amp = sum_raw_f_amp / len(ids)
+mean_denoised_f_frq = sum_denoised_f_frq / len(ids)
+mean_denoised_f_amp = sum_denoised_f_amp / len(ids)
+
 # for plotting all frequency contents in one plot:
+ax1.plot(mean_raw_f_frq, mean_raw_f_amp, color="red")
 ax1.set_xlabel("Frequency [Hz]", fontsize=fs_m)
 ax1.set_ylabel("Amplitude", fontsize=fs_m)
 ax1.set_title("Noisy", fontsize=fs_l)
 ax1.set_ylim(0, 120)
 ax1.tick_params(axis='both', which='major', labelsize=fs_s)
 
-
+ax2.plot(mean_denoised_f_frq, mean_denoised_f_amp, color="red")
 ax2.set_yticks([])
 ax2.set_xlabel("Frequency [Hz]", fontsize=fs_m)
 ax2.set_title("Denoised", fontsize=fs_l)
@@ -296,7 +313,7 @@ ax2.tick_params(axis='both', which='major', labelsize=fs_s)
 
 plt.tight_layout()
 #plt.show()
-plt.savefig("plots/spectograms/fcontent_single_channel/All_in_one.pdf", dpi = 400)
+plt.savefig("plots/spectograms/fcontent_single_channel/All_in_one_with_mean.pdf", dpi=300)
 
 
 

@@ -253,15 +253,15 @@ for id in ids:
     im1 = ax[0, 0].imshow(raw_data.T, aspect=aspect, cmap=cmap, vmin=vmin, vmax=vmax)
     #plt.colorbar(im1, ax=ax[0, 0], label="Strain Rate [norm]")
     im2 = ax[0, 1].imshow(denoised_data.T, aspect=aspect, cmap=cmap, vmin=vmin, vmax=vmax)
-    #plt.colorbar(im2, ax=ax[0, 1], label="Strain Rate [norm.]", font_size=fs_s)
+    #plt.colorbar(im2, ax=ax[0, 1], label="Strain Rate [norm.]")
     print(np.abs(denoised_data).max())
     print(np.abs(raw_data).max())
     ax[1, 0].plot(stacked_raw, color=color, linewidth=line_width1, alpha=alpha)
     ax[1, 1].plot(stacked_denoised, color=color, linewidth=line_width1, alpha=alpha, )
 
-    im3 = ax[2, 0].imshow(csl_raw.T, aspect=aspect, cmap=cmap, vmin=0, vmax=np.abs(csl_raw).max())
+    im3 = ax[2, 0].imshow(csl_raw.T, aspect=aspect, cmap=cmap, vmin=0, vmax=45)#np.abs(csl_raw).max()
     #plt.colorbar(im3, ax=ax[2, 0], label="STA/LTA Ratio")
-    im4 = ax[2, 1].imshow(csl_denoised.T, aspect=aspect, cmap=cmap, vmin=0, vmax=np.abs(csl_denoised).max())
+    im4 = ax[2, 1].imshow(csl_denoised.T, aspect=aspect, cmap=cmap, vmin=0, vmax=45)#np.abs(csl_denoised).max()
     #plt.colorbar(im4, ax=ax[2, 1], label="STA/LTA Ratio")
     ax[3, 0].plot(stacked_csl_raw, color=color, linewidth=line_width2, alpha=alpha)
     ax[3, 1].plot(stacked_csl_denoised, color=color, linewidth=line_width2, alpha=alpha)
@@ -334,8 +334,8 @@ for id in ids:
             ax[i, j].text(x=0.0, y=1.0, transform=ax[i, j].transAxes, s=letters[i*2+j], **letter_params)
 
     plt.tight_layout()
-    plt.savefig("plots/stalta/" + str(id) + "_stalta_paper.pdf", dpi=300)
-
+    #plt.savefig("plots/stalta/" + str(id) + "_stalta_paper.pdf", dpi=300)
+    plt.show()
 
 
 
