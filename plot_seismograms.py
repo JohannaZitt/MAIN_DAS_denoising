@@ -189,11 +189,11 @@ ids = [0, 5, 11, 35, 83, 20, 24, 36, 52, 67, 107, 82]
 
 # for plotting all frequency contents in one plot:
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
-font_size = 12
+fs_s=14
+fs_m=16
+fs_l=18
 
 for id in ids:
-
-
     event_time = event_times[id][0]
     t_start = datetime.strptime(event_time, "%Y-%m-%d %H:%M:%S.%f")
     t_end = t_start + timedelta(seconds=2)
@@ -209,7 +209,6 @@ for id in ids:
                                                                      raw=False,
                                                                      channel_delta_start=event_times[id][1],
                                                                      channel_delta_end=event_times[id][2])
-
 
 
     ################################################
@@ -282,15 +281,18 @@ for id in ids:
     ax2.plot(denoised_f_frq, denoised_f_amp, "k-", linewidth=1, alpha=0.5)
 
 # for plotting all frequency contents in one plot:
-ax1.set_xlabel("Frequency [Hz]", fontsize=font_size)
-ax1.set_ylabel("Amplitude", fontsize=font_size)
-ax1.set_title("Noisy", fontsize=font_size + 4)
+ax1.set_xlabel("Frequency [Hz]", fontsize=fs_m)
+ax1.set_ylabel("Amplitude", fontsize=fs_m)
+ax1.set_title("Noisy", fontsize=fs_l)
 ax1.set_ylim(0, 120)
+ax1.tick_params(axis='both', which='major', labelsize=fs_s)
+
 
 ax2.set_yticks([])
-ax2.set_xlabel("Frequency [Hz]", fontsize=font_size)
-ax2.set_title("Denoised", fontsize=font_size + 4)
+ax2.set_xlabel("Frequency [Hz]", fontsize=fs_m)
+ax2.set_title("Denoised", fontsize=fs_l)
 ax2.set_ylim(0, 120)
+ax2.tick_params(axis='both', which='major', labelsize=fs_s)
 
 plt.tight_layout()
 #plt.show()

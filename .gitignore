@@ -3,6 +3,7 @@ __pycache__
 old
 plots/spectograms
 plots/comparison_with_filter
+plots/stalta
 data/raw_DAS
 data/training_data/raw_seismometer_trainingdata
 data/training_data/raw_DAS
