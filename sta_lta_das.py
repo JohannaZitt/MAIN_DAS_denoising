@@ -134,13 +134,13 @@ def plot_sta_lta_imshow(data_raw, data_denoised, id):
 def plot_sta_lta_single_channel(data_raw, data_denoised, objective_channel, id):
     fig, (ax1, ax2) = plt.subplots(nrows=2, dpi=300, figsize=(6, 6), sharex=True)
 
-    ax1.plot(data_raw[:, objective_chanel])
+    ax1.plot(data_raw[:, objective_channel])
     ax1.set_ylabel("STA/LTA ratio")
-    ax1.set_title("ID: " + str(id) + ", Channel: " + str(objective_chanel) + ", Type: Raw")
-    ax2.plot(data_denoised[:, objective_chanel])
+    ax1.set_title("ID: " + str(id) + ", Channel: " + str(objective_channel) + ", Type: Raw")
+    ax2.plot(data_denoised[:, objective_channel])
     ax2.set_xlabel("Time")
     ax2.set_ylabel("STA/LTA ratio")
-    ax1.set_title("ID: " + str(id) + ", Channel: " + str(objective_chanel) + ", Type: Denosied")
+    ax1.set_title("ID: " + str(id) + ", Channel: " + str(objective_channel) + ", Type: Denosied")
 
     plt.tight_layout()
     plt.show()
@@ -209,7 +209,7 @@ for id in ids:
     # objective_chanel = 50
     # plot_sta_lta_single_channel(csl_raw, csl_denoised, objective_chanel, id)
 
-    # cHECK FOR DIFFERNENT TIMES
+    # CHECK FOR DIFFERNENT TIMES
     if not raw_data.shape[0] == denoised_data.shape[0]:
         print("IN IF")
         difference = raw_data.shape[0] - denoised_data.shape[0]
@@ -254,8 +254,8 @@ for id in ids:
     #plt.colorbar(im1, ax=ax[0, 0], label="Strain Rate [norm]")
     im2 = ax[0, 1].imshow(denoised_data.T, aspect=aspect, cmap=cmap, vmin=vmin, vmax=vmax)
     #plt.colorbar(im2, ax=ax[0, 1], label="Strain Rate [norm.]")
-    print(np.abs(denoised_data).max())
-    print(np.abs(raw_data).max())
+    #print(np.abs(denoised_data).max())
+    #print(np.abs(raw_data).max())
     ax[1, 0].plot(stacked_raw, color=color, linewidth=line_width1, alpha=alpha)
     ax[1, 1].plot(stacked_denoised, color=color, linewidth=line_width1, alpha=alpha, )
 
@@ -336,6 +336,17 @@ for id in ids:
     plt.tight_layout()
     #plt.savefig("plots/stalta/" + str(id) + "_stalta_paper.pdf", dpi=300)
     plt.show()
+
+    plt.plot(stacked_csl_denoised)
+    plt.show()
+    plt.plot(stacked_csl_raw)
+    plt.show()
+
+    print("Denoised", str(max(stacked_csl_denoised)))
+    print("Raw", str(max(stacked_csl_raw)))
+
+
+
 
 
 

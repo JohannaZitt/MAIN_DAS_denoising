@@ -83,7 +83,7 @@ print(data.shape)
 plot_das_data(data)
 """
 
-""" imshow - synthetically corrupted DAS data  """
+""" imshow - synthetically corrupted DAS data  
 
 # Parameters:
 cmap = "plasma"
@@ -259,10 +259,10 @@ plt.show()
 
 
 
+"""
 
 
-
-""" imshow - synthetic DAS data 
+""" imshow - synthetic DAS data """
 
 # Parameters:
 cmap = "plasma"
@@ -345,6 +345,12 @@ for i, event_name in enumerate(event_names):
                        linewidth=1.5, alpha=0.6, zorder=1)
     axs[i, 3].plot(denoised_data[channel_wiggle_comparison][t_start_wiggle:t_end_wiggle], color="black",
                    label="Denoised", linewidth=1.5, alpha=0.8, zorder=1)
+
+    # print max. amplitudes:
+    # print("Event " + event_name)
+    # print("maximal amplitude of ground truth data: ", str(ground_truth_data[channel_wiggle_comparison][t_start_wiggle:t_end_wiggle].max()))
+    # print("maximal amplitude of noisy data: ", str(data[channel_wiggle_comparison][t_start_wiggle:t_end_wiggle].max()))
+    # print("maximal amplitude of denoised data: ", str(denoised_data[channel_wiggle_comparison][t_start_wiggle:t_end_wiggle].max()))
 
     # legend
     #axs[i, 3].legend(fontsize = 15)
@@ -431,7 +437,7 @@ plt.tight_layout()
 #plt.savefig("plots/synthetics/water_fall_wiggle_seis_synthetic.pdf", dpi=400)
 plt.show()
 
-"""
+
 
 
 
