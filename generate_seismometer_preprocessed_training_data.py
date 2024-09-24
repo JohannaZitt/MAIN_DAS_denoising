@@ -6,35 +6,20 @@ from numpy import ndarray
 from obspy import read
 
 from helper_functions import butter_bandpass_filter as bandpass_filter
-
-
-
-def resample(data, ratio):
-
-    """
-    :param data: np array
-    :param ratio: resample ratio = fs_old/fs_new
-    :return: resampled data as np array
-    """
-
-    # resample
-    res = np.zeros((data.shape[0], int(data.shape[1]/ ratio) + 1))
-    for i in range(data.shape[0]):
-        res[i] = np.interp(np.arange(0, len(data[0]), ratio), np.arange(0, len(data[0])), data[i])
-
-    return res
+from helper_functions import resample_seis as resample
 
 
 
 """
 
-Here we generate the initial waveforms from seismometer data for model training as described in section 3.2 Model Training. 
+Here we generate the initial waveforms from seismometer data for model training as described in Section 3.2 Model Training. 
 The waveforms are converted to strain rate, bandpass filtered, downsampled and normalized by std.
 
 The initial waveforms for the models "Ablation Horizontal", "Ablation Vertical", "Accumulation Horizontal", "Accumulation Vertical",
 and "Borehole Seismometer" are generated and saved for model training.  
 
 """
+
 
 ###################
 ### Parameters: ###

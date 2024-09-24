@@ -1,45 +1,27 @@
-from pydas_readers.readers import load_das_h5_CLASSIC as load_das_h5
-import matplotlib.pyplot as plt
-import numpy as np
-from scipy.signal import butter, lfilter
 from datetime import datetime, timedelta
 
-def butter_bandpass(lowcut, highcut, fs, order=4):
-    nyq = 0.5 * fs
-    low = lowcut / nyq
-    high = highcut / nyq
-    b, a = butter(order, [low, high], btype='band')
-    return b, a
+import matplotlib.pyplot as plt
+import numpy as np
 
-def butter_bandpass_filter(data, lowcut, highcut, fs, order=4):
-    b, a = butter_bandpass(lowcut, highcut, fs, order=order)
-    y = lfilter(b, a, data)
-    return y
+from helper_functions import butter_bandpass_filter as bandpass_filter
+from helper_functions import resample_DAS as resample
+from pydas_readers.readers import load_das_h5_CLASSIC as load_das_h5
 
-def resample(data, ratio):
-    """
-    :param data: data to resample
-    :param ratio: resample ratio = fs_old/fs_new
-    :return: resampled data as np array
-    """
 
-    data = data.T
-    # resample
-    res = np.zeros((data.shape[0], int(data.shape[1]/ ratio)+1))
-    for i in range(data.shape[0]):
-        res[i] = np.interp(np.arange(0, len(data[0]), ratio), np.arange(0, len(data[0])), data[i])
 
-    return res.T
 
-def plot_data(data, moveout=8):
-    i = 0
-    alpha = 0.8
-    for ch in range(data.shape[0]):
-        plt.plot(data[ch][:] + moveout * i, '-k', alpha=alpha)
-        i += 1
+"""
 
-    plt.show()
+Here we generate the initial DAS data sections for model fine-tuning as described in Section 3.3 Model Fine-Tuning.
+The waveforms are downsampled in space, downsampled in time, bandpass filtered, demeaned and normalized by std.
 
+
+"""
+
+
+########################################
+### Event Times and Cable Positions: ###
+########################################
 
 # event_data, event_time, start_channel, end_channel
 event01 = ["2020/07/07", "13:24:41.5", 1320, 1450] #Ablation Zone
@@ -57,28 +39,42 @@ event12 = ["2020/07/06", "20:19:00.5", 3420, 3550] #Accumulation Zone
 event13 = ["2020/07/06", "19:42:27.0", 3400, 3510] #Accumulation Zone
 event14 = ["2020/07/06", "19:51:23.0", 3400, 3510] #Accumulation Zone
 events = [event01, event02, event03, event04, event05, event06, event07, event08, event09, event10, event11, event12, event13, event14]
-n_sub = 15
-n_t = 2400
-fs = 400
+
+###################
+### Parameters: ###
+###################
+
+n_sub: int = 15
+n_t: int = 2400
+fs: int = 400
+
 training_data = np.zeros((60, n_t, n_sub))
-n = 0
+n: int = 0 # denotes the current saving spot in the training_data np.array
 
-for event in events: # for evey event
+file_dir = "data/training_data/raw_DAS/"
+savedir = "data/training_data/preprocessed_DAS/retraining_data.npy"
 
-    print(event)
 
-    for m in range(3): # m is the start channel of every
+for event in events:
 
-        # 1. load DAS data
-        file_dir = "data/training_data/raw_DAS/"
+    print("Processing Event " , event)
+
+    for m in range(3): # m represents the initial channel used for spatial downsampling of the data.
+
+        #####################
+        ### Reading Data: ###
+        #####################
+
         event_time = datetime.strptime(event[0] + " " + event[1], "%Y/%m/%d %H:%M:%S.%f")
         t_start = event_time - timedelta(seconds=3)
         t_end   = t_start + timedelta(seconds=6)
         data, headers, axis = load_das_h5.load_das_custom(t_start, t_end, input_dir=file_dir, convert = False)
 
+        ########################
+        ### Processing Data: ###
+        ########################
 
-
-        # 2. downsample to 12 m channel spacing
+        # 1. downsample to 12 m channel spacing
         if data.shape[1] == 4864 or data.shape[1] == 4800:
             data = data[:, m::6]
             startchannel = event[2] // 6
@@ -90,50 +86,59 @@ for event in events: # for evey event
         data = data[:, startchannel:endchannel]
 
 
-        # 3. downsample data in time: we need sample frequency of 400 Hz
+        # 2. downsample data in time
         data = resample(data, headers["fs"] / fs)
         data = data[:n_t, :]
 
-        # 4. filtering data
-        lowcut_sec = 1
-        highcut_sec = 120
+        # 3. filtering data
         for i in range(data.shape[0]):
-            data[i] = butter_bandpass_filter(data[i], lowcut_sec, highcut_sec, 400, order=4)
+            data[i] = bandpass_filter(data[i], 1, 120, 400, order=4)
 
-        # 5. set mean value to 0
+        # 4. demean
         for i in range(data.shape[1]):
             mean = np.mean(data[:, i])
             data[:, i] = data[:, i] - mean
 
-        # 6. normalize data
+        # 5. scale by std
         for i in range(data.shape[1]):
             data[:,i] /= data[:,i].std()
 
-        # 7. concatenate all data in one dataset training_data
+        # 6. concatenate all data in one dataset training_data
         n_samples = int(data.shape[1] / n_sub)
         for i in range(n_samples):
             training_data[n] = data[:, i*n_sub:(i+1)*n_sub]
             n += 1
 
 
-# 8. Save data:
+#################################
+### Saving Initial Waveforms: ###
+#################################
 training_data = np.transpose(training_data, (0, 2, 1))
-print(training_data.shape)
-#np.save("data/training_data/preprocessed_DAS/retraining_data.npy", training_data)
+np.save(savedir, training_data)
 
 
 
-"""
-PLOT SAVED DATA
+######################
+### Plotting Data: ###
+######################
 
-for j in range(training_data.shape[0]):
-    plot_data = training_data[j]
-    i = 0
-    for ch in range(15):
-        plt.plot(plot_data[ch][:] + 10 * i, "-k", alpha=0.8)
-        i += 1
-    plt.show()
+#def plot_data(data, moveout=8):
+#    i = 0
+#    alpha = 0.8
+#    for ch in range(data.shape[0]):
+#        plt.plot(data[ch][:] + moveout * i, '-k', alpha=alpha)
+#        i += 1
 
-"""
+#    plt.show()
+
+#for j in range(training_data.shape[0]):
+#    plot_data = training_data[j]
+#    i: int  = 0
+#    for ch in range(15):
+#        plt.plot(plot_data[ch][:] + 10 * i, "-k", alpha=0.8)
+#        i += 1
+#    plt.show()
+
+
 
 
