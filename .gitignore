@@ -33,5 +33,5 @@ experiments/04_accumulation_vertical/denoised_synthetic_DAS
 experiments/05_combined200/denoised_synthetic_DAS
 experiments/06_combined800/denoised_synthetic_DAS
 experiments/09_borehole_seismometer/denoised_synthetic_DAS
-experiments/11_borehole_seismometer_520/pics
-experiments/13_vandenende/denoisedDAS
+../MAIN_DAS_denoising_not_public/experiments/11_borehole_seismometer_520/pics
+../MAIN_DAS_denoising_not_public/experiments/13_vandenende/denoisedDAS

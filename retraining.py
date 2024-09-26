@@ -30,7 +30,7 @@ model_name = "08_retrained_combined800"
 trainingdata = "data/training_data/preprocessed_DAS/retraining_data.npy"
 
 # Load pretrained Model:
-model_file = os.path.join("experimentstest", pretrained_model_name, pretrained_model_name + ".h5")
+model_file = os.path.join("../MAIN_DAS_denoising_not_public/experimentstest", pretrained_model_name, pretrained_model_name + ".h5")
 model = keras.models.load_model(model_file)
 
 """ Callbacks """
