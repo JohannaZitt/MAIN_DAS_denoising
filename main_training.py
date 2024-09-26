@@ -3,7 +3,7 @@ import time
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import numpy as np
-from models import UNet, CallBacks, DataGenerator, DataGeneratorSeismometer
+from models import UNet, CallBacks, DataGenerator
 from datetime import date, timedelta
 from models import seed
 import random as python_random
@@ -26,16 +26,14 @@ N_sub = 11
 batch_size = 32
 Nt = 1024
 N_epoch = 2000
-batch_multiplier = 10 # set to 10 for 200 training samples (117*32 = 3744), set to 3 for 800 training samples (140*32 = 4480)
-#kernels = [(3,5), (5, 20), (8, 50)]
-
-
+# set batch multiplier to 10 for 200 initial waveforms and to 3 for 800 training samples
+batch_multiplier = 10
 
 model_params = {
     "use_bn": False, # batch normalization
     "use_dropout": False,
     "dropout_rate": 0.1,
-    "N_blocks": 4,
+    "N_blocks": 4, # amount of downsampling and upsampling blocks
     "f0": 4, # dimension of output space (i.e. the number of output filters in the convolution)
     "LR": 1e-4, # learning rate
     "data_shape": (N_sub, Nt, 1),
@@ -44,20 +42,19 @@ model_params = {
 }
 
 
-different_training_data = ["01_ablation_horizontal", "02_ablation_vertical", "03_accumulation_horizontal", "04_accumulation_vertical", "05_combined200", "09_borehole_seismometer"]
-#different_training_data = ["06_combined800"]
-#different_training_data = ["09_borehole_seismometer"]
+different_training_data = ["01_ablation_horizontal"]#, "02_ablation_vertical", "03_accumulation_horizontal", "04_accumulation_vertical", "05_combined200", "09_borehole_seismometer"] # set batch multiplier to 10
+#different_training_data = ["06_combined800"] # set batch multiplier to 3
 
 for training_data in different_training_data:
 
     """ Saving Paths """
     cwd = os.getcwd()
-    savedir = os.path.join("experimentstest", training_data)
+    savedir = os.path.join("../MAIN_DAS_denoising_not_public/experimentstest", training_data)
     if not os.path.isdir(savedir):
         os.makedirs(savedir)
 
-    """Saving Path log"""
-    logdir = os.path.join("experimentstest", training_data, "logs")
+    """ Saving Path log """
+    logdir = os.path.join("../MAIN_DAS_denoising_not_public/experimentstest", training_data, "logs")
     if not os.path.isdir(logdir):
         os.makedirs(logdir)
 
@@ -68,20 +65,11 @@ for training_data in different_training_data:
     """ Trainingdata """
     data_file = os.path.join(cwd, "data", "training_data", "preprocessed_seismometer", training_data + ".npy")
 
-    # Load data
+    """ Load data """
     data = np.load(data_file)
     N_ch, N_t = data.shape
 
-    print(data.shape)
-
-    #t_slice = slice(N_t//4, 3*N_t//4)
-    #scaled_data = np.zeros_like(data)
-
-    # normalize data
-    #for i, wv in enumerate(data):
-    #    scaled_data[i] = wv / wv[t_slice].std()
-
-    # Split data 80-20 train-test
+    """ Split data 80-20 train-test """
     split = int(0.8 * N_ch)
     train_data = data[:split]
     test_data = data[split:]
@@ -89,26 +77,22 @@ for training_data in different_training_data:
     print("Preparing masks")
     train_generator = DataGenerator(X=train_data, Nt=Nt, N_sub=N_sub, batch_size=batch_size, batch_multiplier=batch_multiplier)
     test_generator = DataGenerator(X=test_data, Nt=Nt, N_sub=N_sub, batch_size=batch_size, batch_multiplier=batch_multiplier)
-    #train_generator = DataGeneratorSeismometer(X=train_data, Nt=Nt, N_sub=N_sub, batch_size=batch_size, batch_multiplier=batch_multiplier)
-    #test_generator = DataGeneratorSeismometer(X=test_data, Nt=Nt, N_sub=N_sub, batch_size=batch_size, batch_multiplier=batch_multiplier)
     print("Done")
 
-
-    """ visualize training data:  """
+    """ Visualize training data:  """
     for i in range(10):
         for j in range(11):
             plt.plot(train_generator.samples[i][j] + 12*j, color="black", alpha=0.5)
         plt.show()
 
 
-
-    # Construct model
+    """ Construct model """
     net = UNet()
     net.set_params(model_params)
     model = net.construct()
     # model.summary()
 
-    # Model training
+    """ Model training """
     start = time.time()
     print("Start Model Training")
     model.fit(
@@ -118,14 +102,11 @@ for training_data in different_training_data:
         verbose=1, epochs=N_epoch,
     )
 
-    # Generate output and measure runtime
+    """ Generate output and measure runtime """
     end = time.time()
     dur = end-start
     dur_str = str(timedelta(seconds=dur))
     x = dur_str.split(":")
-    output_text = training_data + ": " + str(x[0]) + " Stunden, " + str(x[1]) + " Minuten und " + str(x[2]) + " Sekunden"
-
-    with open("runtimes.txt", "a") as file:
-        file.write("\n" + output_text)
+    output_text = training_data + ": " + str(x[0]) + " hours, " + str(x[1]) + " minutes and " + str(x[2]) + " seconds."
 
     print(output_text)
