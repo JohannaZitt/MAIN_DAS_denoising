@@ -1,17 +1,25 @@
 import os
 import time
-import matplotlib.pyplot as plt
-import tensorflow as tf
-import numpy as np
-from models import UNet, CallBacks, DataGenerator
 from datetime import date, timedelta
-from models import seed
+
+import matplotlib.pyplot as plt
+import numpy as np
 import random as python_random
+import tensorflow as tf
+
+from models import UNet, CallBacks, DataGenerator
+from models import seed
+
 
 """
 
 Main training on seismometer data or synthetic data
 
+The code is built upon the software provided by van den Endet et al. [1].
+
+[1] van den Ende, M., Lior, I., Ampuero, J.-P., Sladen, A., Ferrari, A. ve Richard, C. (2021, 3 Mart). A Self-Supervised 
+Deep Learning Approach for Blind Denoising and Waveform Coherence Enhancement in Distributed Acoustic Sensing data. 
+figshare. doi:10.6084/m9.figshare.14152277.v1
 
 """
 

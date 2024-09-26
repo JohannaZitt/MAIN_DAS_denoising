@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf
 import tensorflow.keras as keras
+from scipy.signal import butter, filtfilt, tukey
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Conv2D, MaxPool2D
 from tensorflow.keras.layers import Input, concatenate
@@ -8,14 +9,19 @@ from tensorflow.keras.layers import BatchNormalization, UpSampling2D
 from tensorflow.keras.layers import Activation
 from tensorflow.keras.layers import GaussianDropout
 from tensorflow.keras.optimizers import Adam
-from scipy.signal import butter, filtfilt, tukey
-import math
+
 
 
 '''
 
-Code modified after van den Ende et al. (2021) "Self-Supervised Deep Learning Approach for Blind Denoising and 
-Waveform Coherence Enhancement in Distributed Acoustic Sensing Data"
+Model classes and training data generation class
+
+
+The code is built upon the software provided by van den Endet et al. [1].
+
+[1] van den Ende, M., Lior, I., Ampuero, J.-P., Sladen, A., Ferrari, A. ve Richard, C. (2021, 3 Mart). A Self-Supervised 
+Deep Learning Approach for Blind Denoising and Waveform Coherence Enhancement in Distributed Acoustic Sensing data. 
+figshare. doi:10.6084/m9.figshare.14152277.v1
 
 '''
 
@@ -31,8 +37,6 @@ tf.random.set_seed(seed)
 import random as python_random
 python_random.seed(seed)
 
-# NumPy (random number generator used for sampling operations)
-# generates numbers in range (0, 1]
 rng = np.random.default_rng(seed)
 
 def butter_bandpass(lowcut, highcut, fs, order=2):
@@ -67,7 +71,7 @@ class DataGenerator(keras.utils.Sequence):
     def __init__(self, X, Nt=2048, N_sub=10, batch_size=32, batch_multiplier=10):
         # Data matrix
         self.X = X
-        # Number of Trainingsamples
+        # Number of training samples
         self.Nx = X.shape[0]
         # Number of time sampling points in data
         self.Nt_all = X.shape[1]
@@ -75,7 +79,6 @@ class DataGenerator(keras.utils.Sequence):
         self.Nt = Nt
         # Number of stations per batch sample
         self.N_sub = N_sub
-        # Batch size
         self.batch_size = batch_size
         self.batch_multiplier = batch_multiplier
 
@@ -101,7 +104,6 @@ class DataGenerator(keras.utils.Sequence):
 
     def __data_generation(self):
         """ Generate a total batch """
-        # Number of mini-batches
         N_batch = self.__len__()
         N_total = N_batch * self.batch_size
         Nt = self.Nt
@@ -115,23 +117,22 @@ class DataGenerator(keras.utils.Sequence):
         t_starts = rng.integers(low=1, high=Nt_all-Nt, size=N_total)
         X = self.X
 
-        # we want to detect stick-slip events the most -> use velocities of p- and s- waves:
-        # p-wave velocity: 3600-3900 m/s
-        # s-wave velocity: 1700-1950 m/s
-        # rayleigh wave velocity: 1650 - 1668 m/s
+        # p-wave velocity in ice: 3600-3900 m/s
+        # s-wave velocity in ice: 1700-1950 m/s
+        # rayleigh wave velocity in ice: 1650 - 1668 m/s
         # -> between 1650 - 3900
         v_min = 1650
         v_max = 3900
         velocity = rng.integers(v_min, v_max+1)
         slowness = 1/velocity
 
-        gauge = 12. # gauge is channel spacing
+        gauge = 12. # channel spacing
         fs = 400.
 
         log_SNR_min = -2
         log_SNR_max = 4
 
-        # Loop over samples
+        # For every sample
         for s, t_start in enumerate(t_starts):
             sample_ind = rng.integers(low=0, high=self.Nx)
             t_slice = slice(t_start, t_start + Nt)
@@ -146,9 +147,9 @@ class DataGenerator(keras.utils.Sequence):
             shift = direction * gauge * slowness * fs
             sample = sign * X[sample_ind, ::order]
 
-            SNR = rng.random() * (log_SNR_max - log_SNR_min) + log_SNR_min # generiert Zahlen im Bereich [log_SNR_min, log_SNR_max] log_SNR_min and log_SNR_max in decibel scale
-            SNR = 10 ** (0.5 * SNR) # rechnen hier SNR von dezibel Skala in Verhältnis von zwei Amplituden/Wellendrücken um
-            amp = 2 * SNR / np.abs(sample).max() # amp steht für amplitude, waveforms are rescaled such that the maximum amplitude of the signal is 2 * SNR^0.5.
+            SNR = rng.random() * (log_SNR_max - log_SNR_min) + log_SNR_min
+            SNR = 10 ** (0.5 * SNR)
+            amp = 2 * SNR / np.abs(sample).max()
             sample = sample * amp
 
             # 2. waveform is duplicated and shifted
@@ -169,7 +170,6 @@ class DataGenerator(keras.utils.Sequence):
         # normalize data with maximum.
         for s, sample in enumerate(noisy_samples):
             noisy_samples[s] = sample / sample.std()
-            #noisy_samples[s] = sample / np.abs(sample).max()
 
         self.samples = noisy_samples
         self.masks = masks
@@ -220,8 +220,6 @@ class DataGeneratorDAS(keras.utils.Sequence):
 
     def __data_generation(self):
         """ Generate a total batch """
-
-        # Number of mini-batches
         N_batch = self.__len__()
         N_total = N_batch * self.batch_size
         Nt = self.Nt
