@@ -337,11 +337,6 @@ for id in ids:
     #plt.savefig("plots/stalta/" + str(id) + "_stalta_paper.pdf", dpi=300)
     plt.show()
 
-    plt.plot(stacked_csl_denoised)
-    plt.show()
-    plt.plot(stacked_csl_raw)
-    plt.show()
-
     print("Denoised", str(max(stacked_csl_denoised)))
     print("Raw", str(max(stacked_csl_raw)))
 

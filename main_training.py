@@ -57,12 +57,12 @@ for training_data in different_training_data:
 
     """ Saving Paths """
     cwd = os.getcwd()
-    savedir = os.path.join("../MAIN_DAS_denoising_not_public/experimentstest", training_data)
+    savedir = os.path.join("experiments", training_data)
     if not os.path.isdir(savedir):
         os.makedirs(savedir)
 
     """ Saving Path log """
-    logdir = os.path.join("../MAIN_DAS_denoising_not_public/experimentstest", training_data, "logs")
+    logdir = os.path.join("experiments", training_data, "logs")
     if not os.path.isdir(logdir):
         os.makedirs(logdir)
 
@@ -88,10 +88,10 @@ for training_data in different_training_data:
     print("Done")
 
     """ Visualize training data:  """
-    for i in range(10):
-        for j in range(11):
-            plt.plot(train_generator.samples[i][j] + 12*j, color="black", alpha=0.5)
-        plt.show()
+    #for i in range(10):
+    #    for j in range(11):
+    #        plt.plot(train_generator.samples[i][j] + 12*j, color="black", alpha=0.5)
+    #    plt.show()
 
 
     """ Construct model """
@@ -110,7 +110,7 @@ for training_data in different_training_data:
         verbose=1, epochs=N_epoch,
     )
 
-    """ Generate output and measure runtime """
+    """ Measure Runtime """
     end = time.time()
     dur = end-start
     dur_str = str(timedelta(seconds=dur))
