@@ -101,6 +101,28 @@ def compute_moving_coherence(data, bin_size):  # Code by Martijn van den Ende
 
     return cc
 
+def get_middel_channel(receiver):
+    channel = 0
+    if receiver == "AKU":
+        channel = 3740
+    elif receiver == "AJP":
+        channel = 3460
+    elif receiver == "ALH":
+        channel = 3842
+    elif receiver == "RA82":
+        channel = 1300
+    elif receiver == "RA85":
+        channel = 1070
+    elif receiver == "RA87":
+        channel = 1230
+    elif receiver == "RA88":
+        channel = 1615 # 1600
+    else:
+        print("There is no start nor end channel for receiver " + receiver + '.')
+
+    channel = int(channel/6)
+    return channel
+
 
 def load_das_data(folder_path, t_start, t_end, raw, channel_delta_start, channel_delta_end):
 

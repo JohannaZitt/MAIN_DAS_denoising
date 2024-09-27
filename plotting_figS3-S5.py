@@ -1,69 +1,32 @@
-import re
-from datetime import datetime, timedelta, timezone
-import numpy as np
-from obspy import UTCDateTime
+
 import os
+from datetime import datetime, timedelta
+
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.ticker import MaxNLocator
 from obspy import read
+from obspy import UTCDateTime
 from pydas_readers.readers import load_das_h5_CLASSIC as load_das_h5
-from scipy.signal import butter, lfilter
+
+from helper_functions import get_middel_channel, butter_bandpass_filter, resample
 
 
-def butter_bandpass(lowcut, highcut, fs, order=4):
-    nyq = 0.5 * fs
-    low = lowcut / nyq
-    high = highcut / nyq
-    b, a = butter(order, [low, high], btype="band")
-    return b, a
 
-def butter_bandpass_filter(data, lowcut, highcut, fs, order=4):
-    b, a = butter_bandpass(lowcut, highcut, fs, order=order)
-    y = lfilter(b, a, data)
-    return y
-
-def resample(data, ratio):
-    try:
-        res = np.zeros((int(data.shape[0]/ratio) + 1, data.shape[1]))
-        for i in range(data.shape[1]):
-
-            res[:,i] = np.interp(np.arange(0, len(data), ratio), np.arange(0, len(data)), data[:,i])
-    except ValueError as e:
-        res = np.zeros((int(data.shape[0] / ratio), data.shape[1]))
-        for i in range(data.shape[1]):
-            res[:, i] = np.interp(np.arange(0, len(data), ratio), np.arange(0, len(data)), data[:, i])
-    return res
-
-
-def get_middel_channel(receiver):
-    channel = 0
-    if receiver == "AKU":
-        channel = 3740
-    elif receiver == "AJP":
-        channel = 3460
-    elif receiver == "ALH":
-        channel = 3842
-    elif receiver == "RA82":
-        channel = 1300
-    elif receiver == "RA85":
-        channel = 1070
-    elif receiver == "RA87":
-        channel = 1230
-    elif receiver == "RA88":
-        channel = 1615 # 1600
-    else:
-        print("There is no start nor end channel for receiver " + receiver + '.')
-
-    channel = int(channel/6)
-    return channel
 
 def load_das_data(folder_path, t_start, t_end, receiver, raw, ch_delta_start, ch_delta_end):
 
-    # 1. load data
+    """
+
+    loads DAS data
+
+    """
+
+    """ 1. load data """
     data, headers, axis = load_das_h5.load_das_custom(t_start, t_end, input_dir=folder_path, convert=False)
     data = data.astype("f")
 
-    # 2. downsample data in space:
+    """ 2. downsample data in space """
     if raw:
         if data.shape[1] == 4864 or data.shape[1] == 4800 or data.shape[1] == 4928 :
             data = data[:,::6]
@@ -72,16 +35,16 @@ def load_das_data(folder_path, t_start, t_end, receiver, raw, ch_delta_start, ch
         headers["dx"] = 12
 
 
-    # 3. cut to size
+    """ 3. cut to size """
     ch_middel = get_middel_channel(receiver)  # get start and end channel:
     data = data[:, ch_middel-ch_delta_start:ch_middel+ch_delta_end]
 
+    """ 4. downsample in time """
     if raw:
-        # 4. downsample in time
         data = resample(data, headers["fs"] / 400)
         headers["fs"] = 400
 
-    # 5. bandpasfilter and normalize
+    """ 5. bandpasfilter and normalize """
     for i in range(data.shape[1]):
         data[:, i] = butter_bandpass_filter(data[:,i], 1, 120, fs=headers["fs"], order=4)
         data[:,i] = data[:,i] / np.abs(data[:,i]).max()
@@ -91,24 +54,28 @@ def load_das_data(folder_path, t_start, t_end, receiver, raw, ch_delta_start, ch
 
 def plot_sectionplot(raw_data, denoised_data, seis_data, seis_stats, saving_path, middle_channel, id):
 
-    # different fonts:
+    """
+
+    Plots data as waveform section plot
+
+    """
+
+    """ Parameters """
     font_s = 12
     font_m = 14
     font_l = 16
-
-    # parameters:
     channels = raw_data.shape[0]
-    ch_spacing = 12
     fs = 400
     alpha = 0.7
     alpha_dashed_line = 0.2
 
+    """ Create Plot"""
     fig, ax = plt.subplots(2, 2, figsize=(18, 12), gridspec_kw={"height_ratios": [7, 1]}, dpi=400)
 
     plt.rcParams.update({"font.size": font_l})
     plt.tight_layout()
 
-    # Plotting raw_data!
+    """ Plot raw data """
     plt.subplot(221)
     n = 0
     for ch in range(channels):
@@ -133,7 +100,7 @@ def plot_sectionplot(raw_data, denoised_data, seis_data, seis_stats, saving_path
     plt.annotate("", xy=(0, (channels-middle_channel) * 1.5), xytext=(-1, (channels-middle_channel) * 1.5),
                  arrowprops=dict(color="red", arrowstyle="->", linewidth=2))
 
-    # Plotting Denoised Data:
+    """ Plot denoised data """
     plt.subplot(222)
     i = 0
     for ch in range(channels):
@@ -157,7 +124,7 @@ def plot_sectionplot(raw_data, denoised_data, seis_data, seis_stats, saving_path
                  arrowprops=dict(color="red", arrowstyle="->", linewidth=2))
     plt.subplots_adjust(wspace=0.05)
 
-    # plotting seismometer data 1
+    """ Plot Seismometer data raw """
     seis_fs = seis_stats["sampling_rate"]
     plt.subplot(223)
     plt.plot(seis_data, color="black", alpha=0.4)
@@ -173,7 +140,7 @@ def plot_sectionplot(raw_data, denoised_data, seis_data, seis_stats, saving_path
     ax = plt.gca()
     ax.axes.yaxis.set_ticklabels([])
 
-    # plotting seismometer data 2
+    """ Plot Seismometer data denoised """
     plt.subplot(224)
     plt.plot(seis_data, color="black", alpha=0.4)
     for i in range(3):
@@ -187,54 +154,18 @@ def plot_sectionplot(raw_data, denoised_data, seis_data, seis_stats, saving_path
     ax = plt.gca()
     ax.axes.yaxis.set_ticklabels([])
 
+    """ Save Figure """
     plt.tight_layout()
     plt.show()
     #plt.savefig(saving_path + ".png", bbox_inches="tight", pad_inches=0.5, dpi=400)
 
-def plot_wiggle_comparison(raw_data, denoised_data, seis_data, middle_channel, saving_path):
 
-    custom_red = "#BF4843"
-    custom_pink = "#9A1967"
+"""
 
-    # Parameter
-    fs = 20
-    t_start = 50 # 70
-    t_end = 250 # 320
-
-    # Figure und Achsen erstellen
-    fig, ax = plt.subplots(figsize=(15, 5))
-
-    # Daten plotten
-    ax.plot(raw_data[middle_channel][t_start:t_end], color="grey", label="Noisy DAS Channel", linewidth=3, alpha=0.25)
-    ax.plot(denoised_data[middle_channel][t_start:t_end], color="black", label="Denoised DAS Channel", linewidth=2,
-            alpha=1)
-    ax.plot(seis_data[t_start:t_end], color="red", label="Seismometer", linewidth=2, alpha=0.75)
+Here Figure S3-S5 is generated
 
 
-    # Labels und Achsenanpassungen
-    ax.set_xticks([40, 80, 120, 160]) #, 200, 240
-    ax.set_xticklabels([0.1, 0.2, 0.3, 0.4], size=fs-2) #, 0.6, 0.8
-    #ax.set_xlabel("Time [s]", fontsize=fs)
-    ax.set_ylabel("Strain Rate [norm.]", fontsize=fs)
-    ax.set_yticks([])
-
-    # Zweite y-Achse erstellen
-    ax2 = ax.twinx()
-    ax2.set_ylabel("Ground Velocity [norm.]", fontsize=fs, color='red')
-    ax2.set_yticks([])
-    ax2.tick_params(axis="y", labelcolor="red")
-
-    # Layout anpassen
-    plt.tight_layout()
-
-    # leged
-    #handles, labels = ax.get_legend_handles_labels()
-    #fig.legend(handles, labels, bbox_to_anchor=(0.95, 0.9), ncol=3, fontsize=fs+4) #
-
-    # Plot anzeigen
-    plt.show()
-    #plt.savefig(saving_path, dpi=400)
-
+"""
 
 
 # ID : [starttime, start channel delta, end channel delta, category, closts seismometer]
@@ -243,14 +174,15 @@ events = {5: ["2020-07-27 19:43:30.5", 45, 75, 1, "ALH", "5_"],
          82: ["2020-07-27 05:04:55.0", 80, 150, 3, "ALH", "82"]
          }
 
-id = 82
+""" Parameters """
+id = 5 #set to 5 for generating Figure S3, set to 20 for generating Figure S4, set to 82 for generating Figure S5
 event_time = events[id][0]
 t_start = datetime.strptime(event_time, "%Y-%m-%d %H:%M:%S.%f")
 t_end = t_start + timedelta(seconds=2)
 experiment = "03_accumulation_horizontal"
 receiver = "ALH"
 
-# load seismometer data:
+""" load seismometer data """
 string_list = os.listdir("data/test_data/accumulation/")
 filtered_strings = [s for s in string_list if s.startswith("ID:" + events[id][5])]
 seis_data_path = "data/test_data/accumulation/" + filtered_strings[0]
@@ -261,19 +193,18 @@ seis_data = butter_bandpass_filter(seis_data, 1, 120, fs=seis_stats.sampling_rat
 seis_data = seis_data/np.abs(seis_data).max()
 seis_data = seis_data[400:]
 
-# load raw DAS data:
+""" load raw DAS data """
 raw_folder_path = "data/raw_DAS/"
 raw_data, raw_headers, raw_axis = load_das_data(folder_path =raw_folder_path, t_start=t_start, t_end=t_end, receiver=receiver, raw=True, ch_delta_start=events[id][1], ch_delta_end=events[id][2])
 
-# load denoised DAS data
+""" load denoised DAS data """
 denoised_folder_path = "experiments/" + experiment + "/denoisedDAS/"
 denoised_data, denoised_headers, denoised_axis = load_das_data(folder_path=denoised_folder_path, t_start=t_start, t_end=t_end, receiver=receiver, raw=False, ch_delta_start=events[id][1], ch_delta_end=events[id][2])
 
-saving_path = "plots/section_plots/" + str(id) + "_sectionplot"
+saving_path = "plots/figS5"
 
-
+""" Create Plot """
 plot_sectionplot(raw_data=raw_data.T, denoised_data=denoised_data.T, seis_data=seis_data, seis_stats=seis_stats, saving_path=saving_path, middle_channel=events[id][1], id=id)
-#plot_wiggle_comparison(raw_data=raw_data[200:600].T, denoised_data=denoised_data[200:600].T, seis_data=seis_data[200:600], middle_channel=events[id][1], saving_path="plots/wiggle_comparison/" + str(id) + "_wiggle_comparison.pdf")
 
 
 
