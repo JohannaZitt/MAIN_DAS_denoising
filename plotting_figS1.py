@@ -1,14 +1,13 @@
 import os
+
+import matplotlib.pyplot as plt
 import numpy as np
 from numpy import ndarray
-import matplotlib.pyplot as plt
 from obspy import read
-from scipy.signal import butter, lfilter
-'''
 
-Goal: Giving an overview of training data: surface events, stick-slip events, horizontal, vertical events, ablation, accumulation zone
+from helper_functions import butter_bandpass_filter
 
-'''
+
 def resample(stream, ratio):
     """
     :param stream: stream object, which has to be resampled
@@ -30,17 +29,16 @@ def resample(stream, ratio):
 
     return res
 
-def butter_bandpass(lowcut, highcut, fs, order=4):
-    nyq = 0.5 * fs
-    low = lowcut / nyq
-    high = highcut / nyq
-    b, a = butter(order, [low, high], btype = "band")
-    return b, a
-def butter_bandpass_filter(data, lowcut, highcut, fs, order=4):
-    b, a = butter_bandpass(lowcut, highcut, fs, order=order)
-    y = lfilter(b, a, data)
-    return y
 
+
+""" 
+
+Here Figure S1 is generated
+
+"""
+
+
+""" Data Path """
 event_path= "data/training_data/raw_seismometer_trainingdata/"
 events=["01_ablation_horizontal/ID:0_2020-07-25_07:20:54_RA83_EH3.mseed",
         "01_ablation_horizontal/ID:49_2020-07-24_08:00:44_RA82_EH2.mseed",
@@ -53,6 +51,7 @@ events=["01_ablation_horizontal/ID:0_2020-07-25_07:20:54_RA83_EH3.mseed",
         "09_borehole_seismometer/ID:0_2020-07-23_15:31:32_RA91_EH2.mseed",
         "09_borehole_seismometer/ID:49_2020-07-24_03:33:29_RA92_EHZ.mseed"]
 
+""" Plotting Parameters """
 title1 = "Highest Amplitude"
 title2 = "Lowest Amplitude"
 t_start = [1100, 1000, 850, 800, 950, 1100, 1100, 1100, 900, 1100]
@@ -68,35 +67,36 @@ letter_params = {
     "bbox": {"edgecolor": "k", "linewidth": 1, "facecolor": "w",}
 }
 
+""" Create Plot """
 fig, axes = plt.subplots(5, 2, figsize=(10,8))
 
 for i, event in enumerate(events):
-    # load data:
+
+    """ Load Data """
     stream = read(os.path.join(event_path, event))
 
-    # preprocessing data: resample and filter:
+    """ Preprocessing Data """
     if not stream[0].stats["sampling_rate"] == 400:
         stream = resample(stream, stream[0].stats["sampling_rate"]/400)
     data = stream[0].data
     data = butter_bandpass_filter(data, lowcut=1, highcut=120, fs=400, order=4)
     data = data / np.std(data) # Data is normalized -> the amplitudes in the plot are distorted
 
-    # plot data:
     row = i // 2
     col = i % 2
 
+    """ Plot Data """
     axes[row, col].plot(data[t_start[i]:t_start[i]+t], color="black", linewidth=1, alpha=0.8)
     axes[row, col].set_yticks([])
     axes[row, col].text(x=0.0, y=1.0, transform=axes[row, col].transAxes, s=letters[i], **letter_params)
     axes[row, col].set_ylim(-32, 32)
 
+    """ Create Axes """
     axes[0, 0].set_ylabel("Ablation\nHorizontal",  fontsize=fontsize)
     axes[1, 0].set_ylabel("Ablation\nVertical",  fontsize=fontsize)
     axes[2, 0].set_ylabel("Accumulation\nHorizontal",  fontsize=fontsize)
     axes[3, 0].set_ylabel("Accumulation\nVertical",  fontsize=fontsize)
     axes[4, 0].set_ylabel("Borehole",  fontsize=fontsize)
-
-
     if row==0:
         axes[row, 0].set_title(title1, fontsize=fontsize+gain)
         axes[row, 1].set_title(title2, fontsize=fontsize+gain)
@@ -107,6 +107,7 @@ for i, event in enumerate(events):
     else:
         axes[row, col].set_xticks([])
 
+""" Save Plot """
 plt.tight_layout()
 plt.show()
-#plt.savefig("plots/training_data_samples.png", dpi=250)
+#plt.savefig("plots/figS1.pdf", dpi=250)
