@@ -193,8 +193,6 @@ for i in range(4):
    for j in range(4):
        axs[i, j].text(x=0.0, y=1.0, transform=axs[i, j].transAxes, s=letters[i*4 + j], **letter_params)
 
-
-
 plt.tight_layout()
 
 """ Save plot """

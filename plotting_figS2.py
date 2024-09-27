@@ -1,6 +1,6 @@
 import os
 import re
-import matplotlib.patches as patches
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -188,6 +188,7 @@ for i in range(4):
      axs[i, j].text(x=0.0, y=1.0, transform=axs[i, j].transAxes, s=letters[i*4 + j], **letter_params)
 
 
+""" Save plot """
 plt.tight_layout()
 #plt.savefig("plots/figS2.pdf", dpi=400)
 plt.show()
