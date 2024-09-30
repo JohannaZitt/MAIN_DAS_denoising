@@ -1,48 +1,12 @@
 import os
-
-import numpy as np
-import matplotlib.pyplot as plt
-from pydas_readers.readers import load_das_h5_CLASSIC as load_das_h5
-from scipy.signal import butter, lfilter
 from datetime import datetime, timedelta
-from obspy.signal.trigger import classic_sta_lta, recursive_sta_lta, trigger_onset
-from obspy.signal.trigger import plot_trigger
-from obspy import Trace
+
+import matplotlib.pyplot as plt
+import numpy as np
+from obspy.signal.trigger import recursive_sta_lta
 
 from helper_functions import butter_bandpass_filter, resample
-
-"""
-
-
-There are different approaches to use sta/lta for das data
-
-1. from jousset2022.pdf volcanic events
-    STA/LTA is computed for every channel along the fibre and then averaged.
-    For this characteristic function the median absolute deviation is calculated.
-    An event is declared when a threshold defined as the median plus three times the MDA
-    is exceeded.
-
-2. from klaasen2021.pdf (Paitz and Walter) Volcaon-Glacial-environment
-    STA/LTA is computed for the stacked DAS channels (corresponding to 30-40 meters)
-    The STA window length was 0.3 s, the LTA window length 60 s, the trigger value 7.5,
-    and the detrigger value 1.5.
-
-
-There are a lot of parameters to vary:
-1. sta window: STA duration must be longer than a few periods of a typical expected seismic signal
-               0.2-0.5 seconds in cryoseismolgy
-               Since we consider multiple channels at once, sta duration can be chosen longer than considering single trace
-2. lta window: LTA duration must be longer than a few periods of a typically irregular seismic noise fluctuation
-               5-30 seconds in cryoseismology
-3. trigger threshold: 4 worked well
-4. detrgger threshold: 1 worked well
-5. amount of channels: depends strongly on the extend of the icequake. using 20 channel, corresponding to 240 m cable length 
-
-
-"""
-
-
-
+from pydas_readers.readers import load_das_h5_CLASSIC as load_das_h5
 
 
 def get_event_time_from_id(id):
