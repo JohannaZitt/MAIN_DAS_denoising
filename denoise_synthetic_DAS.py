@@ -1,12 +1,25 @@
 import os
+
 import keras
 import numpy as np
-import matplotlib.pyplot as plt
+
 
 
 def denoise_file (DAS_data, model, timesamples = 1024, N_sub = 11):
 
-    # split data in 1024 data point sections
+    """
+
+    Denoises synthetically generated DAS data.
+
+    :param DAS_data: numpy array
+    :param model: keras,model
+    :param timesamples: int: input size for the denoiser in time domain
+    :param N_sub: int: input size for the denoiser in space domain
+    :return: numpy array
+
+    """
+
+    """ Split data in input size for the denoiser """
     n_ch, n_t = DAS_data.shape
     n_samples = int(n_t / timesamples) + 1
     data = np.zeros((n_samples, n_ch, timesamples))
@@ -17,10 +30,10 @@ def denoise_file (DAS_data, model, timesamples = 1024, N_sub = 11):
     DAS_reconstructions = np.zeros_like(data)
     N_samples, N_ch, N_t = data.shape
 
-    # loop over every batche of 1024 sampling points
+    """ Loop over every batche of 1024 sampling points"""
     for n, eval_sample in enumerate(data):
 
-        # prepare sample and masks
+        """ Prepare sample and masks """
         masks = np.ones((N_ch, N_sub, N_t, 1))
         eval_samples = np.zeros_like(masks)
 
@@ -42,16 +55,16 @@ def denoise_file (DAS_data, model, timesamples = 1024, N_sub = 11):
             masks[i, i - N_ch] = 0
             eval_samples[i, :, :, 0] = eval_sample[-N_sub:]
 
-        # set mean = 0
+        """ Demean """
         for i in range(eval_samples.shape[0]): # for every channel
             for j in range(eval_samples.shape[1]): # for every N_sub
                 eval_samples[i, j, :] = eval_samples[i, j, :] - np.mean(eval_samples[i, j, :])
 
-        # Create J-invariant reconstructions
+        """ Denoise Data """
         results = model.predict((eval_samples, masks))
         DAS_reconstructions[n] = np.sum(results, axis=1)[:, :, 0]
 
-    # reshape data into original shape
+    """ Reshape data into original shape """
     data_save = np.zeros_like(DAS_data)
     for i in range(data_save.shape[0]):  # per channel
         for j in range(DAS_reconstructions.shape[0] - 1):  # per sample
@@ -63,34 +76,25 @@ def denoise_file (DAS_data, model, timesamples = 1024, N_sub = 11):
 
     return data_save
 
-def plot_das_data(data):
-    channels = data.shape[0]
-    alpha=0.7
-    i = 0
-    plt.figure(figsize=(20, 12))
-    for ch in range(channels):
-        plt.plot(data[ch][:] + 12 * i, "-k", alpha=alpha)
-        i += 1
-    plt.show()
 
-def deal_with_artifacts(data, filler = 0, Nt=1024):
+"""
 
-    n_edges = int(data.shape[0] / Nt)
-
-    for i in range(n_edges): # for every edge
-        for j in range(data.shape[1]): # for every channel
-            for n in range(5):
-                data[Nt * i + n, j] = filler
-                data[Nt * i - (n + 1), j] = filler
-
-    return data
+Here we denoise the synthetically generated test data as described in Section 3.4 Denoising Procedure
 
 
-#model_names = os.listdir('experiments')
-model_names = ["01_ablation_horizontal", "02_ablation_vertical", "03_accumulation_horizontal", "04_accumulation_vertical", "05_combined200", "06_combined800", "09_borehole_seismometer"]
-data_type = "from_seis"
+"""
 
-data_path = "data/synthetic_DAS/"+data_type+"/"
+#model_names = ["01_ablation_horizontal", "02_ablation_vertical", "03_accumulation_horizontal", "04_accumulation_vertical",
+#               "05_combined200", "06_combined800", "09_borehole_seismometer"]
+
+model_names = ["01_ablation_horizontal"]
+
+# change to "from_seis" to denoise synthetic data generated from seismometer data
+# change to "from_DAS" to denoise synthetic data generated from DAS data
+data_type = "from_DAS"
+
+""" path to data """
+data_path = "data/synthetic_DAS/" + data_type + "/"
 data_files = os.listdir(data_path)
 
 for model_name in model_names:
@@ -101,24 +105,22 @@ for model_name in model_names:
     print("##############################################################")
     print("##############################################################")
 
-    # 1. Load model
+    """ Load model """
     model = keras.models.load_model("experiments/" + model_name + "/" + model_name + ".h5")
 
     for data_file in data_files:
 
-        # 2. Load data
+        """ Load Data """
         raw_data = np.load(data_path+data_file)
 
-        # 3. Denoise data
+        """ Denoise Data """
         denoised_data = denoise_file(raw_data, model)
-
-        #plot_das_data(raw_data)
-        #plot_das_data(denoised_data)
 
         saving_path = "experiments/" + model_name + "/denoised_" + data_path[5:]
         if not os.path.isdir(saving_path):
             os.makedirs(saving_path)
 
+        """ Save Data """
         np.save(saving_path + "/denoised_" + data_file.split("/")[-1], denoised_data)
 
 

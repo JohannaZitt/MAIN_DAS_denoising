@@ -3,9 +3,9 @@ import os
 import time
 from datetime import timedelta
 
-import numpy as np
 import h5py
 import keras
+import numpy as np
 
 from pydas_readers.readers import load_das_h5_CLASSIC as load_das_h5, write_das_h5
 from helper_functions import butter_bandpass_filter
