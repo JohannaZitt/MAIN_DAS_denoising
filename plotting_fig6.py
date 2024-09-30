@@ -20,7 +20,7 @@ Extract Data:
 '''
 for experiment in experiments:
 
-    csv_path = os.path.join("experiments", experiment, "cc_evaluation_max_" + experiment[0:2] + ".csv")
+    csv_path = os.path.join("experiments", experiment, "cc_evaluation_" + experiment[0:2] + ".csv")
 
     with open(csv_path, "r") as file:
 
