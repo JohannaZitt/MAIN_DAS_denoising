@@ -1,0 +1,3 @@
+Replace this folder with the data folder from zenodo:
+
+https://zenodo.org/records/13868934?token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6IjNlZDUyMjdjLWEwN2UtNDkyNS05NWU0LTIxNTc1MGZhZWMyNSIsImRhdGEiOnt9LCJyYW5kb20iOiI0ZjIyNjgzZDIzODkyZDZhNmM2NWZhNWIwNDhkOWVmYyJ9.heSYoKnMCKEkR2dypJ7ga5_zqPlMdsIBJWaqhhsvL43zU0S1irRk4QeHw0EkM0hTXBcfdutLKwPgzgri-AKaqg

@@ -155,6 +155,7 @@ Here we denoise the data as described in Section 3.4 Denoising Procedure
 
 models_path = "experiments"
 
+# TODO Comment out to calculate values for all experiments
 #model_names = ["01_ablation_horizontal", "02_ablation_vertical", "03_accumulation_horizontal", "04_accumulation_vertical",
 #               "05_combined200", "06_combined800", "07_retrained_combined200", "08_retrained_combined800", "09_borehole_seismometer"]
 model_names = ["01_ablation_horizontal"]

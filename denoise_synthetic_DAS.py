@@ -84,13 +84,14 @@ Here we denoise the synthetically generated test data as described in Section 3.
 
 """
 
+# TODO Comment out to calculate values for all experiments
 #model_names = ["01_ablation_horizontal", "02_ablation_vertical", "03_accumulation_horizontal", "04_accumulation_vertical",
 #               "05_combined200", "06_combined800", "09_borehole_seismometer"]
 
 model_names = ["01_ablation_horizontal"]
 
-# change to "from_seis" to denoise synthetic data generated from seismometer data
-# change to "from_DAS" to denoise synthetic data generated from DAS data
+# TODO change to "from_seis" to denoise synthetic data generated from seismometer data
+# TODO change to "from_DAS" to denoise synthetic data generated from DAS data
 data_type = "from_DAS"
 
 """ path to data """
