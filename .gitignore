@@ -14,7 +14,6 @@ experiments/06_combined800/denoisedDAS
 experiments/07_retrained_combined200/denoisedDAS
 experiments/08_retrained_combined800/denoisedDAS
 experiments/09_borehole_seismometer/denoisedDAS
-experiments/01_ablation_horizontal/plots
 experiments/02_ablation_vertical/plots
 experiments/03_accumulation_horizontal/plots
 experiments/04_accumulation_vertical/plots
@@ -30,4 +29,5 @@ experiments/04_accumulation_vertical/denoised_synthetic_DAS
 experiments/05_combined200/denoised_synthetic_DAS
 experiments/06_combined800/denoised_synthetic_DAS
 experiments/09_borehole_seismometer/denoised_synthetic_DAS
+
 
