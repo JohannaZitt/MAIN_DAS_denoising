@@ -2,9 +2,7 @@
 .gitignore
 __pycache__
 data/raw_DAS
-data/training_data
 data/test_data
-data/synthetic_DAS
 experiments/01_ablation_horizontal/denoisedDAS
 experiments/02_ablation_vertical/denoisedDAS
 experiments/03_accumulation_horizontal/denoisedDAS
