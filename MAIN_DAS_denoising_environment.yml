@@ -1,4 +1,4 @@
-name: tf11_matplotlib_obspy
+name: env_main_das_denoising
 channels:
   - conda-forge
   - defaults

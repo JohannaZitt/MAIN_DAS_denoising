@@ -13,7 +13,7 @@ from models import seed
 
 """
 
-Main training on seismometer data or synthetic data
+Primary training is conducted on the initial waveforms generated using seismometer data.
 
 The code is built upon the software provided by van den Endet et al. [1].
 
